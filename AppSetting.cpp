@@ -25,27 +25,25 @@ AppSettings::~AppSettings()
 bool AppSettings::loadSettingsFromFile()
 {
     QString appName = QCoreApplication::applicationName();
+    const QChar sep = QDir::separator();
 
     QDir directory(QDir::homePath());
-    QString targetJsonPath = directory.filePath(appName + ".json");
+    if (!directory.exists(appName)) {
+        directory.mkpath(appName);
+    }
+    QString targetJsonPath = directory.filePath(appName + sep + appName + ".json");
     QFileInfo info(targetJsonPath);
-    if (info.exists() && info.isFile())
-    {
+    if (info.exists() && info.isFile()) {
         QFile jf(targetJsonPath);
-        if (jf.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
+        if (jf.open(QIODevice::ReadOnly | QIODevice::Text)) {
             auto context = jf.readAll();
             read(QJsonDocument::fromJson(context).object());
             jf.close();
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
-    }
-    else
-    {
+    } else {
         return false;
     }
 }
@@ -53,13 +51,16 @@ bool AppSettings::loadSettingsFromFile()
 void AppSettings::dumpSettingsToFile()
 {
     QString appName = QCoreApplication::applicationName();
+    const QChar sep = QDir::separator();
 
     QDir directory(QDir::homePath());
-    QString targetJsonPath = directory.filePath(appName + ".json");
+    if (!directory.exists(appName)) {
+        directory.mkpath(appName);
+    }
+    QString targetJsonPath = directory.filePath(appName + sep + appName + ".json");
 
     QFile jf(targetJsonPath);
-    if (jf.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
+    if (jf.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QJsonObject targetObj;
         write(targetObj);
         jf.write(QJsonDocument(targetObj).toJson());
@@ -67,51 +68,41 @@ void AppSettings::dumpSettingsToFile()
     }
 }
 
-void AppSettings::read(const QJsonObject &json)
+void AppSettings::read(const QJsonObject& json)
 {
-    if (json.contains("workPath"))
-    {
+    if (json.contains("workPath")) {
         workPath = json["workPath"].toString();
     }
-    if (json.contains("yuvType"))
-    {
+    if (json.contains("yuvType")) {
         yuvType = YuvFileInfoDlg::YuvType(json["yuvType"].toInt());
     }
-    if (json.contains("yuv_bitDepth"))
-    {
+    if (json.contains("yuv_bitDepth")) {
         yuv_bitDepth = json["yuv_bitDepth"].toInt();
     }
-    if (json.contains("yuv_width"))
-    {
+    if (json.contains("yuv_width")) {
         yuv_width = json["yuv_width"].toInt();
     }
-    if (json.contains("yuv_height"))
-    {
+    if (json.contains("yuv_height")) {
         yuv_height = json["yuv_height"].toInt();
     }
-    if (json.contains("rawByType"))
-    {
+    if (json.contains("rawByType")) {
         rawByType = RawFileInfoDlg::BayerPatternType(json["rawByType"].toInt());
     }
-    if (json.contains("raw_bitDepth"))
-    {
+    if (json.contains("raw_bitDepth")) {
         raw_bitDepth = json["raw_bitDepth"].toInt();
     }
-    if (json.contains("raw_width"))
-    {
+    if (json.contains("raw_width")) {
         raw_width = json["raw_width"].toInt();
     }
-    if (json.contains("raw_height"))
-    {
+    if (json.contains("raw_height")) {
         raw_height = json["raw_height"].toInt();
     }
-    if (json.contains("raw_byte_order"))
-    {
+    if (json.contains("raw_byte_order")) {
         rawByteOrder = RawFileInfoDlg::ByteOrderType(json["raw_byte_order"].toInt());
     }
 }
 
-void AppSettings::write(QJsonObject &json) const
+void AppSettings::write(QJsonObject& json) const
 {
     json["workPath"] = workPath;
 

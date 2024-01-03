@@ -15,8 +15,8 @@
 #include <QStandardPaths>
 #include <QStyleFactory>
 
-#define LEFT_IMG_WIDGET 0
-#define RIGHT_IMG_WIDGET 1
+constexpr int LEFT_IMG_WIDGET = 0;
+constexpr int RIGHT_IMG_WIDGET = 1;
 
 class ImgInfoDlg : public QDialog {
 public:
