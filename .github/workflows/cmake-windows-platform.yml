@@ -29,14 +29,14 @@ jobs:
         target: 'desktop'
         arch: 'win64_msvc2019_64'
         modules: 'qtcharts qtdatavis3d'
-    - name: list Qt bin directory files
-      run: dir {$QT_ROOT_DIR}/bin
+    # - name: list Qt bin directory files
+    #   run: dir {$QT_ROOT_DIR}/bin
     - uses: actions/checkout@v3
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_PREFIX_PATH={$QT_ROOT_DIR}/lib/cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_PREFIX_PATH=${QT_ROOT_DIR}/lib/cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install
 
     - name: Build
       # Build your program with the given configuration
