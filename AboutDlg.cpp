@@ -22,7 +22,7 @@ void AboutDlg::initUI()
     log->setStyleSheet("QLabel{image: url(:/image/resource/aboutlog.png)}");
     log->setMinimumSize(QSize(64, 64));
     QString title = QString(u8"<h1>ISP intermediate photo viewer</h1>");
-    QString builder_version = QString(u8"<p>Build by %1, version: %2.%3.%4</p>").arg(GIT_USER).arg(IIPviewer_VERSION_MAJOR).arg(IIPviewer_VERSION_MINOR).arg(IIPviewer_VERSION_PATCH);
+    QString builder_version = QString(u8"<p>Build by %1, version: %2.%3.%4</p>").arg(GIT_USER).arg(IIViewer_VERSION_MAJOR).arg(IIViewer_VERSION_MINOR).arg(IIViewer_VERSION_PATCH);
     QString commithash = QString(u8"<p>Commit: %1</p>").arg(GIT_HASH);
     QLabel* label = new QLabel(title + builder_version + commithash + u8"<p>Feedback: sent e-mail to <a href=\"mailto:zengyangqiao@126.com\">author</a></p>"
                                                                       u8"<p>All right reserved  &#169;2022~2023</p>");

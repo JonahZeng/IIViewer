@@ -1,3 +1,4 @@
 {
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "cmake.configureArgs": ["-DCMAKE_PREFIX_PATH=D:\\qt5159\\qtbase\\lib\\cmake", "-DCMAKE_INSTALL_PREFIX=.\\install"]
 }

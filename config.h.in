@@ -1,8 +1,8 @@
 #ifndef __CONFIG__H__
 #define __CONFIG__H__
-#define IIPviewer_VERSION_MAJOR @IIPviewer_VERSION_MAJOR@
-#define IIPviewer_VERSION_MINOR @IIPviewer_VERSION_MINOR@
-#define IIPviewer_VERSION_PATCH @IIPviewer_VERSION_PATCH@
+#define IIViewer_VERSION_MAJOR @IIViewer_VERSION_MAJOR@
+#define IIViewer_VERSION_MINOR @IIViewer_VERSION_MINOR@
+#define IIViewer_VERSION_PATCH @IIViewer_VERSION_PATCH@
 #define GIT_HASH "@GIT_HASH@"
 #define GIT_BRANCH "@GIT_BRANCH@"
 #define GIT_USER "@GIT_USER@"

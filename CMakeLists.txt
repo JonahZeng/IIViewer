@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
-project(IIPviewer VERSION 0.2.3 LANGUAGES CXX)
+project(IIViewer VERSION 0.3.0 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 
@@ -13,9 +13,14 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# list(APPEND CMAKE_PREFIX_PATH "D:/qt643/qtbase")
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization Network)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization)# Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization)# Network)
+
+get_target_property(_qmake_executable Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
+get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+
+include(InstallRequiredSystemLibraries)
 
 # ------check git hash -----------
 macro(get_git_hash _git_hash)
@@ -69,19 +74,19 @@ configure_file (config.h.in ${CMAKE_SOURCE_DIR}/inc/config.h)
 
 set(PROJECT_SOURCES
         main.cpp
-        iipviewer.cpp
-        ${CMAKE_SOURCE_DIR}/inc/iipviewer.h
+        IIPViewer.cpp
+        ${CMAKE_SOURCE_DIR}/inc/IIPViewer.h
         AboutDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/AboutDlg.h
-        iipviewer.rc
-        iipviewer.qrc
+        IIPViewer.rc
+        IIPViewer.qrc
         ImageWidget.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
         RawFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.ui
-        IIPviewer_ui.cpp
-        ${CMAKE_SOURCE_DIR}/inc/IIPviewer_ui.h
+        IIPViewer_ui.cpp
+        ${CMAKE_SOURCE_DIR}/inc/IIPViewer_ui.h
         YuvFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.ui
@@ -94,37 +99,37 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(IIPviewer
+    qt_add_executable(IIViewer
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
 # Define target properties for Android with Qt 6 as:
-#    set_property(TARGET IIPviewer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#    set_property(TARGET IIViewer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(IIPviewer SHARED
+        add_library(IIViewer SHARED
             ${PROJECT_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(IIPviewer
+        add_executable(IIViewer
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
-target_include_directories(IIPviewer PRIVATE ${CMAKE_SOURCE_DIR}/inc)
-target_link_libraries(IIPviewer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network)
+target_include_directories(IIViewer PRIVATE ${CMAKE_SOURCE_DIR}/inc)
+target_link_libraries(IIViewer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization)# Qt${QT_VERSION_MAJOR}::Network)
 # if(WIN32)
-#     target_compile_options(IIPviewer PRIVATE /W4)
+#     target_compile_options(IIViewer PRIVATE /W4)
 # elseif(UNIX)
-#    target_compile_options(IIPviewer PRIVATE -Wall)
+#    target_compile_options(IIViewer PRIVATE -Wall)
 # endif()
 
-set_target_properties(IIPviewer PROPERTIES
+set_target_properties(IIViewer PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -132,10 +137,17 @@ set_target_properties(IIPviewer PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-install(TARGETS IIPviewer
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_finalize_executable(IIViewer)
+endif()
+
+install(TARGETS IIViewer
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(IIPviewer)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+if(WIN32)
+    # Ensure the Qt runtime libraries are installed
+    include(windeployqt)
+    windeployqt(IIViewer "bin")
 endif()
