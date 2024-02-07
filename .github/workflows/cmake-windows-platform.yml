@@ -31,6 +31,8 @@ jobs:
         modules: 'qtcharts qtdatavis3d'
     - name: list Qt root directory files
       run: dir ${{github.workspace}}/thirdparty/Qt/5.15.2/msvc2019_64
+    - name: list cmake version
+      run: cmake --version
     - uses: actions/checkout@v3
 
     - name: Configure CMake
