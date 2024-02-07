@@ -34,7 +34,7 @@ jobs:
     - name: list Qt root directory files
       run: dir ${{env.Qt5_Dir}}
     - name: list Qt5 cmake files
-      run: dir ${{env.Qt5_Dir}}\lib\cmake
+      run: dir ${{env.Qt5_Dir}}\lib\cmake\Qt5
     - name: list cmake version
       run: cmake --version
     - uses: actions/checkout@v3
