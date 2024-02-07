@@ -30,7 +30,7 @@ jobs:
         arch: 'win64_msvc2019_64'
         modules: 'qtcharts qtdatavis3d'
     - name: list Qt root directory files
-      run: dir ${{github.workspace}}/thirdparty/Qt/5.15.2/msvc2019_64
+      run: dir ${{env.Qt5_Dir}}
     - name: list cmake version
       run: cmake --version
     - uses: actions/checkout@v3
