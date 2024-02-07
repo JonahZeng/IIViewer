@@ -29,6 +29,8 @@ jobs:
         target: 'desktop'
         arch: 'win64_msvc2019_64'
         modules: 'qtcharts qtdatavis3d'
+        cache: 'true'
+        cache-key-prefix: 'install-qt-action'
     - name: list Qt root directory files
       run: dir ${{env.Qt5_Dir}}
     - name: list cmake version
