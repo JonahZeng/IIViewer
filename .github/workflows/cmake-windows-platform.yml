@@ -38,7 +38,7 @@ jobs:
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}\build -S ${{github.workspace}} -DCMAKE_PREFIX_PATH=${{github.workspace}}\thirdparty\Qt\5.15.2\msvc2019_64\lib\cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\build\install
+      run: cmake -B ${{github.workspace}}\build -S ${{github.workspace}} -DCMAKE_PREFIX_PATH=${{env.Qt5_Dir}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\build\install
 
     - name: Build
       # Build your program with the given configuration
