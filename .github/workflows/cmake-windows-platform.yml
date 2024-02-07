@@ -36,10 +36,7 @@ jobs:
     - name: list Qt5 cmake files
       run: dir ${{env.Qt5_Dir}}\lib\cmake\Qt5
     - name: set Qt5 dir env
-      run: |
-        $Qt5_Directory = ${{env.Qt5_Dir}}\lib\cmake\Qt5
-        echo "Qt5_Directory $Qt5_Directory"
-        echo "Qt5_DIR=$Qt5_Directory" >> $env:GITHUB_ENV
+      run: echo "Qt5_DIR=${{env.Qt5_Dir}}\lib\cmake\Qt5" >> $env:GITHUB_ENV
     - name: list cmake version
       run: cmake --version
     - uses: actions/checkout@v3
