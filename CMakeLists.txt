@@ -13,6 +13,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+list(APPEND ${CMAKE_PREFIX_PATH} "D:\\a\\IIViewer\\IIViewer\\thirdparty\\Qt\\5.15.2\\msvc2019_64\\lib\\cmake;D:\\a\\IIViewer\\IIViewer\\thirdparty\\Qt\\5.15.2\\msvc2019_64\\lib\\cmake\\Qt5;D:\\a\\IIViewer\\IIViewer\\thirdparty\\Qt\\5.15.2\\msvc2019_64")
+message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 # find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization)# Network)
 set(QT_VERSION_MAJOR 5)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization)# Network)
