@@ -24,7 +24,7 @@ set(CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY FALSE)
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 # find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization)# Network)
 set(QT_VERSION_MAJOR 5)
-find_package(Qt5 REQUIRED COMPONENTS Widgets DataVisualization)# Network)
+find_package(Qt5 REQUIRED COMPONENTS Widgets DataVisualization PATHS ${CMAKE_PREFIX_PATH})# Network)
 
 get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
