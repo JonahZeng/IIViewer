@@ -73,5 +73,6 @@ jobs:
     - name: install
       run: cmake --install ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
     - name: generate installer package
+      working-directory: ${{github.workspace}}\build
       run: cpack -C ${{env.BUILD_TYPE}} -G NSIS
 
