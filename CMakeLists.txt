@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(IIViewer VERSION 0.3.0 LANGUAGES CXX)
+project(IIViewer VERSION 0.3.1 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 
@@ -13,20 +13,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH FALSE)
-# set(CMAKE_FIND_USE_CMAKE_PATH TRUE)
-# set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH TRUE)
-# set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH FALSE)
-# set(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY FALSE)
-# set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)
-# set(CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY FALSE)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization)# Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization)# Network)
 
-message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-# find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization)# Network)
-set(QT_VERSION_MAJOR 5)
-find_package(Qt5 REQUIRED COMPONENTS Widgets DataVisualization PATHS ${CMAKE_PREFIX_PATH})# Network)
-
-get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+get_target_property(_qmake_executable Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
 
