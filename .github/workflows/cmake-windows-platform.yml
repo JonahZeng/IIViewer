@@ -44,8 +44,11 @@ jobs:
         # extra: '--external 7z'
     - name: list Qt5_DIR
       run: dir ${{github.workspace}}\thirdparty\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5
-    # - name: set Qt5 dir env
-    #   run: echo "Qt5_DIR=${{github.workspace}}\thirdparty\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5" >> $env:GITHUB_ENV
+    - name: set Qt5 dir env
+      run: |
+        echo "Qt5_DIR=${{env.Qt5_Dir}}\lib\cmake\Qt5" >> $env:GITHUB_ENV
+        echo "Qt5_ROOT=${{env.Qt5_Dir}}" >> $env:GITHUB_ENV
+        echo "Qt5_ROOT_DIR=${{env.Qt5_Dir}}" >> $env:GITHUB_ENV
     - name: list cmake version
       run: cmake --version
     - uses: actions/checkout@v3
