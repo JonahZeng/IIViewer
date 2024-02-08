@@ -76,3 +76,9 @@ jobs:
       working-directory: ${{github.workspace}}\build
       run: cpack -C ${{env.BUILD_TYPE}} -G NSIS
 
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+          name: IIViewer windows installer
+          if-no-files-found: ignore
+          path: ${{github.workspace}}\build\IIViewer-*-win64.exe
