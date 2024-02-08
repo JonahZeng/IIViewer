@@ -23,7 +23,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        dir: '${{github.workspace}}/app/'
+        dir: '${{github.workspace}}\app'
         version: '5.15.2'
         host: 'windows'
         target: 'desktop'
