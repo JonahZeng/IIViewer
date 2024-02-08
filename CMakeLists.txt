@@ -152,7 +152,6 @@ if(WIN32)
     windeployqt(IIViewer "bin")
 endif()
 
-include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "${IIViewer_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${IIViewer_VERSION_MINOR}")
