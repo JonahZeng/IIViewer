@@ -28,6 +28,7 @@ jobs:
         version: '5.15.2'
         cache: true
         arch: 'win64_msvc2019_64'
+        modules: 'qtcharts qtdatavis3d'
         # dir: '${{github.workspace}}\thirdparty'
         # version: '5.15.2'
         # host: 'windows'
