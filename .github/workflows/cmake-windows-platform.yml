@@ -20,8 +20,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Remove old Qt
-      run: rm ${{github.workspace}}\thirdparty\Qt -r -force
+    # - name: Remove old Qt
+    #   run: rm ${{github.workspace}}\thirdparty\Qt -r -force
     - name: Install Qt
       uses: jurplel/install-qt-action@v3.3.0
       with:
@@ -34,14 +34,14 @@ jobs:
         set-env: 'true'
         cache: 'true'
         cache-key-prefix: 'install-qt-action'
-        install-deps: 'true'
-        archives: 'qtbase qtsvg'
-        setup-python: 'true'
-        tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
-        tools-only: 'false'
-        aqtversion: '==3.1.*'
-        py7zrversion: '==0.20.*'
-        extra: '--external 7z'
+        # install-deps: 'true'
+        # archives: 'qtbase qtsvg'
+        # setup-python: 'true'
+        # tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+        # tools-only: 'false'
+        # aqtversion: '==3.1.*'
+        # py7zrversion: '==0.20.*'
+        # extra: '--external 7z'
     - name: list Qt5_DIR
       run: dir ${{github.workspace}}\thirdparty\Qt\5.15.2\msvc2019_64\lib\cmake\Qt5
     # - name: set Qt5 dir env
