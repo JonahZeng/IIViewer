@@ -82,3 +82,4 @@ jobs:
           name: IIViewer windows installer
           if-no-files-found: ignore
           path: ${{github.workspace}}\build\IIViewer-*-win64.exe
+          compression-level: 0 # no compression
