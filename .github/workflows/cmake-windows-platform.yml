@@ -20,6 +20,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: Remove old Qt
+      run: rm ${{github.workspace}}\thirdparty\Qt -r -force
     - name: Install Qt
       uses: jurplel/install-qt-action@v3.3.0
       with:
