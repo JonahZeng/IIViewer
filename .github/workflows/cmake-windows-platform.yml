@@ -23,14 +23,14 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3.3.0
       with:
-        dir: '${{github.workspace}}\thirdparty\'
+        dir: '${{github.workspace}}\thirdparty'
         version: '5.15.2'
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
         modules: 'qtcharts qtdatavis3d'
         set-env: 'true'
-        cache: 'false'
+        cache: 'true'
         cache-key-prefix: 'install-qt-action'
         install-deps: 'true'
         archives: 'qtbase qtsvg'
