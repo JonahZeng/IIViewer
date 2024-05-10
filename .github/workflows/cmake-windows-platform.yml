@@ -75,11 +75,21 @@ jobs:
     - name: generate installer package
       working-directory: ${{github.workspace}}\build
       run: cpack -C ${{env.BUILD_TYPE}} -G NSIS
+    - name: generate zip package
+      working-directory: ${{github.workspace}}\build
+      run: cpack -C ${{env.BUILD_TYPE}} -G ZIP
 
-    - name: Upload Artifacts
+    - name: Upload Installer Artifacts
       uses: actions/upload-artifact@v4
       with:
           name: IIViewer windows installer
           if-no-files-found: ignore
           path: ${{github.workspace}}\build\IIViewer-*-win64.exe
+          compression-level: 0 # no compression
+    - name: Upload Zip Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+          name: IIViewer windows zip
+          if-no-files-found: ignore
+          path: ${{github.workspace}}\build\IIViewer-*-win64.zip
           compression-level: 0 # no compression
