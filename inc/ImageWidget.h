@@ -9,7 +9,8 @@
 #include <QWidget>
 #include <array>
 
-enum OpenedImageType {
+enum OpenedImageType
+{
     NORMAL_IMG = 1,
     RAW_IMG = 2,
     PNM_IMG = 3,
@@ -17,7 +18,8 @@ enum OpenedImageType {
     UNKNOW_IMG = -1
 };
 
-enum MouseActionType {
+enum MouseActionType
+{
     NONE_ACTION = -1,
     PAINT_ROI_ACTION = 0,
     DRAG_IMG_ACTION = 1
@@ -25,20 +27,21 @@ enum MouseActionType {
 
 #define ZOOM_LIST_LENGTH 13
 
-class ImageWidget : public QWidget {
+class ImageWidget : public QWidget
+{
     Q_OBJECT
 public:
     ImageWidget() = delete;
-    ImageWidget(QColor color, int penWidth, QScrollArea* parentScroll, QWidget* parent = nullptr);
+    ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, QWidget *parent = nullptr);
     ~ImageWidget();
-    void paintEvent(QPaintEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void wheelEvent(QWheelEvent* event) override;
-    void setPixmap(QString& img);
-    void setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height);
-    void setPixmap(QString& img, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize);
+    void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
+    void setPixmap(QString &img);
+    void setPixmap(QString &img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height);
+    void setPixmap(QString &img, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize);
     void zoomIn(int zoomIdx);
     void zoomOut(int zoomIdx);
     void setMouseActionPaintRoi()
@@ -68,24 +71,24 @@ public:
         repaint();
     }
     void releaseBuffer();
-    void acceptImgFromOther(const ImageWidget* other);
+    void acceptImgFromOther(const ImageWidget *other);
     void restoreImg();
 
 private:
-    void processWheelZoom(QWheelEvent* event, int zoomDelta);
-    void paintBitMapPixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
-    void paintRawPixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
-    void paintPnmPixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
-    void paintYuv444InterleavePixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
-    void paintYuv444PlanarPixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
-    void paintYuv422UYVYPixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
-    void paintYuv422YUYVPixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
-    void paintYuv420NV12PixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
-    void paintYuv420NV21PixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft);
+    void processWheelZoom(QWheelEvent *event, int zoomDelta);
+    void paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv444InterleavePixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv444PlanarPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv422UYVYPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv422YUYVPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv420NV12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     RawFileInfoDlg::BayerPixelType getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by);
 
 public:
-    QScrollArea* parentScroll;
+    QScrollArea *parentScroll;
     MouseActionType mouseAction;
     QColor penColor;
     int penWidth;
@@ -95,16 +98,16 @@ public:
     bool doDragImg;
     QPoint imgDragStartPos;
     QPoint imgDragEndPos;
-    QImage* pixMap;
+    QImage *pixMap;
     int zoomIdx;
     const std::array<float, ZOOM_LIST_LENGTH> zoomList;
     QRectF zoomTextRect;
     QRectF pixValPaintRect;
-    unsigned char* rawDataPtr;
+    unsigned char *rawDataPtr;
     int rawDataBit;
-    unsigned char* pnmDataPtr;
+    unsigned char *pnmDataPtr;
     int pnmDataBit;
-    unsigned char* yuvDataPtr;
+    unsigned char *yuvDataPtr;
     int yuvDataBit;
     RawFileInfoDlg::BayerPatternType rawBayerType;
     RawFileInfoDlg::ByteOrderType rawByteOrderType;
@@ -112,12 +115,12 @@ public:
     OpenedImageType openedImgType;
 
 private:
-    QImage* pixMapBak;
-    unsigned char* rawDataPtrBak;
+    QImage *pixMapBak;
+    unsigned char *rawDataPtrBak;
     int rawDataBitBak;
-    unsigned char* pnmDataPtrBak;
+    unsigned char *pnmDataPtrBak;
     int pnmDataBitBak;
-    unsigned char* yuvDataPtrBak;
+    unsigned char *yuvDataPtrBak;
     int yuvDataBitBak;
     RawFileInfoDlg::BayerPatternType rawBayerTypeBak;
     RawFileInfoDlg::ByteOrderType rawByteOrderTypeBak;

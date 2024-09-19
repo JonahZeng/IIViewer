@@ -4,7 +4,8 @@
 #include <QJsonObject>
 #include <QString>
 
-class AppSettings {
+class AppSettings
+{
 public:
     explicit AppSettings();
     ~AppSettings();
@@ -23,6 +24,6 @@ public:
     void dumpSettingsToFile();
 
 private:
-    void read(const QJsonObject& json);
-    void write(QJsonObject& json) const;
+    void read(const QJsonObject &json);
+    void write(QJsonObject &json) const;
 };

@@ -2,7 +2,6 @@
 #include <QChartView>
 using namespace QtCharts;
 
-class LineChartView: public QChartView
+class LineChartView : public QChartView
 {
-
 };

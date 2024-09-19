@@ -5,27 +5,28 @@
 #include "IIPviewer_ui.h"
 #include <QtWidgets/QMainWindow>
 
-class IIPviewer : public QMainWindow {
+class IIPviewer : public QMainWindow
+{
     Q_OBJECT
 
 public:
-    IIPviewer(QWidget* parent = nullptr);
+    IIPviewer(QWidget *parent = nullptr);
     virtual ~IIPviewer();
     void setTitle();
-    void closeEvent(QCloseEvent* event) override;
-    void dragEnterEvent(QDragEnterEvent* event) override;
-    void dropEvent(QDropEvent* event) override;
-    bool eventFilter(QObject* obj, QEvent* event) override;
+    void closeEvent(QCloseEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
-    void loadFile(QString& fileName, int scrollArea);
-    void loadYuvFile(QString& fileName, int scrollArea);
-    void loadRawFile(QString& fileName, int scrollArea);
-    void loadPnmFile(QString& fileName, int scrollArea);
+    void loadFile(QString &fileName, int scrollArea);
+    void loadYuvFile(QString &fileName, int scrollArea);
+    void loadRawFile(QString &fileName, int scrollArea);
+    void loadPnmFile(QString &fileName, int scrollArea);
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
-    void setImage(QString& image, int leftOrRight);
-    void setYuvImage(QString& imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
-    void setRawImage(QString& image, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height, int leftOrRight);
+    void setImage(QString &image, int leftOrRight);
+    void setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
+    void setRawImage(QString &image, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height, int leftOrRight);
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -82,7 +83,7 @@ public:
     QString workPath;
     QSize originSize[2];
     QString openedFile[2];
-    QScrollArea* masterScrollarea;
+    QScrollArea *masterScrollarea;
     AppSettings settings;
 };
 

@@ -40,8 +40,9 @@ function(windeployqt target directory)
 
     # Run windeployqt immediately after build
     add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E
-            env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}"
+        # COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}"
+        COMMAND "${_qt_bin_dir}/windeployqt.exe"
+
                 --verbose 0
                 --no-compiler-runtime
                 --no-angle

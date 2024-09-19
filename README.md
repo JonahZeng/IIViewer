@@ -10,12 +10,14 @@ this repo is designed for open and view ISP intermediate image. we support these
 ## how to use
 use this software is very easy, just double click this application icon from your files explore, you can see this if there is no any unexpected error:
 ![main-ui](./doc/image/main-ui.png)
-like its tip, drag any supported format image to dash rectangle，it will display the image context.
+like its tip, drag any supported format image to dash rectangle，it will display the image context. when you zoom in to 96X by scroll your mouse wheel, you will see every pixel's real value.
 that's all.
 
 ## how to build from source code
 ### windows
-- install Qt5 or Qt6, cmake, MSVC v143
+I have tested build it on windows10 with mingw64 13.2.0, also windows11 with MSVC v143.
+so, follow below steps:
+- install Qt5 or Qt6, cmake, MSVC or MinGW64 (should support **C++11 at least**)
 - git clone this repo
 - mk dir build, and run cmake in this directory
 ```bat
@@ -26,3 +28,6 @@ cd build
 cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR
 cmake --build . --config Release
 ```
+
+### linux
+I did not tested very much, just had a try on Ubuntu 22.04, it works.

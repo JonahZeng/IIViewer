@@ -2,9 +2,11 @@
 #include "ui_YuvFileInfoDlg.h"
 #include <QDialog>
 
-class YuvFileInfoDlg : public QDialog {
+class YuvFileInfoDlg : public QDialog
+{
 public:
-    enum YuvType {
+    enum YuvType
+    {
         YUV444_INTERLEAVE = 0,
         YUV444_PLANAR = 1,
         YUV422_UYVY = 2,
@@ -18,7 +20,7 @@ public:
 
 public:
     YuvFileInfoDlg() = delete;
-    YuvFileInfoDlg(QWidget* parent);
+    YuvFileInfoDlg(QWidget *parent);
     ~YuvFileInfoDlg();
 
 public:

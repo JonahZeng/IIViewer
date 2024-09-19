@@ -1,10 +1,11 @@
 #pragma once
 #include <QDialog>
 
-class AboutDlg : public QDialog {
+class AboutDlg : public QDialog
+{
 public:
     AboutDlg() = delete;
-    AboutDlg(QWidget* parent);
+    AboutDlg(QWidget *parent);
     ~AboutDlg();
 
 private:
