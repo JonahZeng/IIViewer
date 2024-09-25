@@ -5,6 +5,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 
+#define CLIP3(a, mi, ma) (a < mi ? mi : (a > ma ? ma : a))
+
 ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea* parentScroll, QWidget* parent)
     : QWidget(parent)
     , parentScroll(parentScroll)
@@ -962,22 +964,22 @@ void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, R
         unsigned short* buffer_us = (unsigned short*)buffer;
         if (order == RawFileInfoDlg::RAW_BIG_ENDIAN) {
             for (qint64 i = 0; i < width * height; i++) {
-                bufferShow[i] = ((buffer_us[i] & 0x00ff << 8) | (buffer_us[i] & 0xff00 >> 8)) >> (bitDepth - 8);
+                bufferShow[i] = CLIP3(((buffer_us[i] & 0x00ff << 8) | (buffer_us[i] & 0xff00 >> 8)) >> (bitDepth - 8), 0, 255);
             }
         } else {
             for (qint64 i = 0; i < width * height; i++) {
-                bufferShow[i] = buffer_us[i] >> (bitDepth - 8);
+                bufferShow[i] = CLIP3(buffer_us[i] >> (bitDepth - 8), 0, 255);
             }
         }
     } else if (pixSize == 4) {
         unsigned int* buffer_ui = (unsigned int*)buffer;
         if (order == RawFileInfoDlg::RAW_BIG_ENDIAN) {
             for (qint64 i = 0; i < width * height; i++) {
-                bufferShow[i] = ((buffer_ui[i] & 0x000000ff << 24) | (buffer_ui[i] & 0x0000ff00 << 8) | (buffer_ui[i] & 0x00ff0000 >> 8) | (buffer_ui[i] & 0xff000000 >> 24)) >> (bitDepth - 8);
+                bufferShow[i] = CLIP3(((buffer_ui[i] & 0x000000ff << 24) | (buffer_ui[i] & 0x0000ff00 << 8) | (buffer_ui[i] & 0x00ff0000 >> 8) | (buffer_ui[i] & 0xff000000 >> 24)) >> (bitDepth - 8), 0, 255);
             }
         } else {
             for (qint64 i = 0; i < width * height; i++) {
-                bufferShow[i] = buffer_ui[i] >> (bitDepth - 8);
+                bufferShow[i] = CLIP3(buffer_ui[i] >> (bitDepth - 8), 0, 255);
             }
         }
     }
@@ -1185,7 +1187,6 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         }
     }
 
-#define CLIP3(a, mi, ma) (a < mi ? mi : (a > ma ? ma : a))
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             short y = rgb888Buf[i * width * 3 + j * 3 + 0];
