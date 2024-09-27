@@ -253,10 +253,8 @@ void ImageWidget::paintYuv444InterleavePixVal(QPoint& viewTopLeftPix, QPainter& 
                 unsigned int u = 0;
                 if (yuvDataBit <= 8) {
                     u = ((unsigned char*)yuvDataPtr)[(yStart + h) * yuvWidth * 3 + (xStart + w) * 3 + 1] - (1 << (yuvDataBit - 1));
-                    ;
                 } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                     u = ((unsigned short*)yuvDataPtr)[(yStart + h) * yuvWidth * 3 + (xStart + w) * 3 + 1] - (1 << (yuvDataBit - 1));
-                    ;
                 }
 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
@@ -272,10 +270,8 @@ void ImageWidget::paintYuv444InterleavePixVal(QPoint& viewTopLeftPix, QPainter& 
                 unsigned int v = 0;
                 if (yuvDataBit <= 8) {
                     v = ((unsigned char*)yuvDataPtr)[(yStart + h) * yuvWidth * 3 + (xStart + w) * 3 + 2] - (1 << (yuvDataBit - 1));
-                    ;
                 } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                     v = ((unsigned short*)yuvDataPtr)[(yStart + h) * yuvWidth * 3 + (xStart + w) * 3 + 2] - (1 << (yuvDataBit - 1));
-                    ;
                 }
 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
@@ -319,10 +315,8 @@ void ImageWidget::paintYuv444PlanarPixVal(QPoint& viewTopLeftPix, QPainter& pain
                 unsigned int u = 0;
                 if (yuvDataBit <= 8) {
                     u = ((unsigned char*)yuvDataPtr)[yuvWidth * yuvHeight + (yStart + h) * yuvWidth + (xStart + w)] - (1 << (yuvDataBit - 1));
-                    ;
                 } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                     u = ((unsigned short*)yuvDataPtr)[yuvWidth * yuvHeight + (yStart + h) * yuvWidth + (xStart + w)] - (1 << (yuvDataBit - 1));
-                    ;
                 }
 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
@@ -338,10 +332,8 @@ void ImageWidget::paintYuv444PlanarPixVal(QPoint& viewTopLeftPix, QPainter& pain
                 unsigned int v = 0;
                 if (yuvDataBit <= 8) {
                     v = ((unsigned char*)yuvDataPtr)[yuvWidth * yuvHeight * 2 + (yStart + h) * yuvWidth + (xStart + w)] - (1 << (yuvDataBit - 1));
-                    ;
                 } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                     v = ((unsigned short*)yuvDataPtr)[yuvWidth * yuvHeight * 2 + (yStart + h) * yuvWidth + (xStart + w)] - (1 << (yuvDataBit - 1));
-                    ;
                 }
 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
@@ -378,17 +370,20 @@ void ImageWidget::paintYuv422UYVYPixVal(QPoint& viewTopLeftPix, QPainter& painte
         }
     }
 
-    painter.setPen(QColor(0, 50, 255));
+    if ((xStart & 0x1) == 0x0){
+        painter.setPen(QColor(0, 50, 255));
+    }
+    else {
+        painter.setPen(QColor(255, 50, 0));
+    }
     for (int h = 0; h < viewPixHeight; h++) {
         for (int w = 0; w < viewPixWidth; w += 2) {
             if (yStart + h < yuvHeight && xStart + w < yuvWidth) {
                 unsigned int u = 0;
                 if (yuvDataBit <= 8) {
                     u = ((unsigned char*)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2] - (1 << (yuvDataBit - 1));
-                    ;
                 } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                     u = ((unsigned short*)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2] - (1 << (yuvDataBit - 1));
-                    ;
                 }
 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
@@ -401,17 +396,20 @@ void ImageWidget::paintYuv422UYVYPixVal(QPoint& viewTopLeftPix, QPainter& painte
             }
         }
     }
-    painter.setPen(QColor(255, 50, 0));
+    if ((xStart & 0x1) == 0x0) {
+        painter.setPen(QColor(255, 50, 0));
+    }
+    else {
+        painter.setPen(QColor(0, 50, 255));
+    }
     for (int h = 0; h < viewPixHeight; h++) {
         for (int w = 1; w < viewPixWidth; w += 2) {
             if (yStart + h < yuvHeight && xStart + w < yuvWidth) {
                 unsigned int v = 0;
                 if (yuvDataBit <= 8) {
                     v = ((unsigned char*)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2] - (1 << (yuvDataBit - 1));
-                    ;
                 } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                     v = ((unsigned short*)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2] - (1 << (yuvDataBit - 1));
-                    ;
                 }
 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
@@ -452,17 +450,20 @@ void ImageWidget::paintYuv422YUYVPixVal(QPoint& viewTopLeftPix, QPainter& painte
         }
     }
 
-    painter.setPen(QColor(0, 50, 255));
+    if ((xStart & 0x1) == 0x0){
+        painter.setPen(QColor(0, 50, 255));
+    }
+    else {
+        painter.setPen(QColor(255, 50, 0));
+    }
     for (int h = 0; h < viewPixHeight; h++) {
         for (int w = 0; w < viewPixWidth; w += 2) {
             if (yStart + h < yuvHeight && xStart + w < yuvWidth) {
                 unsigned int u = 0;
                 if (yuvDataBit <= 8) {
                     u = ((unsigned char*)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2 + 1] - (1 << (yuvDataBit - 1));
-                    ;
                 } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                     u = ((unsigned short*)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2 + 1] - (1 << (yuvDataBit - 1));
-                    ;
                 }
 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
@@ -474,17 +475,20 @@ void ImageWidget::paintYuv422YUYVPixVal(QPoint& viewTopLeftPix, QPainter& painte
             }
         }
     }
-    painter.setPen(QColor(255, 50, 0));
+    if ((xStart & 0x1) == 0x0) {
+        painter.setPen(QColor(255, 50, 0));
+    }
+    else {
+        painter.setPen(QColor(0, 50, 255));
+    }
     for (int h = 0; h < viewPixHeight; h++) {
         for (int w = 1; w < viewPixWidth; w += 2) {
             if (yStart + h < yuvHeight && xStart + w < yuvWidth) {
                 unsigned int v = 0;
                 if (yuvDataBit <= 8) {
                     v = ((unsigned char*)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2 + 1] - (1 << (yuvDataBit - 1));
-                    ;
                 } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                     v = ((unsigned short*)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2 + 1] - (1 << (yuvDataBit - 1));
-                    ;
                 }
 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
@@ -536,10 +540,8 @@ void ImageWidget::paintYuv420NV12PixVal(QPoint& viewTopLeftPix, QPainter& painte
                     unsigned int u = 0;
                     if (yuvDataBit <= 8) {
                         u = ((unsigned char*)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w)] - (1 << (yuvDataBit - 1));
-                        ;
                     } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                         u = ((unsigned short*)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w)] - (1 << (yuvDataBit - 1));
-                        ;
                     }
 
                     QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
@@ -557,10 +559,8 @@ void ImageWidget::paintYuv420NV12PixVal(QPoint& viewTopLeftPix, QPainter& painte
                     unsigned int v = 0;
                     if (yuvDataBit <= 8) {
                         v = ((unsigned char*)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w) + 1] - (1 << (yuvDataBit - 1));
-                        ;
                     } else if (yuvDataBit > 8 && yuvDataBit <= 16) {
                         v = ((unsigned short*)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w) + 1] - (1 << (yuvDataBit - 1));
-                        ;
                     }
 
                     QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
