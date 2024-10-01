@@ -11,6 +11,7 @@ class IIPviewer;
 #include <QPushButton>
 #include <QRadioButton>
 #include <QScrollArea>
+#include <QToolBar>
 #include <array>
 
 namespace Ui
@@ -23,12 +24,14 @@ namespace Ui
         void setupUi(IIPviewer *mainWindow);
 
     public:
+        QToolBar *toolBar;
         QAction *openFileLeftAction;
         QAction *openFileRightAction;
         QAction *reloadFileLeftAction;
         QAction *reloadFileRightAction;
         QAction *exitAction;
-        QAction *closeAction;
+        QAction *closeLeftAction;
+        QAction *closeRightAction;
         QAction *dataAnalyseAction;
         QAction *playListAction;
         QAction *aboutQtAction;
@@ -36,7 +39,9 @@ namespace Ui
         QAction *useRoiToolAction;
         QAction *useMoveToolAction;
         QPushButton *penColorSetBtn;
+        QAction* penColorSetAction;
         QSpinBox *penWidthSbox;
+        QAction* penWidthAction;
         QVector<QAction *> themes;
         QFrame *mainWidget;
         std::array<QScrollArea *, 2> scrollArea;

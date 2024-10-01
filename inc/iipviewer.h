@@ -33,7 +33,8 @@ protected:
 
 public slots:
     void onOpenFileAction();
-    void onCloseFileAction();
+    void onCloseLeftFileAction();
+    void onCloseRightFileAction();
     void onReloadFileAction();
     void setPenWidth(int width);
     void setTheme();

@@ -144,7 +144,8 @@ IIPviewer::IIPviewer(QWidget *parent)
     connect(ui.exchangeAreaPreviewBtn, &QPushButton::pressed, this, &IIPviewer::exchangeRight2LeftImg);
     connect(ui.exchangeAreaPreviewBtn, &QPushButton::released, this, &IIPviewer::restoreLeftImg);
     connect(ui.imageInfoBtn, &QPushButton::clicked, this, &IIPviewer::showImageInfo);
-    connect(ui.closeAction, &QAction::triggered, this, &IIPviewer::onCloseFileAction);
+    connect(ui.closeLeftAction, &QAction::triggered, this, &IIPviewer::onCloseLeftFileAction);
+    connect(ui.closeRightAction, &QAction::triggered, this, &IIPviewer::onCloseRightFileAction);
     connect(ui.exitAction, &QAction::triggered, this, [this]()
             { this->close(); });
     connect(ui.aboutQtAction, &QAction::triggered, []()
@@ -236,14 +237,20 @@ void IIPviewer::onUseRoiAction(bool check)
         ui.useMoveToolAction->setChecked(false);
         ui.imageLabel[LEFT_IMG_WIDGET]->setMouseActionPaintRoi();
         ui.imageLabel[RIGHT_IMG_WIDGET]->setMouseActionPaintRoi();
+
+        ui.penColorSetAction->setVisible(true);
+        ui.penWidthAction->setVisible(true);
+        // ui.toolBar->update();
     }
     else
     {
         ui.imageLabel[LEFT_IMG_WIDGET]->setMouseActionNone();
         ui.imageLabel[RIGHT_IMG_WIDGET]->setMouseActionNone();
+
+        ui.penColorSetAction->setVisible(false);
+        ui.penWidthAction->setVisible(false);
+        // ui.toolBar->update();
     }
-    ui.penColorSetBtn->setEnabled(check);
-    ui.penWidthSbox->setEnabled(check);
 }
 
 void IIPviewer::onUseMoveAction(bool check)
@@ -251,8 +258,8 @@ void IIPviewer::onUseMoveAction(bool check)
     if (check)
     {
         ui.useRoiToolAction->setChecked(false);
-        ui.penColorSetBtn->setEnabled(false);
-        ui.penWidthSbox->setEnabled(false);
+        ui.penColorSetAction->setVisible(false);
+        ui.penWidthAction->setVisible(false);
         ui.imageLabel[LEFT_IMG_WIDGET]->setMouseActionDragImg();
         ui.imageLabel[RIGHT_IMG_WIDGET]->setMouseActionDragImg();
     }
@@ -331,7 +338,8 @@ void IIPviewer::closeEvent(QCloseEvent *event)
     auto reply = QMessageBox::question(this, "Question", "Are you sure to quit ? ", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes)
     {
-        onCloseFileAction();
+        onCloseLeftFileAction();
+        onCloseRightFileAction();
         QMainWindow::closeEvent(event);
         event->accept();
     }
@@ -859,11 +867,15 @@ void IIPviewer::setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int 
     ui.imageLabel[leftOrRight]->setPixmap(imageName, tp, bitDepth, width, height, pixSize);
 }
 
-void IIPviewer::onCloseFileAction()
+void IIPviewer::onCloseLeftFileAction()
 {
-    if (ui.imageLabel[LEFT_IMG_WIDGET]->pixMap == nullptr && ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap == nullptr)
+    if (ui.imageLabel[LEFT_IMG_WIDGET]->pixMap == nullptr)
     {
         return;
+    }
+    if(ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap != nullptr)
+    {
+        masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
     }
 
     ui.imageLabel[LEFT_IMG_WIDGET]->releaseBuffer();
@@ -873,25 +885,12 @@ void IIPviewer::onCloseFileAction()
     ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
     ui.imageLabel[LEFT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
     ui.imageLabel[LEFT_IMG_WIDGET]->rawDataBit = 0;
-    ui.imageLabel[RIGHT_IMG_WIDGET]->releaseBuffer();
-    ui.imageLabel[RIGHT_IMG_WIDGET]->paintBegin = false;
-    ui.imageLabel[RIGHT_IMG_WIDGET]->paintEnd = false;
-    ui.imageLabel[RIGHT_IMG_WIDGET]->zoomIdx = 2;
-    ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
-    ui.imageLabel[RIGHT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
-    ui.imageLabel[RIGHT_IMG_WIDGET]->rawDataBit = 0;
     openedFile[0].clear();
-    openedFile[1].clear();
     setTitle();
     ui.start_x_edit0->clear();
     ui.start_y_edit0->clear();
     ui.end_x_edit0->clear();
     ui.end_y_edit0->clear();
-    ui.start_x_edit1->clear();
-    ui.start_y_edit1->clear();
-    ui.end_x_edit1->clear();
-    ui.end_y_edit1->clear();
-    ui.zoomRatioLabel->setText("1.00x");
 
     int scrollWidth = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().width();
     int scrollHeight = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().height();
@@ -900,10 +899,38 @@ void IIPviewer::onCloseFileAction()
     ui.imageLabelContianer[LEFT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
     ui.imageLabelContianer[LEFT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
 
-    scrollWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().width();
-    scrollHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().height();
-    scrollBarWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->width();
-    scrollBarHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->height();
+    emit updateExchangeBtnStatus();
+}
+
+void IIPviewer::onCloseRightFileAction()
+{
+    if (ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap == nullptr)
+    {
+        return;
+    }
+    if(ui.imageLabel[LEFT_IMG_WIDGET]->pixMap != nullptr)
+    {
+        masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+    }
+
+    ui.imageLabel[RIGHT_IMG_WIDGET]->releaseBuffer();
+    ui.imageLabel[RIGHT_IMG_WIDGET]->paintBegin = false;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->paintEnd = false;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->zoomIdx = 2;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->rawDataBit = 0;
+    openedFile[1].clear();
+    setTitle();
+    ui.start_x_edit1->clear();
+    ui.start_y_edit1->clear();
+    ui.end_x_edit1->clear();
+    ui.end_y_edit1->clear();
+
+    int scrollWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().width();
+    int scrollHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().height();
+    int scrollBarWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->width();
+    int scrollBarHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->height();
     ui.imageLabelContianer[RIGHT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
     ui.imageLabelContianer[RIGHT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
 
