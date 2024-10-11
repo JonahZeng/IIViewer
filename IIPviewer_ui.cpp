@@ -6,14 +6,20 @@
 #include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
-#include <QToolBar>
 #include <QValidator>
 #include <QStyleFactory>
 
 #include "iipviewer.h"
 
-Ui::IIPviewerUi::IIPviewerUi()
-    : openFileLeftAction(nullptr), openFileRightAction(nullptr), exitAction(nullptr), closeAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), aboutQtAction(nullptr), aboutThisAction(nullptr), mainWidget(nullptr), scrollArea{nullptr, nullptr}, imageLabel{nullptr, nullptr}, dataAnalyseDockWgt(nullptr), playListDockWgt(nullptr), paintOk0(nullptr), paintOk1(nullptr), syncRight(nullptr), syncLeft(nullptr), clearPaintBtn(nullptr), start_x_edit0(nullptr), start_y_edit0(nullptr), start_x_edit1(nullptr), start_y_edit1(nullptr), end_x_edit0(nullptr), end_y_edit0(nullptr), end_x_edit1(nullptr), end_y_edit1(nullptr), plot_rgb_contourf_line(nullptr), plot_rgb_hist(nullptr), plot_yuv_contourf_line(nullptr), plot_yuv_hist(nullptr), plot_hsv_contourf_line(nullptr), plot_hsv_hist(nullptr), rgb2yuv_mat_0(nullptr), rgb2yuv_mat_1(nullptr), rgb2yuv_mat_2(nullptr), rgb2yuv_mat_3(nullptr), rgb2yuv_mat_4(nullptr), rgb2yuv_mat_5(nullptr), rgb2yuv_mat_6(nullptr), rgb2yuv_mat_7(nullptr), rgb2yuv_mat_8(nullptr)
+Ui::IIPviewerUi::IIPviewerUi() : openFileLeftAction(nullptr), openFileRightAction(nullptr), exitAction(nullptr), 
+    closeLeftAction(nullptr), closeRightAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), aboutQtAction(nullptr), 
+    aboutThisAction(nullptr), mainWidget(nullptr), scrollArea{nullptr, nullptr}, imageLabel{nullptr, nullptr}, 
+    dataAnalyseDockWgt(nullptr), playListDockWgt(nullptr), paintOk0(nullptr), paintOk1(nullptr), 
+    syncRight(nullptr), syncLeft(nullptr), clearPaintBtn(nullptr), start_x_edit0(nullptr), start_y_edit0(nullptr), 
+    start_x_edit1(nullptr), start_y_edit1(nullptr), end_x_edit0(nullptr), end_y_edit0(nullptr), end_x_edit1(nullptr), 
+    end_y_edit1(nullptr), plot_rgb_contourf_line(nullptr), plot_rgb_hist(nullptr), plot_yuv_contourf_line(nullptr), 
+    plot_yuv_hist(nullptr), plot_hsv_contourf_line(nullptr), plot_hsv_hist(nullptr), rgb2yuv_mat_0(nullptr), rgb2yuv_mat_1(nullptr), 
+    rgb2yuv_mat_2(nullptr), rgb2yuv_mat_3(nullptr), rgb2yuv_mat_4(nullptr), rgb2yuv_mat_5(nullptr), rgb2yuv_mat_6(nullptr), rgb2yuv_mat_7(nullptr), rgb2yuv_mat_8(nullptr)
 {
 }
 
@@ -23,7 +29,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
 {
     QMenuBar *mbar = mainWindow->menuBar();
     QMenu *fileMenu = mbar->addMenu("&File");
-    QToolBar *toolBar = new QToolBar();
+    toolBar = new QToolBar(mainWindow);
     toolBar->setAllowedAreas(Qt::ToolBarArea::TopToolBarArea);
     mainWindow->addToolBar(Qt::ToolBarArea::TopToolBarArea, toolBar);
     // mbar->setStyleSheet("QMenuBar{background:rgb(128,128,128)}
@@ -42,14 +48,18 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     reloadFileRightAction->setIcon(QIcon(":/image/resource/reload-right.png"));
     exitAction = new QAction("Exit", mainWindow);
     exitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q));
-    closeAction = new QAction("Close", mainWindow);
-    closeAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_W));
-    closeAction->setIcon(QIcon(":/image/resource/file-x.svg"));
+    closeLeftAction = new QAction("Close left image", mainWindow);
+    closeLeftAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L));
+    closeLeftAction->setIcon(QIcon(":/image/resource/file-x.svg"));
+    closeRightAction = new QAction("Close right image", mainWindow);
+    closeRightAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R));
+    closeRightAction->setIcon(QIcon(":/image/resource/file-x.svg"));
     fileMenu->addAction(openFileLeftAction);
     fileMenu->addAction(openFileRightAction);
     fileMenu->addAction(reloadFileLeftAction);
     fileMenu->addAction(reloadFileRightAction);
-    fileMenu->addAction(closeAction);
+    fileMenu->addAction(closeLeftAction);
+    fileMenu->addAction(closeRightAction);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
@@ -111,14 +121,15 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     toolBar->addAction(openFileRightAction);
     toolBar->addAction(reloadFileLeftAction);
     toolBar->addAction(reloadFileRightAction);
-    toolBar->addAction(closeAction);
+    toolBar->addAction(closeLeftAction);
+    toolBar->addAction(closeRightAction);
     toolBar->addSeparator();
     toolBar->addAction(aboutThisAction);
     toolBar->addSeparator();
     toolBar->addAction(useMoveToolAction);
     toolBar->addAction(useRoiToolAction);
     toolBar->addSeparator();
-    penColorSetBtn = new QPushButton();
+    penColorSetBtn = new QPushButton(toolBar);
     QPixmap penColorIcon(32, 32);
     penColorIcon.fill(QColor(0, 0, 0));
     penColorSetBtn->setIcon(penColorIcon);
@@ -126,17 +137,20 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
                                   "QPushButton:hover{background-color:#41a7e0} "
                                   "QPushButton:pressed{background-color:#a7a7a7}");
     penColorSetBtn->setMinimumWidth(64);
-    toolBar->addWidget(penColorSetBtn);
-    penColorSetBtn->setEnabled(false);
-
-    penWidthSbox = new QSpinBox();
+    penColorSetBtn->setVisible(false);
+    penColorSetBtn->setEnabled(true);
+    penColorSetAction = toolBar->addWidget(penColorSetBtn);
+    
+    penWidthSbox = new QSpinBox(toolBar);
     penWidthSbox->setRange(1, 32);
     penWidthSbox->setSingleStep(1);
     penWidthSbox->setStepType(QSpinBox::StepType::DefaultStepType);
     penWidthSbox->setSuffix("px");
-    penWidthSbox->setEnabled(false);
+    penWidthSbox->setEnabled(true);
     penWidthSbox->setValue(2);
-    toolBar->addWidget(penWidthSbox);
+    penWidthSbox->setVisible(false);
+    penWidthAction = toolBar->addWidget(penWidthSbox);
+    
 
     mainWidget = new QFrame();
     //    mainWidget->setFrameStyle(QFrame::Box | QFrame::Sunken);

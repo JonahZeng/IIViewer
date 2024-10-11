@@ -1,11 +1,13 @@
-# About 
+# IIPviewer
 ----
+## About
 this repo is designed for open and view ISP intermediate image. we support these format below:
 - jpg
-- pnm
-- raw
+- pnm(8/10/12/14/16 bit)
+- raw(8/10/12/14/16/18/20/22/24 bit)
 - bmp
 - png
+- yuv(8/10/12 444-interleave4 444-plannar 22-UYVY 422-YUYV 420-NV12 420-NV21)
 
 ## how to use
 use this software is very easy, just double click this application icon from your files explore, you can see this if there is no any unexpected error:
