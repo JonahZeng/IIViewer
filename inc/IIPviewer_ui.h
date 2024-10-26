@@ -34,7 +34,6 @@ namespace Ui
         QAction *closeRightAction;
         QAction *dataAnalyseAction;
         QAction *playListAction;
-        QAction *aboutQtAction;
         QAction *aboutThisAction;
         QAction *useRoiToolAction;
         QAction *useMoveToolAction;

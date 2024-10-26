@@ -148,8 +148,8 @@ IIPviewer::IIPviewer(QWidget *parent)
     connect(ui.closeRightAction, &QAction::triggered, this, &IIPviewer::onCloseRightFileAction);
     connect(ui.exitAction, &QAction::triggered, this, [this]()
             { this->close(); });
-    connect(ui.aboutQtAction, &QAction::triggered, []()
-            { qApp->aboutQt(); });
+    // connect(ui.aboutQtAction, &QAction::triggered, []()
+    //         { qApp->aboutQt(); });
     connect(ui.aboutThisAction, &QAction::triggered, this, [this]()
             { AboutDlg dlg(this); dlg.exec(); });
 
