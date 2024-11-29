@@ -379,7 +379,7 @@ void IIPviewer::onOpenFileAction()
 {
     // QString path = settings.workPath;
     auto fileName = QFileDialog::getOpenFileName(this, "open images", settings.workPath,
-                                                 "Images files(*.jpg *JPG *.jpeg *JPEG *.png *PNG *.bmp *BMP);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;yuv files(*.yuv *.YUV);;All files(*.*)");
+                                                 "Images files(*.jpg *JPG *.jpeg *JPEG *.png *PNG *.bmp *BMP);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;Pgm files(*.pgm *.PGM);;yuv files(*.yuv *.YUV);;All files(*.*)");
 
     if (fileName.isEmpty())
     {
@@ -515,6 +515,10 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
     else if (fileName.endsWith(".pnm", Qt::CaseInsensitive))
     {
         loadPnmFile(fileName, scrollArea);
+    }
+    else if (fileName.endsWith(".pgm", Qt::CaseInsensitive))
+    {
+        loadPgmFile(fileName, scrollArea);
     }
     else if (fileName.endsWith(".yuv", Qt::CaseInsensitive))
     {
@@ -806,6 +810,47 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea)
 }
 
 void IIPviewer::loadPnmFile(QString &fileName, int scrollArea)
+{
+    QImageReader reader(fileName);
+    if (!reader.canRead())
+    {
+        QString t = QString("can not open ") + fileName + QString(" as image!");
+        QMessageBox::information(this, "error", t, QMessageBox::StandardButton::Ok);
+        return;
+    }
+    if (scrollArea == LEFT_IMG_WIDGET)
+    {
+        if (!openedFile[1].isEmpty())
+        {
+            if (reader.size() != originSize[1])
+            {
+                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                return;
+            }
+        }
+        openedFile[0] = fileName;
+        originSize[0] = reader.size();
+        setImage(fileName, LEFT_IMG_WIDGET);
+        loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+    }
+    else if (scrollArea == RIGHT_IMG_WIDGET)
+    {
+        if (openedFile[0].length() > 0)
+        {
+            if (reader.size() != originSize[0])
+            {
+                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                return;
+            }
+        }
+        openedFile[1] = fileName;
+        originSize[1] = reader.size();
+        setImage(fileName, RIGHT_IMG_WIDGET);
+        loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+    }
+}
+
+void IIPviewer::loadPgmFile(QString &fileName, int scrollArea)
 {
     QImageReader reader(fileName);
     if (!reader.canRead())

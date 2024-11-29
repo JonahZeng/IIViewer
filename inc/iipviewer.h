@@ -23,6 +23,7 @@ private:
     void loadYuvFile(QString &fileName, int scrollArea);
     void loadRawFile(QString &fileName, int scrollArea);
     void loadPnmFile(QString &fileName, int scrollArea);
+    void loadPgmFile(QString &fileName, int scrollArea);
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);

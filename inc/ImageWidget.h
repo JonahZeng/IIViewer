@@ -14,7 +14,8 @@ enum OpenedImageType
     NORMAL_IMG = 1,
     RAW_IMG = 2,
     PNM_IMG = 3,
-    YUV_IMG = 4,
+    PGM_IMG = 4,
+    YUV_IMG = 5,
     UNKNOW_IMG = -1
 };
 
@@ -79,6 +80,7 @@ private:
     void paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintPgmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv444InterleavePixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv444PlanarPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv422UYVYPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
@@ -107,6 +109,8 @@ public:
     int rawDataBit;
     unsigned char *pnmDataPtr;
     int pnmDataBit;
+    unsigned char *pgmDataPtr;
+    int pgmDataBit;
     unsigned char *yuvDataPtr;
     int yuvDataBit;
     RawFileInfoDlg::BayerPatternType rawBayerType;
@@ -120,6 +124,8 @@ private:
     int rawDataBitBak;
     unsigned char *pnmDataPtrBak;
     int pnmDataBitBak;
+    unsigned char *pgmDataPtrBak;
+    int pgmDataBitBak;
     unsigned char *yuvDataPtrBak;
     int yuvDataBitBak;
     RawFileInfoDlg::BayerPatternType rawBayerTypeBak;
