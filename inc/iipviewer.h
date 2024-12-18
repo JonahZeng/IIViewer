@@ -10,7 +10,7 @@ class IIPviewer : public QMainWindow
     Q_OBJECT
 
 public:
-    IIPviewer(QWidget *parent = nullptr);
+    IIPviewer(QString needOpenFilePath, QWidget *parent = nullptr);
     virtual ~IIPviewer();
     void setTitle();
     void closeEvent(QCloseEvent *event) override;
@@ -28,6 +28,7 @@ private:
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
     void setRawImage(QString &image, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height, int leftOrRight);
+    void openGivenFileFromCmdArgv(QString image);
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -72,12 +73,15 @@ public slots:
     void syncScrollArea0_horScBarVal(int);
     void syncScrollArea0_verScBarVal(int);
     void updateExchangeBtn();
+    void updateZoomLabelText();
     void exchangeRight2LeftImg();
     void restoreLeftImg();
     void showImageInfo();
 
 signals:
     void updateExchangeBtnStatus();
+    void updateZoomLabelStatus();
+    void needOpenFileFromCmdArgv(QString image);
 
 public:
     Ui::IIPviewerUi ui;

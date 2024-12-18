@@ -4,6 +4,7 @@
 // #include <QtNetwork/QHostInfo>
 #include <QStyleFactory>
 // #include <QDebug>
+#include <QFileInfo>
 
 int main(int argc, char* argv[])
 {
@@ -21,8 +22,16 @@ int main(int argc, char* argv[])
     //        QMessageBox::critical(nullptr, "domain error", "can't run this app on you pc", QMessageBox::StandardButton::Ok);
     //        return -1;
     //    }
+    QString needOpenFilePath{};
+    if(argc > 1) {
+        QString path = QString::fromLocal8Bit(argv[1]); 
+        QFileInfo fileInfo(path); // 检查路径是否有效 
+        if (fileInfo.exists() && fileInfo.isFile()) { 
+            needOpenFilePath = path;
+        }
+    }
 
-    IIPviewer w;
+    IIPviewer w{needOpenFilePath};
     w.show();
     return app.exec();
 }

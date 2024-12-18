@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(IIViewer VERSION 0.4.2 LANGUAGES CXX)
+project(IIViewer VERSION 0.4.3 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 
@@ -109,15 +109,18 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(IIViewer SHARED
-            ${PROJECT_SOURCES}
-        )
+        add_library(IIViewer SHARED ${PROJECT_SOURCES})
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(IIViewer
-            ${PROJECT_SOURCES}
-        )
+        add_executable(IIViewer WIN32 ${PROJECT_SOURCES})
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            if(MSVC)
+                set_target_properties(IIViewer PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+            else()
+                set_target_properties(IIViewer PROPERTIES LINK_FLAGS "-Wl,-subsystem,console")
+            endif()
+        endif()
     endif()
 endif()
 
