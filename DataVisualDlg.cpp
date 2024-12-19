@@ -176,6 +176,34 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
             graph->addSeries(series1);
             graph->addSeries(series2);
         }
+        else if(wg->openedImgType == OpenedImageType::PGM_IMG)
+        {
+            bitPerPixel = wg->pgmDataBit;
+            uchar *buffer = wg->pgmDataPtr;
+            int lineWidth = wg->pixMap->width();
+            QSurfaceDataArray *dataArray0 = new QSurfaceDataArray;
+            for (int i = 0; i < height; i++)
+            {
+                QSurfaceDataRow *newRow0 = new QSurfaceDataRow(width);
+                for (int j = 0; j < width; j++)
+                {
+                    int pix_gray = bitPerPixel <= 8 ? buffer[(i + topPos) * lineWidth + (leftPos + j)] : ((uint16_t *)buffer)[(i + topPos) * lineWidth + (leftPos + j)];
+                    (*newRow0)[j].setPosition(QVector3D(j, pix_gray, i));
+                }
+                dataArray0->append(newRow0);
+            }
+            seriesProxy0->resetArray(dataArray0);
+
+            series0->setBaseColor(QColor(100, 100, 100));
+            series0->setVisible(true);
+
+            dispR->setChecked(true);
+            dispG->setChecked(false);
+            dispB->setChecked(false);
+            graph->addSeries(series0);
+            dispG->setDisabled(true);
+            dispB->setDisabled(true);
+        }
         else if (wg->openedImgType == OpenedImageType::RAW_IMG)
         {
             bitPerPixel = wg->rawDataBit;

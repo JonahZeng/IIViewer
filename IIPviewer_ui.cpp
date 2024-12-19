@@ -12,7 +12,7 @@
 #include "iipviewer.h"
 
 Ui::IIPviewerUi::IIPviewerUi() : openFileLeftAction(nullptr), openFileRightAction(nullptr), exitAction(nullptr), 
-    closeLeftAction(nullptr), closeRightAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), aboutQtAction(nullptr), 
+    closeLeftAction(nullptr), closeRightAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), // aboutQtAction(nullptr), 
     aboutThisAction(nullptr), mainWidget(nullptr), scrollArea{nullptr, nullptr}, imageLabel{nullptr, nullptr}, 
     dataAnalyseDockWgt(nullptr), playListDockWgt(nullptr), paintOk0(nullptr), paintOk1(nullptr), 
     syncRight(nullptr), syncLeft(nullptr), clearPaintBtn(nullptr), start_x_edit0(nullptr), start_y_edit0(nullptr), 
@@ -110,12 +110,10 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     settingMenu->addMenu(toolBoxMenu);
     settingMenu->addMenu(themeMenu);
 
-    QMenu *aboutMenu = mbar->addMenu("&About");
-    aboutQtAction = new QAction("About Qt", mainWindow);
+    QMenu *helpMenu = mbar->addMenu("&Help");
     aboutThisAction = new QAction("About | Feedback", mainWindow);
     aboutThisAction->setIcon(QIcon(":/image/resource/info-circle.svg"));
-    aboutMenu->addAction(aboutQtAction);
-    aboutMenu->addAction(aboutThisAction);
+    helpMenu->addAction(aboutThisAction);
 
     toolBar->addAction(openFileLeftAction);
     toolBar->addAction(openFileRightAction);

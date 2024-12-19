@@ -108,7 +108,7 @@ private:
     QLabel *rightLabel;
 };
 
-IIPviewer::IIPviewer(QWidget *parent)
+IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     : QMainWindow(parent), ui(), penColor(0, 0, 0), originSize{{0, 0}, {0, 0}}, openedFile{QString(), QString()}
 {
     if (settings.loadSettingsFromFile())
@@ -148,8 +148,8 @@ IIPviewer::IIPviewer(QWidget *parent)
     connect(ui.closeRightAction, &QAction::triggered, this, &IIPviewer::onCloseRightFileAction);
     connect(ui.exitAction, &QAction::triggered, this, [this]()
             { this->close(); });
-    connect(ui.aboutQtAction, &QAction::triggered, []()
-            { qApp->aboutQt(); });
+    // connect(ui.aboutQtAction, &QAction::triggered, []()
+    //         { qApp->aboutQt(); });
     connect(ui.aboutThisAction, &QAction::triggered, this, [this]()
             { AboutDlg dlg(this); dlg.exec(); });
 
@@ -194,6 +194,8 @@ IIPviewer::IIPviewer(QWidget *parent)
     connect(ui.playListAction, &QAction::toggled, this, &IIPviewer::togglePlayListDockWgt);
 
     connect(this, &IIPviewer::updateExchangeBtnStatus, this, &IIPviewer::updateExchangeBtn);
+    connect(this, &IIPviewer::updateZoomLabelStatus, this, &IIPviewer::updateZoomLabelText);
+    connect(this, &IIPviewer::needOpenFileFromCmdArgv, this, &IIPviewer::openGivenFileFromCmdArgv);
 
     ui.dataAnalyseDockWgt->installEventFilter(this);
     ui.playListDockWgt->installEventFilter(this);
@@ -205,6 +207,11 @@ IIPviewer::IIPviewer(QWidget *parent)
     ui.playListAction->setChecked(false);
     ui.exchangeAreaPreviewBtn->setEnabled(false);
     setWindowIcon(QIcon(":image/resource/aboutlog.png"));
+
+    if(needOpenFilePath.length() > 0)
+    {
+        emit needOpenFileFromCmdArgv(needOpenFilePath);
+    }
 }
 
 void IIPviewer::showEvent(QShowEvent *event)
@@ -321,6 +328,19 @@ void IIPviewer::updateExchangeBtn()
     }
 }
 
+void IIPviewer::updateZoomLabelText()
+{
+    if (ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType == UNKNOW_IMG && ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType == UNKNOW_IMG)
+    {
+        ui.zoomRatioLabel->setEnabled(false);
+        ui.zoomRatioLabel->setText("1.00x");
+    }
+    else
+    {
+        ui.zoomRatioLabel->setEnabled(true);
+    }
+}
+
 void IIPviewer::exchangeRight2LeftImg()
 {
     ui.imageLabel[LEFT_IMG_WIDGET]->acceptImgFromOther(ui.imageLabel[RIGHT_IMG_WIDGET]);
@@ -379,7 +399,7 @@ void IIPviewer::onOpenFileAction()
 {
     // QString path = settings.workPath;
     auto fileName = QFileDialog::getOpenFileName(this, "open images", settings.workPath,
-                                                 "Images files(*.jpg *JPG *.jpeg *JPEG *.png *PNG *.bmp *BMP);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;yuv files(*.yuv *.YUV);;All files(*.*)");
+                                                 "Images files(*.jpg *JPG *.jpeg *JPEG *.png *PNG *.bmp *BMP);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;Pgm files(*.pgm *.PGM);;yuv files(*.yuv *.YUV);;All files(*.*)");
 
     if (fileName.isEmpty())
     {
@@ -399,6 +419,27 @@ void IIPviewer::onOpenFileAction()
     setTitle();
 
     emit updateExchangeBtnStatus();
+    emit updateZoomLabelStatus();
+}
+
+/**
+ * @brief 从命令行参数启动并打开图像，如果注册了文件关联，双击图像直接进入程序
+ * 
+ * @param image 
+ */
+void IIPviewer::openGivenFileFromCmdArgv(QString image)
+{
+    QFileInfo info(image);
+    // qDebug() << info.suffix();
+    QString suf = info.suffix().toLower();
+    if(suf == "jpg" || suf == "png" || suf == "bmp" || suf == "raw" || suf == "yuv" || suf == "pnm" || suf == "pgm")
+    {
+        onCloseLeftFileAction();
+        loadFile(image, LEFT_IMG_WIDGET);
+        setTitle();
+        emit updateExchangeBtnStatus();
+        emit updateZoomLabelStatus();
+    }
 }
 
 void IIPviewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)
@@ -515,6 +556,10 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
     else if (fileName.endsWith(".pnm", Qt::CaseInsensitive))
     {
         loadPnmFile(fileName, scrollArea);
+    }
+    else if (fileName.endsWith(".pgm", Qt::CaseInsensitive))
+    {
+        loadPgmFile(fileName, scrollArea);
     }
     else if (fileName.endsWith(".yuv", Qt::CaseInsensitive))
     {
@@ -846,6 +891,47 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea)
     }
 }
 
+void IIPviewer::loadPgmFile(QString &fileName, int scrollArea)
+{
+    QImageReader reader(fileName);
+    if (!reader.canRead())
+    {
+        QString t = QString("can not open ") + fileName + QString(" as image!");
+        QMessageBox::information(this, "error", t, QMessageBox::StandardButton::Ok);
+        return;
+    }
+    if (scrollArea == LEFT_IMG_WIDGET)
+    {
+        if (!openedFile[1].isEmpty())
+        {
+            if (reader.size() != originSize[1])
+            {
+                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                return;
+            }
+        }
+        openedFile[0] = fileName;
+        originSize[0] = reader.size();
+        setImage(fileName, LEFT_IMG_WIDGET);
+        loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+    }
+    else if (scrollArea == RIGHT_IMG_WIDGET)
+    {
+        if (openedFile[0].length() > 0)
+        {
+            if (reader.size() != originSize[0])
+            {
+                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                return;
+            }
+        }
+        openedFile[1] = fileName;
+        originSize[1] = reader.size();
+        setImage(fileName, RIGHT_IMG_WIDGET);
+        loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+    }
+}
+
 void IIPviewer::setImage(QString &imageName, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
@@ -881,7 +967,7 @@ void IIPviewer::onCloseLeftFileAction()
     ui.imageLabel[LEFT_IMG_WIDGET]->releaseBuffer();
     ui.imageLabel[LEFT_IMG_WIDGET]->paintBegin = false;
     ui.imageLabel[LEFT_IMG_WIDGET]->paintEnd = false;
-    ui.imageLabel[LEFT_IMG_WIDGET]->zoomIdx = 2;
+    ui.imageLabel[LEFT_IMG_WIDGET]->zoomIdx = 2; // 关闭之后恢复到1.0x倍率
     ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
     ui.imageLabel[LEFT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
     ui.imageLabel[LEFT_IMG_WIDGET]->rawDataBit = 0;
@@ -900,6 +986,7 @@ void IIPviewer::onCloseLeftFileAction()
     ui.imageLabelContianer[LEFT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
 
     emit updateExchangeBtnStatus();
+    emit updateZoomLabelStatus();
 }
 
 void IIPviewer::onCloseRightFileAction()
@@ -916,7 +1003,7 @@ void IIPviewer::onCloseRightFileAction()
     ui.imageLabel[RIGHT_IMG_WIDGET]->releaseBuffer();
     ui.imageLabel[RIGHT_IMG_WIDGET]->paintBegin = false;
     ui.imageLabel[RIGHT_IMG_WIDGET]->paintEnd = false;
-    ui.imageLabel[RIGHT_IMG_WIDGET]->zoomIdx = 2;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->zoomIdx = 2; // 关闭之后恢复到1.0x倍率
     ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
     ui.imageLabel[RIGHT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
     ui.imageLabel[RIGHT_IMG_WIDGET]->rawDataBit = 0;
@@ -935,6 +1022,7 @@ void IIPviewer::onCloseRightFileAction()
     ui.imageLabelContianer[RIGHT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
 
     emit updateExchangeBtnStatus();
+    emit updateZoomLabelStatus();
 }
 
 void IIPviewer::onReloadFileAction()
@@ -1170,6 +1258,11 @@ void IIPviewer::zoomIn0(int zoomIdx)
     }
 }
 
+/**
+ * @brief 由left widget触发的信号，right widget响应
+ * 
+ * @param zoomIdx 
+ */
 void IIPviewer::zoomIn1(int zoomIdx)
 {
     masterScrollarea = ui.scrollArea[0];
@@ -1186,6 +1279,11 @@ void IIPviewer::zoomIn1(int zoomIdx)
     }
 }
 
+/**
+ * @brief 由right widget触发的信号，left widget响应
+ * 
+ * @param zoomIdx 
+ */
 void IIPviewer::zoomOut0(int zoomIdx)
 {
     masterScrollarea = ui.scrollArea[1];
@@ -1262,6 +1360,11 @@ void IIPviewer::handleRightMouseBtnDrag1(QPointF startPt, QPointF endPt)
     ui.scrollArea[1]->verticalScrollBar()->setValue(curVscrollVal + delta_y);
 }
 
+/**
+ * @brief 同步left image widget horizontal bar value
+ * 
+ * @param value horizontal bar value
+ */
 void IIPviewer::syncScrollArea1_horScBarVal(int value)
 {
     ui.imageLabel[0]->update(ui.imageLabel[0]->zoomTextRect.toRect());
@@ -1276,6 +1379,11 @@ void IIPviewer::syncScrollArea1_horScBarVal(int value)
     ui.scrollArea[1]->horizontalScrollBar()->setValue(value);
 }
 
+/**
+ * @brief 同步left image widget vertical bar value
+ * 
+ * @param value vertical bar value
+ */
 void IIPviewer::syncScrollArea1_verScBarVal(int value)
 {
     ui.imageLabel[0]->update(ui.imageLabel[0]->zoomTextRect.toRect());
@@ -1351,6 +1459,7 @@ void IIPviewer::dropEvent(QDropEvent *event)
                 return;
             loadFile(fileName0, LEFT_IMG_WIDGET);
             setTitle();
+            masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
         }
         else if (scrollArea1_rect.left() < dropPt.x() && dropPt.x() < scrollArea1_rect.right())
         {
@@ -1359,6 +1468,7 @@ void IIPviewer::dropEvent(QDropEvent *event)
                 return;
             loadFile(fileName0, RIGHT_IMG_WIDGET);
             setTitle();
+            masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
         }
         QFileInfo info(urlList[0].toLocalFile());
         settings.workPath = info.absolutePath();
@@ -1368,6 +1478,7 @@ void IIPviewer::dropEvent(QDropEvent *event)
         QMessageBox::critical(this, "error", "At most 1 image!", QMessageBox::StandardButton::Ok);
     }
     emit updateExchangeBtnStatus();
+    emit updateZoomLabelStatus();
 }
 
 bool IIPviewer::eventFilter(QObject *obj, QEvent *event)

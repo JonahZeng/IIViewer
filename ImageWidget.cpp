@@ -28,6 +28,8 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea* parentScroll, 
     , rawDataBit(0)
     , pnmDataPtr(nullptr)
     , pnmDataBit(0)
+    , pgmDataPtr(nullptr)
+    , pgmDataBit(0)
     , yuvDataPtr(nullptr)
     , yuvDataBit(0)
     , rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW)
@@ -215,6 +217,33 @@ void ImageWidget::paintPnmPixVal(QPoint& viewTopLeftPix, QPainter& painter, int 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", b));
+            }
+        }
+    }
+}
+
+void ImageWidget::paintPgmPixVal(QPoint& viewTopLeftPix, QPainter& painter, int viewPixWidth, int viewPixHeight, QPoint& paintPixValTopLeft)
+{
+    int xStart = viewTopLeftPix.x();
+    int yStart = viewTopLeftPix.y();
+
+    int pgmWidth = pixMap->width();
+    int pgmHeight = pixMap->height();
+
+    painter.setPen(QColor(96, 96, 96));
+    for (int h = 0; h < viewPixHeight; h++) {
+        for (int w = 0; w < viewPixWidth; w++) {
+            if (yStart + h < pgmHeight && xStart + w < pgmWidth) {
+                unsigned int gray = 0;
+                if (pgmDataBit <= 8) {
+                    gray = ((unsigned char*)pgmDataPtr)[(yStart + h) * pgmWidth + (xStart + w)];
+                } else if (pgmDataBit > 8 && pgmDataBit <= 16) {
+                    gray = ((unsigned short*)pgmDataPtr)[(yStart + h) * pgmWidth + (xStart + w)];
+                }
+
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+
+                painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", gray));
             }
         }
     }
@@ -707,6 +736,8 @@ void ImageWidget::paintEvent(QPaintEvent* event)
             paintRawPixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
         } else if (openedImgType == PNM_IMG) {
             paintPnmPixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
+        } else if(openedImgType == PGM_IMG) {
+            paintPgmPixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
         } else if (openedImgType == YUV_IMG) {
             if (yuvType == YuvFileInfoDlg::YuvType::YUV444_INTERLEAVE) {
                 paintYuv444InterleavePixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
@@ -825,9 +856,85 @@ void ImageWidget::wheelEvent(QWheelEvent* event)
     event->accept();
 }
 
-void ImageWidget::setPixmap(QString& img) // jpg, jpeg, bmp, png
+void ImageWidget::setPixmap(QString& img) // jpg, jpeg, bmp, png, pnm, pgm
 {
-    if (img.endsWith(".pnm", Qt::CaseInsensitive)) {
+    if (img.endsWith(".pgm", Qt::CaseInsensitive)) {
+        QFile input_f(img);
+        input_f.open(QIODevice::ReadOnly);
+        QByteArray p5 = input_f.readLine();
+        QByteArray w_h = input_f.readLine();
+        QByteArray maxVal = input_f.readLine();
+        if (p5 != QString("P5\n")) {
+            QMessageBox::critical(this, "error", "no P5 flag detected in portable gray image", QMessageBox::StandardButton::Ok);
+            input_f.close();
+            return;
+        }
+        int maxPixVal = maxVal.toInt();
+        auto width_height = w_h.split(' ');
+        width_height.removeAll(QByteArray(nullptr));
+        if (width_height.size() != 2) {
+            input_f.close();
+            return;
+        }
+        int pixSize = 2;
+        if (maxPixVal <= 255) {
+            pixSize = 1;
+        } else if (maxPixVal > 255 && maxPixVal <= 65535) {
+            pixSize = 2;
+        }
+        int bitDepth = 8;
+        if (maxPixVal <= 255) {
+            bitDepth = 8;
+        } else if (maxPixVal > 255 && maxPixVal <= 1023) {
+            bitDepth = 10;
+        } else if (maxPixVal > 1023 && maxPixVal <= 4095) {
+            bitDepth = 12;
+        } else if (maxPixVal > 4095 && maxPixVal <= 16383) {
+            bitDepth = 14;
+        } else if (maxPixVal > 16383 && maxPixVal <= 65535) {
+            bitDepth = 16;
+        }
+
+        int width = width_height[0].toInt();
+        int height = width_height[1].toInt();
+        releaseBuffer();
+
+        unsigned char *buffer = new unsigned char[pixSize * width * height];
+        pixMap = new QImage(width, height, QImage::Format_Grayscale8);
+        input_f.read((char *)buffer, qint64(pixSize) * width * height);
+        input_f.close();
+
+        unsigned char* bufferShow = pixMap->bits();
+        qint64 total_cnt = width * height;
+
+        if (pixSize == 1) {
+            for (qint64 i = 0; i < total_cnt; i++) {
+                bufferShow[i] = buffer[i];
+            }
+        } else if (pixSize == 2) {
+            unsigned short* buffer_us = (unsigned short*)buffer;
+            for (qint64 i = 0; i < total_cnt; i++) {
+                buffer_us[i] = ((buffer_us[i] & 0xff00) >> 8) | ((buffer_us[i] & 0x00ff) << 8);
+                bufferShow[i] = buffer_us[i] >> (bitDepth - 8);
+            }
+        }
+
+        rawDataPtr = nullptr;
+        rawDataBit = 0;
+        rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
+        rawByteOrderType = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+        yuvDataBit = 0;
+        yuvDataPtr = nullptr;
+        yuvType = YuvFileInfoDlg::YuvType::YUV_UNKNOW;
+        pnmDataPtr = nullptr;
+        pnmDataBit = 0;
+        openedImgType = PGM_IMG;
+        pgmDataPtr = buffer;
+        pgmDataBit = bitDepth;
+
+        resize(pixMap->size() * zoomList[zoomIdx]);
+        repaint();
+    } else if (img.endsWith(".pnm", Qt::CaseInsensitive)) {
         bool isGray = false;
         QFile input_f(img);
         input_f.open(QIODevice::ReadOnly);
@@ -913,6 +1020,8 @@ void ImageWidget::setPixmap(QString& img) // jpg, jpeg, bmp, png
         openedImgType = PNM_IMG;
         pnmDataPtr = buffer;
         pnmDataBit = bitDepth;
+        pgmDataPtr = nullptr;
+        pgmDataBit = 0;
 
         resize(pixMap->size() * zoomList[zoomIdx]);
         repaint();
@@ -924,8 +1033,10 @@ void ImageWidget::setPixmap(QString& img) // jpg, jpeg, bmp, png
         rawByteOrderType = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
         rawDataBit = 0;
         rawDataPtr = nullptr;
-        pnmDataPtr = nullptr;
         pnmDataBit = 0;
+        pnmDataPtr = nullptr;
+        pgmDataBit = 0;
+        pgmDataPtr = nullptr;
         yuvDataBit = 0;
         yuvDataPtr = nullptr;
         yuvType = YuvFileInfoDlg::YuvType::YUV_UNKNOW;
@@ -991,6 +1102,8 @@ void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, R
     openedImgType = RAW_IMG;
     pnmDataPtr = nullptr;
     pnmDataBit = 0;
+    pgmDataPtr = nullptr;
+    pgmDataBit = 0;
     yuvDataBit = 0;
     yuvDataPtr = nullptr;
     yuvType = YuvFileInfoDlg::YuvType::YUV_UNKNOW;
@@ -1235,6 +1348,8 @@ void ImageWidget::setPixmap(QString& img, YuvFileInfoDlg::YuvType tp, int bitDep
     openedImgType = YUV_IMG;
     pnmDataPtr = nullptr;
     pnmDataBit = 0;
+    pgmDataPtr = nullptr;
+    pgmDataBit = 0;
     yuvDataBit = bitDepth;
     yuvDataPtr = buffer;
     yuvType = tp;
@@ -1391,6 +1506,10 @@ void ImageWidget::releaseBuffer()
         delete[] pnmDataPtr;
         pnmDataPtr = nullptr;
     }
+    if (pgmDataPtr != nullptr) {
+        delete[] pgmDataPtr;
+        pgmDataPtr = nullptr;
+    }
     if (yuvDataPtr != nullptr) {
         delete[] yuvDataPtr;
         yuvDataPtr = nullptr;
@@ -1404,6 +1523,8 @@ void ImageWidget::acceptImgFromOther(const ImageWidget* other)
     rawDataBitBak = rawDataBit;
     pnmDataPtrBak = pnmDataPtr;
     pnmDataBitBak = pnmDataBit;
+    pgmDataPtrBak = pgmDataPtr;
+    pgmDataBitBak = pgmDataBit;
     yuvDataPtrBak = yuvDataPtr;
     yuvDataBitBak = yuvDataBit;
     rawBayerTypeBak = rawBayerType;
@@ -1416,6 +1537,8 @@ void ImageWidget::acceptImgFromOther(const ImageWidget* other)
     rawDataBit = other->rawDataBit;
     pnmDataPtr = other->pnmDataPtr;
     pnmDataBit = other->pnmDataBit;
+    pgmDataPtr = other->pgmDataPtr;
+    pgmDataBit = other->pgmDataBit;
     yuvDataPtr = other->yuvDataPtr;
     yuvDataBit = other->yuvDataBit;
     rawBayerType = other->rawBayerType;
@@ -1432,6 +1555,8 @@ void ImageWidget::restoreImg()
     rawDataBit = rawDataBitBak;
     pnmDataPtr = pnmDataPtrBak;
     pnmDataBit = pnmDataBitBak;
+    pgmDataPtr = pgmDataPtrBak;
+    pgmDataBit = pgmDataBitBak;
     yuvDataPtr = yuvDataPtrBak;
     yuvDataBit = yuvDataBitBak;
     rawBayerType = rawBayerTypeBak;
