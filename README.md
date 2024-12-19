@@ -1,5 +1,6 @@
 # IIPviewer
-----
+
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-windows-platform.yml)
 ## About
 this repo is designed for open and view ISP intermediate image. we support these format below:
 - jpg
