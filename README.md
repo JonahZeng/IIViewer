@@ -17,7 +17,7 @@ like its tip, drag any supported format image to dash rectangle，it will displa
 that's all.
 
 ## how to build from source code
-### windows
+### windows(amd64)
 I have tested build it on windows10 with mingw64 13.2.0, also windows11 with MSVC v143.
 so, follow below steps:
 - install Qt5 or Qt6, cmake, MSVC or MinGW64 (should support **C++11 at least**)
@@ -32,5 +32,8 @@ cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR
 cmake --build . --config Release
 ```
 
-### linux
-I did not tested very much, just had a try on Ubuntu 22.04, it works.
+### linux(amd64)
+I did not tested very deeply, just have a try on Ubuntu 22.04, it works.
+
+### macos
+I didn't have any mac device, but I'm sure compile this project on macos would be easy.
