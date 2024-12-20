@@ -1,5 +1,6 @@
 # IIPviewer
-----
+
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-windows-platform.yml)
 ## About
 this repo is designed for open and view ISP intermediate image. we support these format below:
 - jpg
@@ -16,8 +17,8 @@ like its tip, drag any supported format image to dash rectangle，it will displa
 that's all.
 
 ## how to build from source code
-### windows
-I have tested build it on windows10 with mingw64 13.2.0, also windows11 with MSVC v143.
+### windows(amd64)
+I have test it both on windows10 with mingw64 13.2.0 and windows11 with MSVC v143.
 so, follow below steps:
 - install Qt5 or Qt6, cmake, MSVC or MinGW64 (should support **C++11 at least**)
 - git clone this repo
@@ -31,5 +32,16 @@ cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR
 cmake --build . --config Release
 ```
 
-### linux
-I did not tested very much, just had a try on Ubuntu 22.04, it works.
+### linux(amd64)
+I did not tested deeply, just have a try on Ubuntu 22.04, it works.
+```bash
+git clone https://github.com/JonahZeng/IIViewer.git
+cd IIViewer
+mkdir build
+cd build
+cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR -DCMAKE_BUILD_TYPE=Release
+cmake --build . -j 4
+```
+
+### macos
+I didn't have any mac device, but I'm sure compile this project on macos would not be diffcult since this project use cross-platform build tool(cmake).
