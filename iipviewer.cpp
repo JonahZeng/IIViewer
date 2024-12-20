@@ -458,11 +458,11 @@ void IIPviewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)
     if (!openedFile[slave].isEmpty())
     {
         int zoomIdx = ui.imageLabel[slave]->zoomIdx;
-        if (zoomIdx > 3)
+        if (zoomIdx > 2)
         {
             ui.imageLabel[master]->zoomIn(zoomIdx);
         }
-        else if (zoomIdx < 3)
+        else if (zoomIdx < 2)
         {
             ui.imageLabel[master]->zoomOut(zoomIdx);
         }
