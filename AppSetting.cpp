@@ -25,13 +25,14 @@ AppSettings::~AppSettings()
 bool AppSettings::loadSettingsFromFile()
 {
     QString appName = QCoreApplication::applicationName();
+    QString appConfigDir = QString(".") + appName;
     const QChar sep = QDir::separator();
 
     QDir directory(QDir::homePath());
-    if (!directory.exists(appName)) {
-        directory.mkpath(appName);
+    if (!directory.exists(appConfigDir)) {
+        directory.mkpath(appConfigDir);
     }
-    QString targetJsonPath = directory.filePath(appName + sep + appName + ".json");
+    QString targetJsonPath = directory.filePath(appConfigDir + sep + appName + ".json");
     QFileInfo info(targetJsonPath);
     if (info.exists() && info.isFile()) {
         QFile jf(targetJsonPath);
@@ -51,13 +52,14 @@ bool AppSettings::loadSettingsFromFile()
 void AppSettings::dumpSettingsToFile()
 {
     QString appName = QCoreApplication::applicationName();
+    QString appConfigDir = QString(".") + appName;
     const QChar sep = QDir::separator();
 
     QDir directory(QDir::homePath());
-    if (!directory.exists(appName)) {
-        directory.mkpath(appName);
+    if (!directory.exists(appConfigDir)) {
+        directory.mkpath(appConfigDir);
     }
-    QString targetJsonPath = directory.filePath(appName + sep + appName + ".json");
+    QString targetJsonPath = directory.filePath(appConfigDir + sep + appName + ".json");
 
     QFile jf(targetJsonPath);
     if (jf.open(QIODevice::WriteOnly | QIODevice::Text)) {

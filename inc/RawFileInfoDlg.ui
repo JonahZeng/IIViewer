@@ -142,9 +142,6 @@
        <property name="currentIndex">
         <number>2</number>
        </property>
-       <property name="placeholderText">
-        <string/>
-       </property>
        <item>
         <property name="text">
          <string>8</string>

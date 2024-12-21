@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-project(IIViewer VERSION 0.4.3 LANGUAGES CXX)
+project(IIViewer VERSION 0.4.4 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 
@@ -89,19 +89,19 @@ configure_file (config.h.in ${CMAKE_SOURCE_DIR}/inc/config.h)
 
 set(PROJECT_SOURCES
         main.cpp
-        IIPViewer.cpp
-        ${CMAKE_SOURCE_DIR}/inc/IIPViewer.h
+        iipviewer.cpp
+        ${CMAKE_SOURCE_DIR}/inc/iipviewer.h
         AboutDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/AboutDlg.h
-        IIPViewer.rc
-        IIPViewer.qrc
+        iipviewer.rc
+        iipviewer.qrc
         ImageWidget.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
         RawFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.ui
-        IIPViewer_ui.cpp
-        ${CMAKE_SOURCE_DIR}/inc/IIPViewer_ui.h
+        IIPviewer_ui.cpp
+        ${CMAKE_SOURCE_DIR}/inc/IIPviewer_ui.h
         YuvFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.ui
@@ -127,7 +127,7 @@ else()
         add_library(IIViewer SHARED ${PROJECT_SOURCES})
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
+    elseif(WIN32)
         add_executable(IIViewer WIN32 ${PROJECT_SOURCES})
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             if(MSVC)
@@ -136,6 +136,8 @@ else()
                 set_target_properties(IIViewer PROPERTIES LINK_FLAGS "-Wl,-subsystem,console")
             endif()
         endif()
+    elseif(UNIX)
+        add_executable(IIViewer ${PROJECT_SOURCES})
     endif()
 endif()
 
@@ -178,5 +180,7 @@ if(WIN32)
     set(CPACK_SOURCE_GENERATOR "NSIS")
 elseif(UNIX)
     set(CPACK_SOURCE_GENERATOR "TGZ")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    SET(CPACK_PACKAGE_CONTACT "jonah.zeng")
 endif()
 include(CPack)

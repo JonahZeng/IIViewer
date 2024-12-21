@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     // QCoreApplication::setOrganizationName("IIPviewer.org");
     // QCoreApplication::setOrganizationDomain("IIPviewer.com");
-    QCoreApplication::setApplicationName("IIPviewer");
+    QCoreApplication::setApplicationName("IIViewer");
     app.setFont(QFont("Microsoft YaHei UI", 10));
     auto themes = QStyleFactory::keys();
     // qDebug() << themes;

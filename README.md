@@ -18,7 +18,7 @@ that's all.
 
 ## how to build from source code
 ### windows(amd64)
-I have test it both on windows10 with mingw64 13.2.0 and windows11 with MSVC v143.
+I have test it both on windows10 with mingw64 13.2.0 and windows11 with MSVC v143, Qt5.15.2.
 so, follow below steps:
 - install Qt5 or Qt6, cmake, MSVC or MinGW64 (should support **C++11 at least**)
 - git clone this repo
@@ -33,13 +33,14 @@ cmake --build . --config Release
 ```
 
 ### linux(amd64)
-I did not tested deeply, just have a try on Ubuntu 22.04, it works.
+I have test it on ubuntu 20.04(cmake 3.16, Qt5.12.8, gcc 9.4.0)，you should follow these step:
 ```bash
+sudo apt install build-essential qt5-default libqt5datavisualization5-dev cmake
 git clone https://github.com/JonahZeng/IIViewer.git
 cd IIViewer
 mkdir build
 cd build
-cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j 4
 ```
 
