@@ -26,6 +26,7 @@ jobs:
         version: '5.15.2'
         host: 'linux'
         target: 'desktop'
+        cache: true
         # arch: 'win64_msvc2019_64'
         # dir: '${{ github.workspace }}/example/'
         install-deps: 'true'
@@ -39,10 +40,34 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build
 
     # - name: Test
     #   working-directory: ${{github.workspace}}/build
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
     #   run: ctest -C ${{env.BUILD_TYPE}}
+    - name: install
+      run: cmake --install ${{github.workspace}}/build
+    - name: generate deb package
+      working-directory: ${{github.workspace}}/build
+      run: cpack -G DEB
+    - name: generate tgz package
+      working-directory: ${{github.workspace}}/build
+      run: cpack -G TGZ
+
+    - name: Upload Deb Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+          name: IIViewer ubuntu deb
+          if-no-files-found: ignore
+          path: ${{github.workspace}}\build\IIViewer-*-linux.deb
+          compression-level: 0 # no compression
+    - name: Upload Tgz Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+          name: IIViewer ubuntu tgz
+          if-no-files-found: ignore
+          path: ${{github.workspace}}\build\IIViewer-*-linux.tar.gz
+          compression-level: 0 # no compression
+
