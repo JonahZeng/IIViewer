@@ -20,12 +20,35 @@ this repo is designed for open and view ISP intermediate image. we support these
 - yuv(8/10/12 444-interleave4 444-plannar 22-UYVY 422-YUYV 420-NV12 420-NV21)
 
 ## Usage
-download it from [release page](https://github.com/JonahZeng/IIViewer/releases), start this app on your PC, you can see this if there is no any unexpected error:
+download it from [release page](https://github.com/JonahZeng/IIViewer/releases), start this app on your PC, you can see this if there is no any unexpect error:
 ![main-ui](./doc/image/main-ui.png)
 as its tips, drag any supported format image to dash rectangle，it will display the image context. when you zoom in to 96X by scroll your mouse wheel, you will see every pixel's real value.
 that's all.
 
 ## Build from source code
+you should install Qt5 with necessary module first: 
+- Widgets
+- Gui
+- Core 
+- DataVisualization(**commercial license**)
+- Network(**enable ssl**)
+
+if you install Qt by build from soure, here is my configuration(MinGW64 13.2.0, Qt5.15.15) for reference:
+```bash
+.\configure -prefix {qt_source\qtbase} \
+-commercial -confirm-license \
+-openssl-runtime \
+-I {openssl3 header direcotry} \
+-L {openssl3 library directory} \
+-nomake tests \
+-nomake examples \
+-opengl desktop \
+-release \
+-skip webview \
+-skip webengine \
+-skip webglplugin \
+-skip webchannel 
+```
 ### windows(amd64)
 I have test it both on windows10 with mingw64 13.2.0 and windows11 with MSVC v143, Qt version >= 5.15.2.
 follow these steps:
@@ -40,6 +63,7 @@ cd build
 cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR
 cmake --build . --config Release
 ```
+don't forget copy `libssl-3-x64.dll` and `libcrypto-3-x64.dll` to `bin/[Release|Debug]` when cmake build it finished, as you see, we enable openssl with option `-openssl-runtime` when configure/build Qt.
 
 ### linux(amd64)
 only tested it on ubuntu 20.04(cmake 3.16, Qt5.12.8, gcc 9.4.0), here are the steps:

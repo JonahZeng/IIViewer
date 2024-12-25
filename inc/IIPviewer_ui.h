@@ -35,6 +35,7 @@ namespace Ui
         QAction *dataAnalyseAction;
         QAction *playListAction;
         QAction *aboutThisAction;
+        QAction *checkUpdateAction;
         QAction *useRoiToolAction;
         QAction *useMoveToolAction;
         QPushButton *penColorSetBtn;

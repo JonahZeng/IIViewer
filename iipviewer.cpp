@@ -1,6 +1,7 @@
 #include "iipviewer.h"
 #include "AboutDlg.h"
 #include "DataVisualDlg.h"
+#include "config.h"
 #include <QApplication>
 #include <QColorDialog>
 #include <QDir>
@@ -14,6 +15,11 @@
 #include <QScrollBar>
 #include <QStandardPaths>
 #include <QStyleFactory>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QVersionNumber>
 
 constexpr int LEFT_IMG_WIDGET = 0;
 constexpr int RIGHT_IMG_WIDGET = 1;
@@ -152,6 +158,7 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     //         { qApp->aboutQt(); });
     connect(ui.aboutThisAction, &QAction::triggered, this, [this]()
             { AboutDlg dlg(this); dlg.exec(); });
+    connect(ui.checkUpdateAction, &QAction::triggered, this, &IIPviewer::checkUpdate);
 
     connect(ui.penColorSetBtn, &QPushButton::clicked, this, &IIPviewer::selectPenPaintColor);
     connect(ui.penWidthSbox, QOverload<int>::of(&QSpinBox::valueChanged), this, &IIPviewer::setPenWidth);
@@ -316,6 +323,43 @@ void IIPviewer::showImageInfo()
     dlg.exec();
 }
 
+void IIPviewer::checkUpdate()
+{
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+    QObject::connect(manager, &QNetworkAccessManager::finished, [this, manager](QNetworkReply *reply) {
+        if (reply->error() == QNetworkReply::NoError) {
+             QByteArray response = reply->readAll(); 
+             QJsonDocument jsonDoc = QJsonDocument::fromJson(response); 
+             QJsonObject jsonObj = jsonDoc.object(); 
+             QString latestVersion = jsonObj["tag_name"].toString();
+             if(latestVersion.startsWith('v', Qt::CaseSensitivity::CaseInsensitive)) {
+                latestVersion.remove(QChar('v'), Qt::CaseSensitivity::CaseInsensitive);
+             }
+             QVersionNumber currentVersion{IIViewer_VERSION_MAJOR, IIViewer_VERSION_MINOR, IIViewer_VERSION_PATCH}; // 当前版本号 
+             QVersionNumber newVersion = QVersionNumber::fromString(latestVersion);
+            //  qDebug() << currentVersion << newVersion << latestVersion;
+             if (newVersion > currentVersion) {
+                QString text("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>");
+                QMessageBox msgBox(QMessageBox::Icon::Information, QString("find new version"), text, QMessageBox::StandardButton::Ok, this);
+                // msgBox.resize(200, 100);
+                // 使用 HTML 格式化文本 
+
+                // msgBox.setInformativeText(text);
+                msgBox.exec();
+            } else { 
+                QMessageBox::information(this, QString("no new version"), QString("You are using the latest version"), QMessageBox::StandardButton::Ok);
+            } 
+        } else {
+            QMessageBox::critical(this, QString("network error"), QString("Error checking for updates: %1").arg(reply->errorString()), QMessageBox::StandardButton::Ok);
+        } 
+        reply->deleteLater();
+        manager->deleteLater();
+    }); 
+    QUrl url("https://api.github.com/repos/JonahZeng/IIViewer/releases/latest");
+    QNetworkRequest request(url); 
+    manager->get(request);
+}
+
 void IIPviewer::updateExchangeBtn()
 {
     if (ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType != UNKNOW_IMG && ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType != UNKNOW_IMG)
@@ -355,7 +399,7 @@ void IIPviewer::restoreLeftImg()
 
 void IIPviewer::closeEvent(QCloseEvent *event)
 {
-    auto reply = QMessageBox::question(this, "Question", "Are you sure to quit ? ", QMessageBox::Yes | QMessageBox::No);
+    auto reply = QMessageBox::question(this, "Confirm", "Are you sure to quit ? ", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes)
     {
         onCloseLeftFileAction();

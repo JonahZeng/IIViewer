@@ -77,6 +77,7 @@ public slots:
     void exchangeRight2LeftImg();
     void restoreLeftImg();
     void showImageInfo();
+    void checkUpdate();
 
 signals:
     void updateExchangeBtnStatus();

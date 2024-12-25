@@ -114,6 +114,8 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     aboutThisAction = new QAction("About | Feedback", mainWindow);
     aboutThisAction->setIcon(QIcon(":/image/resource/info-circle.svg"));
     helpMenu->addAction(aboutThisAction);
+    checkUpdateAction = new QAction("Check update", mainWindow);
+    helpMenu->addAction(checkUpdateAction);
 
     toolBar->addAction(openFileLeftAction);
     toolBar->addAction(openFileRightAction);
