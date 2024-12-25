@@ -1,12 +1,13 @@
-<center>
-  <h1>IIViewer</h1>
-  <strong>A professional tool which designed for image signal process developer</strong>
-  <p align="center">
-    <img src="./icon/64.png" alt="IIViewer icon" width="64"/>
-  </p>
-</center>
+<h1 align="center">IIViewer</h1>
 <p align="center">
-  <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-windows-platform.yml" alt="GitHub Actions Workflow Status"/>
+    <strong>A professional tool which designed for image signal process developer</strong>
+</p>
+<p align="center">
+    <img src="./icon/64.png" alt="IIViewer icon" width="64"/>
+</p>
+
+<p align="center">
+    <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-windows-platform.yml" alt="GitHub Actions Workflow Status"/>
 </p>
 
 ## About

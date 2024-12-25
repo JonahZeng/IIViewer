@@ -5,8 +5,26 @@ name: CMake on a windows platform
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.ui'
+      - '**/*.cmake'
+      - '*.cpp'
+      - '*.rc'
+      - '*.qrc'
+      - 'CMakeLists.txt'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.ui'
+      - '**/*.cmake'
+      - '*.cpp'
+      - '*.rc'
+      - '*.qrc'
+      - 'CMakeLists.txt'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)

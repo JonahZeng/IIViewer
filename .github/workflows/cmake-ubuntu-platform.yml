@@ -3,10 +3,28 @@
 name: CMake on a ubuntu platform
 
 on:
-    push:
-      branches: [ "main" ]
-    pull_request:
-      branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.ui'
+      - '**/*.cmake'
+      - '*.cpp'
+      - '*.rc'
+      - '*.qrc'
+      - 'CMakeLists.txt'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.ui'
+      - '**/*.cmake'
+      - '*.cpp'
+      - '*.rc'
+      - '*.qrc'
+      - 'CMakeLists.txt'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
