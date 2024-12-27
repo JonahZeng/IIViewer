@@ -847,6 +847,7 @@ void ImageWidget::wheelEvent(QWheelEvent* event)
 {
     if (pixMap == nullptr)
         return;
+    emit inform_change_master();
     int delta_y = event->angleDelta().y() / 120;
     if (delta_y > 0 && zoomIdx < ZOOM_LIST_LENGTH - 1) {
         processWheelZoom(event, 1);

@@ -186,6 +186,14 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     connect(ui.imageLabel[LEFT_IMG_WIDGET], &ImageWidget::inform_zoom_out, this, &IIPviewer::zoomOut1);
     connect(ui.imageLabel[RIGHT_IMG_WIDGET], &ImageWidget::inform_zoom_in, this, &IIPviewer::zoomIn0);
     connect(ui.imageLabel[RIGHT_IMG_WIDGET], &ImageWidget::inform_zoom_out, this, &IIPviewer::zoomOut0);
+    connect(ui.imageLabel[LEFT_IMG_WIDGET], &ImageWidget::inform_change_master, this, [this]()
+        {
+            this->masterScrollarea = this->ui.scrollArea[LEFT_IMG_WIDGET];
+        });
+    connect(ui.imageLabel[RIGHT_IMG_WIDGET], &ImageWidget::inform_change_master, this, [this]()
+        {
+            this->masterScrollarea = this->ui.scrollArea[RIGHT_IMG_WIDGET];
+        });
 
     connect(ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar(), &QScrollBar::valueChanged, this, &IIPviewer::syncScrollArea1_horScBarVal);
     connect(ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar(), &QScrollBar::valueChanged, this, &IIPviewer::syncScrollArea1_verScBarVal);
@@ -546,6 +554,77 @@ void IIPviewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)
     }
 }
 
+void IIPviewer::reLoadFile(int scrollArea)
+{
+    QString& dstFn = openedFile[scrollArea == LEFT_IMG_WIDGET ? 0 : 1];
+    if (dstFn.endsWith(".jpg", Qt::CaseInsensitive) || dstFn.endsWith(".jpeg", Qt::CaseInsensitive) || dstFn.endsWith(".png", Qt::CaseInsensitive) || dstFn.endsWith(".bmp", Qt::CaseInsensitive))
+    {
+        QImageReader reader(dstFn);
+        reader.setAutoTransform(true);
+        if (!reader.canRead())
+        {
+            QString t = QString("can not open ") + dstFn + QString(" as image!");
+            QMessageBox::information(this, "error", t, QMessageBox::StandardButton::Ok);
+            return;
+        }
+
+        if (scrollArea == LEFT_IMG_WIDGET)
+        {
+            if (!openedFile[1].isEmpty())
+            {
+                if (reader.size() != originSize[1])
+                {
+                    QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                    return;
+                }
+            }
+            // openedFile[0] = dstFn;
+            originSize[0] = reader.size();
+            setImage(dstFn, LEFT_IMG_WIDGET);
+
+            // loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+        }
+        else if (scrollArea == RIGHT_IMG_WIDGET)
+        {
+            if (openedFile[0].length() > 0)
+            {
+                if (reader.size() != originSize[0])
+                {
+                    QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                    return;
+                }
+            }
+            // openedFile[1] = dstFn;
+            originSize[1] = reader.size();
+            // ui.imageLabelContianer[1]->resize(originSize[1]);
+            setImage(dstFn, RIGHT_IMG_WIDGET);
+
+            // loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+        }
+    }
+    else if (dstFn.endsWith(".raw", Qt::CaseInsensitive))
+    {
+        loadRawFile(dstFn, scrollArea, true);
+    }
+    else if (dstFn.endsWith(".pnm", Qt::CaseInsensitive))
+    {
+        loadPnmFile(dstFn, scrollArea, true);
+    }
+    else if (dstFn.endsWith(".pgm", Qt::CaseInsensitive))
+    {
+        loadPgmFile(dstFn, scrollArea, true);
+    }
+    else if (dstFn.endsWith(".yuv", Qt::CaseInsensitive))
+    {
+        loadYuvFile(dstFn, scrollArea, true);
+    }
+    else
+    {
+        QMessageBox::warning(this, "not support", "this format file not support yet!", QMessageBox::StandardButton::Ok);
+        return;
+    }
+}
+
 void IIPviewer::loadFile(QString &fileName, int scrollArea)
 {
     if (fileName.endsWith(".jpg", Qt::CaseInsensitive) || fileName.endsWith(".jpeg", Qt::CaseInsensitive) || fileName.endsWith(".png", Qt::CaseInsensitive) || fileName.endsWith(".bmp", Qt::CaseInsensitive))
@@ -587,7 +666,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
             }
             openedFile[1] = fileName;
             originSize[1] = reader.size();
-            ui.imageLabelContianer[1]->resize(originSize[1]);
+            // ui.imageLabelContianer[1]->resize(originSize[1]);
             setImage(fileName, RIGHT_IMG_WIDGET);
 
             loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
@@ -616,7 +695,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
     }
 }
 
-void IIPviewer::loadYuvFile(QString &fileName, int scrollArea)
+void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
 {
     YuvFileInfoDlg dlg(this);
 
@@ -750,8 +829,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea)
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
         setYuvImage(fileName, tp, bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
-
-        loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+        if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
@@ -766,12 +844,11 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea)
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
         setYuvImage(fileName, tp, bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
-
-        loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+        if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
 
-void IIPviewer::loadRawFile(QString &fileName, int scrollArea)
+void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
 {
     RawFileInfoDlg dlg(this);
 
@@ -875,7 +952,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea)
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
         setRawImage(fileName, by, order, bitDepth, width, height, LEFT_IMG_WIDGET);
-        loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+        if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET); }
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
@@ -890,11 +967,11 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea)
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
         setRawImage(fileName, by, order, bitDepth, width, height, RIGHT_IMG_WIDGET);
-        loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+        if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
 
-void IIPviewer::loadPnmFile(QString &fileName, int scrollArea)
+void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
 {
     QImageReader reader(fileName);
     if (!reader.canRead())
@@ -916,7 +993,7 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea)
         openedFile[0] = fileName;
         originSize[0] = reader.size();
         setImage(fileName, LEFT_IMG_WIDGET);
-        loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+        if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
@@ -931,11 +1008,11 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea)
         openedFile[1] = fileName;
         originSize[1] = reader.size();
         setImage(fileName, RIGHT_IMG_WIDGET);
-        loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+        if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
 
-void IIPviewer::loadPgmFile(QString &fileName, int scrollArea)
+void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
 {
     QImageReader reader(fileName);
     if (!reader.canRead())
@@ -957,7 +1034,7 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea)
         openedFile[0] = fileName;
         originSize[0] = reader.size();
         setImage(fileName, LEFT_IMG_WIDGET);
-        loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+        if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
@@ -972,7 +1049,7 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea)
         openedFile[1] = fileName;
         originSize[1] = reader.size();
         setImage(fileName, RIGHT_IMG_WIDGET);
-        loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+        if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
 
@@ -1073,15 +1150,18 @@ void IIPviewer::onReloadFileAction()
 {
     if (sender() == static_cast<QObject *>(ui.reloadFileLeftAction))
     {
-        loadFile(openedFile[0], LEFT_IMG_WIDGET);
+        // loadFile(openedFile[0], LEFT_IMG_WIDGET);
+        reLoadFile(LEFT_IMG_WIDGET);
     }
     else if (sender() == static_cast<QObject *>(ui.reloadFileRightAction))
     {
-        loadFile(openedFile[1], RIGHT_IMG_WIDGET);
+        // loadFile(openedFile[1], RIGHT_IMG_WIDGET);
+        reLoadFile(RIGHT_IMG_WIDGET);
     }
     // setTitle();
 
     emit updateExchangeBtnStatus();
+    // emit updateZoomLabelStatus();
 }
 
 void IIPviewer::setPenWidth(int width)

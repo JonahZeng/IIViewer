@@ -20,10 +20,11 @@ public:
 
 private:
     void loadFile(QString &fileName, int scrollArea);
-    void loadYuvFile(QString &fileName, int scrollArea);
-    void loadRawFile(QString &fileName, int scrollArea);
-    void loadPnmFile(QString &fileName, int scrollArea);
-    void loadPgmFile(QString &fileName, int scrollArea);
+    void reLoadFile(int scrollArea);
+    void loadYuvFile(QString &fileName, int scrollArea, bool reload=false);
+    void loadRawFile(QString &fileName, int scrollArea, bool reload=false);
+    void loadPnmFile(QString &fileName, int scrollArea, bool reload=false);
+    void loadPgmFile(QString &fileName, int scrollArea, bool reload=false);
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);

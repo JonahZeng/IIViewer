@@ -17,7 +17,7 @@ this repo is designed for open and view ISP intermediate image. we support these
 - png
 - pnm(8/10/12/14/16 bit)
 - raw(8/10/12/14/16/18/20/22/24 bit)
-- yuv(8/10/12 444-interleave4 444-plannar 22-UYVY 422-YUYV 420-NV12 420-NV21)
+- yuv(8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21)
 
 ## Usage
 download it from [release page](https://github.com/JonahZeng/IIViewer/releases), start this app on your PC, you can see this if there is no any unexpect error:

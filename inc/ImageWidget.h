@@ -137,4 +137,5 @@ signals:
     void inform_drag_img(QPoint, QPoint);
     void inform_zoom_in(int);
     void inform_zoom_out(int);
+    void inform_change_master();
 };
