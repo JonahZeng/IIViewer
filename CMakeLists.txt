@@ -88,29 +88,29 @@ message(STATUS "Git user is ${GIT_USER}")
 configure_file (config.h.in ${CMAKE_SOURCE_DIR}/inc/config.h)
 
 set(PROJECT_SOURCES
-        main.cpp
-        iipviewer.cpp
+        ${CMAKE_SOURCE_DIR}/src/main.cpp
+        ${CMAKE_SOURCE_DIR}/src/iipviewer.cpp
         ${CMAKE_SOURCE_DIR}/inc/iipviewer.h
-        AboutDlg.cpp
+        ${CMAKE_SOURCE_DIR}/src/AboutDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/AboutDlg.h
-        iipviewer.rc
-        iipviewer.qrc
-        ImageWidget.cpp
+        ${CMAKE_SOURCE_DIR}/src/iipviewer.rc
+        ${CMAKE_SOURCE_DIR}/src/iipviewer.qrc
+        ${CMAKE_SOURCE_DIR}/src/ImageWidget.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
-        RawFileInfoDlg.cpp
+        ${CMAKE_SOURCE_DIR}/src/RawFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.ui
-        IIPviewer_ui.cpp
+        ${CMAKE_SOURCE_DIR}/src/IIPviewer_ui.cpp
         ${CMAKE_SOURCE_DIR}/inc/IIPviewer_ui.h
-        YuvFileInfoDlg.cpp
+        ${CMAKE_SOURCE_DIR}/src/YuvFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.ui
-        DataVisualDlg.cpp
+        ${CMAKE_SOURCE_DIR}/src/DataVisualDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/DataVisualDlg.h
         ${CMAKE_SOURCE_DIR}/inc/resource.h
         ${CMAKE_SOURCE_DIR}/inc/config.h
         ${CMAKE_SOURCE_DIR}/inc/AppSetting.h
-        AppSetting.cpp
+        ${CMAKE_SOURCE_DIR}/src/AppSetting.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

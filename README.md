@@ -36,7 +36,7 @@ you should install Qt5 with necessary module first:
 if you install Qt by build from soure, here is my configuration(MinGW64 13.2.0, Qt5.15.15) for reference:
 ```bash
 .\configure -prefix {qt_source\qtbase} \
--commercial -confirm-license \
+-opensource -confirm-license \
 -openssl-runtime \
 -I {openssl3 header direcotry} \
 -L {openssl3 library directory} \
@@ -48,6 +48,10 @@ if you install Qt by build from soure, here is my configuration(MinGW64 13.2.0, 
 -skip webengine \
 -skip webglplugin \
 -skip webchannel 
+```
+MSVC build Qt5.15.16:
+```bat
+configure -prefix %CD%\qtbase -opensource -confirm-license -nomake tests -nomake examples -release -skip webview -skip webengine -skip webglplugin -skip webchannel -openssl-runtime -I {openssl3 header direcotry} -L {openssl3 library directory} -make-tool jom -platform win32-msvc
 ```
 ### windows(amd64)
 I have test it both on windows10 with mingw64 13.2.0 and windows11 with MSVC v143, Qt version >= 5.15.2.
