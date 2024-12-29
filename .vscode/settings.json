@@ -1,9 +1,7 @@
 {
     "cmake.configureOnOpen": false,
     "cmake.configureArgs": [
-        "-DCMAKE_PREFIX_PATH=C:\\Qt\\qt-5.15.16\\qtbase",
-        "-DOpenSSL_DIR=C:\\Qt\\OpenSSL\\lib\\cmake\\OpenSSL",
-        // "-DOPENSSL_USE_STATIC_LIBS=OFF"
+        "-DCMAKE_PREFIX_PATH=C:\\Qt\\qt-5.15.16\\qtbase"
     ],
     "github-actions.remote-name": "origin",
     "files.associations": {
