@@ -62,10 +62,8 @@ function(windeployqt target directory)
         "
         file(READ \"${CMAKE_CURRENT_BINARY_DIR}/${target}_$<$<CONFIG:Release>:release>$<$<CONFIG:Debug>:debug>$<$<CONFIG:MinSizeRel>:minsizerel>$<$<CONFIG:RelWithDebInfo>:relwithdebinfo>_path\" _file)
         execute_process(
-            COMMAND \"${CMAKE_COMMAND}\" -E
-                env PATH=\"${_qt_bin_dir}\" \"${WINDEPLOYQT_EXECUTABLE}\"
+            COMMAND \"${_qt_bin_dir}/windeployqt.exe\"
                     --dry-run
-                    --no-compiler-runtime
                     --no-angle
                     --no-opengl-sw
                     --list mapping

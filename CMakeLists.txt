@@ -38,7 +38,6 @@ elseif ((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
 elseif((UNIX) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/gcc/lib/cmake/OpenSSL")
 endif()
-message(STATUS ${OpenSSL_DIR})
 find_package(OpenSSL CONFIG REQUIRED)
 
 get_target_property(_qmake_executable Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
@@ -124,42 +123,42 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(IIViewer
+    qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
 # Define target properties for Android with Qt 6 as:
-#    set_property(TARGET IIViewer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(IIViewer SHARED ${PROJECT_SOURCES})
+        add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     elseif(WIN32)
-        add_executable(IIViewer WIN32 ${PROJECT_SOURCES})
+        add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES})
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             if(MSVC)
-                set_target_properties(IIViewer PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+                set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
             else()
-                set_target_properties(IIViewer PROPERTIES LINK_FLAGS "-Wl,-subsystem,console")
+                set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-subsystem,console")
             endif()
         endif()
     elseif(UNIX)
-        add_executable(IIViewer ${PROJECT_SOURCES})
+        add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
     endif()
 endif()
 
-target_include_directories(IIViewer PRIVATE ${CMAKE_SOURCE_DIR}/inc)
-target_link_libraries(IIViewer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network)
 # if(WIN32)
-#     target_compile_options(IIViewer PRIVATE /W4)
+#     target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 # elseif(UNIX)
-#    target_compile_options(IIViewer PRIVATE -Wall)
+#    target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 # endif()
 
-set_target_properties(IIViewer PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -168,7 +167,7 @@ set_target_properties(IIViewer PROPERTIES
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(IIViewer)
+    qt_finalize_executable(${PROJECT_NAME})
 endif()
 
 
@@ -177,7 +176,7 @@ cmake_path(GET OPENSSL_LIBCRYPTO_SHARED FILENAME CRYPTO_DLL_NAME)
 cmake_path(GET OPENSSL_LIBSSL_SHARED FILENAME SSL_DLL_NAME)
 if((NOT EXISTS "${BIN_OUTPUT_DIRECTORY}/${CRYPTO_DLL_NAME}") OR (NOT EXISTS "${BIN_OUTPUT_DIRECTORY}/${SSL_DLL_NAME}"))
     add_custom_command(
-        TARGET IIViewer
+        TARGET ${PROJECT_NAME}
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_LIBCRYPTO_SHARED}  ${BIN_OUTPUT_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_LIBSSL_SHARED}  ${BIN_OUTPUT_DIRECTORY}
@@ -185,19 +184,21 @@ if((NOT EXISTS "${BIN_OUTPUT_DIRECTORY}/${CRYPTO_DLL_NAME}") OR (NOT EXISTS "${B
     )
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+if(WIN32)
+    # Ensure the Qt runtime libraries are installed
+    include(windeployqt)
+    windeployqt(${PROJECT_NAME} "bin")
+endif()
 
-install(TARGETS IIViewer
+include(InstallRequiredSystemLibraries)
+# install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin)
+
+install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${OPENSSL_LIBCRYPTO_SHARED} DESTINATION bin)
 install(FILES ${OPENSSL_LIBSSL_SHARED} DESTINATION bin)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-if(WIN32)
-    # Ensure the Qt runtime libraries are installed
-    include(windeployqt)
-    windeployqt(IIViewer "bin")
-endif()
 
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "${IIViewer_VERSION_MAJOR}")
@@ -208,6 +209,6 @@ if(WIN32)
 elseif(UNIX)
     set(CPACK_SOURCE_GENERATOR "TGZ")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-    SET(CPACK_PACKAGE_CONTACT "jonah.zeng")
+    SET(CPACK_PACKAGE_CONTACT "JonahZeng@github")
 endif()
 include(CPack)

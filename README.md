@@ -26,12 +26,14 @@ as its tips, drag any supported format image to dash rectangle，it will display
 that's all.
 
 ## Build from source code
-you should install Qt5 with necessary module first: 
-- Widgets
-- Gui
-- Core 
-- DataVisualization(**commercial license**)
-- Network(**enable ssl**)
+1. build and install OpenSSL, if you works on Windows platform, here is offical [repo](https://github.com/openssl/openssl) and build [guide](https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md), once you build and install it successed, copy its install dir to this git repo **thirdparty** directory. if you works on Linux, install OpenSSL with your software package manager like atp, yum, dnf.
+
+2. install Qt5 with necessary module:
+    - Widgets
+    - Gui
+    - Core 
+    - DataVisualization(**commercial license**)
+    - Network(**enable ssl**)
 
 if you install Qt by build from soure, here is my configuration(MinGW64 13.2.0, Qt5.15.15) for reference:
 ```bash

@@ -435,15 +435,15 @@ void IIPviewer::setTitle()
     }
     if (openedFile[0].isEmpty() && openedFile[1].isEmpty())
     {
-        setWindowTitle("IIP viewer");
+        setWindowTitle("IIViewer");
     }
     else if (openedFile[0].isEmpty() || openedFile[1].isEmpty())
     {
-        setWindowTitle(openedFile0_t + openedFile1_t + " - IIP viewer");
+        setWindowTitle(openedFile0_t + openedFile1_t + " - IIViewer");
     }
     else
     {
-        setWindowTitle(openedFile0_t + "<--->" + openedFile1_t + " - IIP viewer");
+        setWindowTitle(openedFile0_t + "<--->" + openedFile1_t + " - IIViewer");
     }
 }
 
