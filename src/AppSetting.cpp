@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QJsonDocument>
+#include <QStyleFactory>
 
 AppSettings::AppSettings()
 {
@@ -16,6 +17,7 @@ AppSettings::AppSettings()
     raw_width = 0;
     raw_height = 0;
     rawByteOrder = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+    theme = QStyleFactory::keys().first();
 }
 
 AppSettings::~AppSettings()
@@ -102,6 +104,9 @@ void AppSettings::read(const QJsonObject& json)
     if (json.contains("raw_byte_order")) {
         rawByteOrder = RawFileInfoDlg::ByteOrderType(json["raw_byte_order"].toInt());
     }
+    if (json.contains("theme")) {
+        theme = json["theme"].toString();
+    }
 }
 
 void AppSettings::write(QJsonObject& json) const
@@ -125,4 +130,6 @@ void AppSettings::write(QJsonObject& json) const
     json["raw_height"] = raw_height;
 
     json["raw_byte_order"] = int(rawByteOrder);
+
+    json["theme"] = theme;
 }

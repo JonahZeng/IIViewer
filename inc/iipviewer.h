@@ -4,6 +4,8 @@
 #include "AppSetting.h"
 #include "IIPviewer_ui.h"
 #include <QtWidgets/QMainWindow>
+#include <QFileSystemWatcher>
+#include <QDateTime>
 
 class IIPviewer : public QMainWindow
 {
@@ -79,6 +81,7 @@ public slots:
     void restoreLeftImg();
     void showImageInfo();
     void checkUpdate();
+    void openedFileChanged(const QString& filePath);
 
 signals:
     void updateExchangeBtnStatus();
@@ -89,8 +92,10 @@ public:
     Ui::IIPviewerUi ui;
     QColor penColor;
     QString workPath;
-    QSize originSize[2];
-    QString openedFile[2];
+    std::array<QSize, 2> originSize;
+    std::array<QString, 2> openedFile;
+    std::array<QDateTime, 2> openedFileLastModifiedTime;
+    QFileSystemWatcher openedFileWatcher;
     QScrollArea *masterScrollarea;
     AppSettings settings;
 };

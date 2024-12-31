@@ -20,6 +20,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QVersionNumber>
+#include <QStyleFactory>
 
 constexpr int LEFT_IMG_WIDGET = 0;
 constexpr int RIGHT_IMG_WIDGET = 1;
@@ -30,8 +31,8 @@ public:
     ImgInfoDlg(QWidget *parent)
         : QDialog(parent)
     {
-        leftLabel = new QLabel();
-        rightLabel = new QLabel();
+        leftLabel = new QLabel(this);
+        rightLabel = new QLabel(this);
         QFrame *centerLine = new QFrame();
         centerLine->setFrameShape(QFrame::Shape::VLine);
         centerLine->setFrameShadow(QFrame::Shadow::Sunken);
@@ -115,7 +116,12 @@ private:
 };
 
 IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
-    : QMainWindow(parent), ui(), penColor(0, 0, 0), originSize{{0, 0}, {0, 0}}, openedFile{QString(), QString()}
+    : QMainWindow(parent), ui(), 
+    penColor(0, 0, 0), 
+    originSize{QSize{0, 0}, QSize{0, 0}}, 
+    openedFile{QString(), QString()},
+    openedFileLastModifiedTime{QDateTime(), QDateTime()},
+    openedFileWatcher{}
 {
     if (settings.loadSettingsFromFile())
     {
@@ -132,6 +138,10 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
         {
             workPath = QDir::currentPath();
         }
+    }
+    if(QStyleFactory::keys().contains(settings.theme))
+    {    
+        QApplication::setStyle(settings.theme);
     }
 
     setAcceptDrops(true);
@@ -211,6 +221,8 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     connect(this, &IIPviewer::updateExchangeBtnStatus, this, &IIPviewer::updateExchangeBtn);
     connect(this, &IIPviewer::updateZoomLabelStatus, this, &IIPviewer::updateZoomLabelText);
     connect(this, &IIPviewer::needOpenFileFromCmdArgv, this, &IIPviewer::openGivenFileFromCmdArgv);
+
+    connect(&openedFileWatcher, &QFileSystemWatcher::fileChanged, this, &IIPviewer::openedFileChanged);
 
     ui.dataAnalyseDockWgt->installEventFilter(this);
     ui.playListDockWgt->installEventFilter(this);
@@ -368,6 +380,42 @@ void IIPviewer::checkUpdate()
     manager->get(request);
 }
 
+void IIPviewer::openedFileChanged(const QString &filePath)
+{
+    if(filePath == openedFile[LEFT_IMG_WIDGET])
+    {
+        auto curModifiedTime = QFileInfo(filePath).lastModified();
+        if (curModifiedTime > openedFileLastModifiedTime[LEFT_IMG_WIDGET])
+        {
+            auto resp = QMessageBox::information(this, QString("file changed"), QString("%1 has been changed, do you want to reload it").arg(filePath), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
+            if (resp == QMessageBox::StandardButton::Ok)
+            {
+                reLoadFile(LEFT_IMG_WIDGET);
+                masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+                openedFileLastModifiedTime[LEFT_IMG_WIDGET] = curModifiedTime;
+            }
+        }
+    }
+    else if(filePath == openedFile[RIGHT_IMG_WIDGET])
+    {
+        auto curModifiedTime = QFileInfo(filePath).lastModified();
+        if (curModifiedTime > openedFileLastModifiedTime[RIGHT_IMG_WIDGET])
+        {
+            auto resp = QMessageBox::information(this, QString("file changed"), QString("%1 has been changed, do you want to reload it").arg(filePath), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
+            if (resp == QMessageBox::StandardButton::Ok)
+            {
+                reLoadFile(RIGHT_IMG_WIDGET);
+                masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
+                openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = curModifiedTime;
+            }
+        }
+    }
+    else
+    {
+        openedFileWatcher.removePath(filePath);
+    }
+}
+
 void IIPviewer::updateExchangeBtn()
 {
     if (ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType != UNKNOW_IMG && ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType != UNKNOW_IMG)
@@ -462,11 +510,19 @@ void IIPviewer::onOpenFileAction()
     settings.workPath = info.absolutePath();
     if (sender() == static_cast<QObject *>(ui.openFileLeftAction))
     {
+        onCloseLeftFileAction(); // 这里删除关闭文件监控
         loadFile(fileName, LEFT_IMG_WIDGET);
+        masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+        openedFileWatcher.addPath(fileName); // 添加新文件监控
+        openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(fileName).lastModified(); // 记录新文件的修改时间
     }
     else if (sender() == static_cast<QObject *>(ui.openFileRightAction))
     {
+        onCloseRightFileAction();
         loadFile(fileName, RIGHT_IMG_WIDGET);
+        masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
+        openedFileWatcher.addPath(fileName); // 添加新文件监控
+        openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = QFileInfo(fileName).lastModified(); // 记录新文件的修改时间
     }
     setTitle();
 
@@ -488,6 +544,9 @@ void IIPviewer::openGivenFileFromCmdArgv(QString image)
     {
         onCloseLeftFileAction();
         loadFile(image, LEFT_IMG_WIDGET);
+        masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+        openedFileWatcher.addPath(image);
+        openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(image).lastModified();
         setTitle();
         emit updateExchangeBtnStatus();
         emit updateZoomLabelStatus();
@@ -1092,6 +1151,7 @@ void IIPviewer::onCloseLeftFileAction()
     ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
     ui.imageLabel[LEFT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
     ui.imageLabel[LEFT_IMG_WIDGET]->rawDataBit = 0;
+    openedFileWatcher.removePath(openedFile[0]);
     openedFile[0].clear();
     setTitle();
     ui.start_x_edit0->clear();
@@ -1128,6 +1188,7 @@ void IIPviewer::onCloseRightFileAction()
     ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
     ui.imageLabel[RIGHT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
     ui.imageLabel[RIGHT_IMG_WIDGET]->rawDataBit = 0;
+    openedFileWatcher.removePath(openedFile[1]);
     openedFile[1].clear();
     setTitle();
     ui.start_x_edit1->clear();
@@ -1152,11 +1213,15 @@ void IIPviewer::onReloadFileAction()
     {
         // loadFile(openedFile[0], LEFT_IMG_WIDGET);
         reLoadFile(LEFT_IMG_WIDGET);
+        masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+        openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(openedFile[LEFT_IMG_WIDGET]).lastModified();
     }
     else if (sender() == static_cast<QObject *>(ui.reloadFileRightAction))
     {
         // loadFile(openedFile[1], RIGHT_IMG_WIDGET);
         reLoadFile(RIGHT_IMG_WIDGET);
+        masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
+        openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = QFileInfo(openedFile[RIGHT_IMG_WIDGET]).lastModified();
     }
     // setTitle();
 
@@ -1179,6 +1244,7 @@ void IIPviewer::setTheme()
         if (sender() == static_cast<QObject *>(theme))
         {
             QApplication::setStyle(themeKeys[t_idx]);
+            settings.theme = themeKeys[t_idx];
             theme->setChecked(true);
         }
         else
@@ -1581,18 +1647,24 @@ void IIPviewer::dropEvent(QDropEvent *event)
             auto fileName0 = urlList[0].toLocalFile();
             if (fileName0.isEmpty())
                 return;
+            onCloseLeftFileAction(); // 这里删除关闭文件监控
             loadFile(fileName0, LEFT_IMG_WIDGET);
             setTitle();
             masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+            openedFileWatcher.addPath(fileName0); // 添加新文件监控
+            openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(fileName0).lastModified(); // 记录新文件的修改时间
         }
         else if (scrollArea1_rect.left() < dropPt.x() && dropPt.x() < scrollArea1_rect.right())
         {
             auto fileName0 = urlList[0].toLocalFile();
             if (fileName0.isEmpty())
                 return;
+            onCloseRightFileAction(); // 这里删除关闭文件监控
             loadFile(fileName0, RIGHT_IMG_WIDGET);
             setTitle();
             masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
+            openedFileWatcher.addPath(fileName0); // 添加新文件监控
+            openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = QFileInfo(fileName0).lastModified(); // 记录新文件的修改时间
         }
         QFileInfo info(urlList[0].toLocalFile());
         settings.workPath = info.absolutePath();

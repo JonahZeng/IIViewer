@@ -2,7 +2,7 @@
 #include <QApplication>
 #include <QMessageBox>
 // #include <QtNetwork/QHostInfo>
-#include <QStyleFactory>
+// #include <QStyleFactory>
 // #include <QDebug>
 #include <QFileInfo>
 
@@ -13,9 +13,9 @@ int main(int argc, char* argv[])
     // QCoreApplication::setOrganizationDomain("IIPviewer.com");
     QCoreApplication::setApplicationName("IIViewer");
     app.setFont(QFont("Microsoft YaHei UI", 10));
-    auto themes = QStyleFactory::keys();
+    // auto themes = QStyleFactory::keys();
     // qDebug() << themes;
-    QApplication::setStyle(themes[0]);
+    // QApplication::setStyle(themes[0]);
 
     //    QString localDomainName = QHostInfo::localDomainName();
     //    if (localDomainName != QString("int.egs.com")) {
