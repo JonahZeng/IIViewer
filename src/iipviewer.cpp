@@ -139,9 +139,11 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
             workPath = QDir::currentPath();
         }
     }
+    int theme_idx = 0;
     if(QStyleFactory::keys().contains(settings.theme))
     {    
         QApplication::setStyle(settings.theme);
+        theme_idx = QStyleFactory::keys().indexOf(settings.theme);
     }
 
     setAcceptDrops(true);
@@ -152,6 +154,11 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     setTitle();
 
     masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+    // set theme idx by settings
+    for(int t_idx=0; t_idx < ui.themes.size(); t_idx++)
+    {
+        ui.themes[t_idx]->setChecked(t_idx == theme_idx ? true : false);
+    }
 
     connect(ui.openFileLeftAction, &QAction::triggered, this, &IIPviewer::onOpenFileAction);
     connect(ui.openFileRightAction, &QAction::triggered, this, &IIPviewer::onOpenFileAction);
@@ -937,6 +944,10 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     {
         dlg.ui.big_endian->setChecked(true);
     }
+    if(!settings.raw_compact)
+        dlg.ui.BitDepthComboBox->setCurrentText(QString::asprintf("%d", settings.raw_bitDepth));
+    else
+        dlg.ui.BitDepthComboBox->setCurrentText(QString::asprintf("%d-comp", settings.raw_bitDepth));
     dlg.ui.BitDepthComboBox->setCurrentText(QString::asprintf("%d", settings.raw_bitDepth));
     dlg.ui.WidthLineEdit->setText(QString::asprintf("%d", settings.raw_width));
     dlg.ui.HeightLineEdit->setText(QString::asprintf("%d", settings.raw_height));
@@ -967,7 +978,16 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     {
         order = RawFileInfoDlg::ByteOrderType::RAW_BIG_ENDIAN;
     }
-    int bitDepth = dlg.ui.BitDepthComboBox->currentText().toInt();
+    bool isInt = false;
+    QString bit_option_str = dlg.ui.BitDepthComboBox->currentText();
+    int bitDepth = bit_option_str.toInt(&isInt, 10);
+    bool raw_compact = false;
+    if(!isInt && bit_option_str.endsWith(QString("-comp"))) // 12-comp, sep by '-'
+    {
+        auto bit_opt_list = bit_option_str.split(QChar('-'));
+        bitDepth = bit_opt_list[0].toInt();
+        raw_compact = true;
+    }
     int width = dlg.ui.WidthLineEdit->text().toInt();
     int height = dlg.ui.HeightLineEdit->text().toInt();
 
@@ -976,6 +996,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     settings.raw_width = width;
     settings.raw_height = height;
     settings.rawByteOrder = order;
+    settings.raw_compact = raw_compact;
 
     int pixSize = 2;
     if (bitDepth <= 8)
@@ -993,7 +1014,15 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
 
     QFileInfo fileInfo(fileName);
     qint64 rawFileSize = fileInfo.size();
-    if ((qint64)pixSize * width * height > rawFileSize)
+    if(raw_compact)
+    {
+        if(width * height * bitDepth / 8 > rawFileSize)
+        {
+            QMessageBox::information(this, "error", "raw file size < your input", QMessageBox::StandardButton::Ok);
+            return;
+        }
+    }
+    else if ((qint64)pixSize * width * height > rawFileSize)
     {
         QMessageBox::information(this, "error", "raw file size < your input", QMessageBox::StandardButton::Ok);
         return;
@@ -1010,7 +1039,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
-        setRawImage(fileName, by, order, bitDepth, width, height, LEFT_IMG_WIDGET);
+        setRawImage(fileName, by, order, bitDepth, raw_compact, width, height, LEFT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET); }
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
@@ -1025,7 +1054,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
-        setRawImage(fileName, by, order, bitDepth, width, height, RIGHT_IMG_WIDGET);
+        setRawImage(fileName, by, order, bitDepth, raw_compact, width, height, RIGHT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
@@ -1119,11 +1148,11 @@ void IIPviewer::setImage(QString &imageName, int leftOrRight)
     ui.imageLabel[leftOrRight]->setPixmap(imageName);
 }
 
-void IIPviewer::setRawImage(QString &imageName, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height, int leftOrRight)
+void IIPviewer::setRawImage(QString &imageName, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
-    ui.imageLabel[leftOrRight]->setPixmap(imageName, by, order, bitDepth, width, height);
+    ui.imageLabel[leftOrRight]->setPixmap(imageName, by, order, bitDepth, compact, width, height);
 }
 
 void IIPviewer::setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)

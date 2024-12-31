@@ -1047,50 +1047,133 @@ void ImageWidget::setPixmap(QString& img) // jpg, jpeg, bmp, png, pnm, pgm
     }
 }
 
-void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height) // raw
+static void decompress10BitData(uint8_t* inputData, int width, int height, uint16_t* outputData)
+{ 
+    int inputSize = width * height * 10 / 8;
+    int outputSize = width * height;
+
+    for(int i=0; i<inputSize; i += 5)
+    {
+
+    }
+}
+
+static void decompress12BitData(uint8_t* inputData, int width, int height, uint16_t* outputData)
+{ 
+    int inputSize = width * height * 12 / 8;
+    int outputSize = width * height;
+
+    for(int i=0; i<inputSize; i += 5)
+    {
+
+    }
+}
+
+static void decompress14BitData(uint8_t* inputData, int width, int height, uint16_t* outputData)
+{ 
+    int inputSize = width * height * 14 / 8;
+    int outputSize = width * height;
+
+    for(int i=0; i<inputSize; i += 5)
+    {
+
+    }
+}
+
+void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height) // raw
 {
     int pixSize = 2;
-    if (bitDepth <= 8) {
+    if (bitDepth <= 8)
+    {
         pixSize = 1;
-    } else if (bitDepth > 8 && bitDepth <= 16) {
+    }
+    else if (bitDepth > 8 && bitDepth <= 16)
+    {
         pixSize = 2;
-    } else if (bitDepth > 16 && bitDepth <= 32) {
+    }
+    else if (bitDepth > 16 && bitDepth <= 32)
+    {
         pixSize = 4;
     }
     releaseBuffer();
 
-    unsigned char* buffer = new unsigned char[pixSize * width * height];
+    qint64 raw_buffer_length = pixSize * width * height;
+    unsigned char *buffer = new unsigned char[raw_buffer_length];
+    unsigned char *compact_buffer = compact ? new unsigned char[(bitDepth * width * height + 7) / 8] : nullptr;
+
     pixMap = new QImage(width, height, QImage::Format_Grayscale8);
-    unsigned char* bufferShow = pixMap->bits();
+    unsigned char *bufferShow = pixMap->bits();
 
     QFile rawFile(img);
     rawFile.open(QIODevice::ReadOnly);
-    rawFile.read((char*)buffer, qint64(pixSize) * width * height);
+    if(compact)
+        rawFile.read((char *)compact_buffer, (bitDepth * width * height + 7) / 8);
+    else 
+        rawFile.read((char *)buffer, raw_buffer_length);
     rawFile.close();
 
-    if (pixSize == 1) {
-        for (qint64 i = 0; i < width * height; i++) {
+    if (compact) // 目前只有10,12,14 bit raw有compact
+    {
+        if(bitDepth != 10 && bitDepth != 12 && bitDepth != 14)
+        {
+            throw std::runtime_error("compact raw only support 10/12/14 bit!");
+        }
+
+        if(bitDepth == 10)
+        {
+            decompress10BitData(compact_buffer, width, height, (uint16_t*)buffer);
+        }
+        else if(bitDepth == 12)
+        {
+            decompress12BitData(compact_buffer, width, height, (uint16_t*)buffer);
+        }
+        else if(bitDepth == 14)
+        {
+            decompress14BitData(compact_buffer, width, height, (uint16_t*)buffer);
+        }
+
+        delete[] compact_buffer;
+    }
+
+    if (pixSize == 1)
+    {
+        for (qint64 i = 0; i < width * height; i++)
+        {
             bufferShow[i] = buffer[i];
         }
-    } else if (pixSize == 2) {
-        unsigned short* buffer_us = (unsigned short*)buffer;
-        if (order == RawFileInfoDlg::RAW_BIG_ENDIAN) {
-            for (qint64 i = 0; i < width * height; i++) {
+    }
+    else if (pixSize == 2)
+    {
+        unsigned short *buffer_us = (unsigned short *)buffer;
+        if (order == RawFileInfoDlg::RAW_BIG_ENDIAN)
+        {
+            for (qint64 i = 0; i < width * height; i++)
+            {
                 bufferShow[i] = CLIP3(((buffer_us[i] & 0x00ff << 8) | (buffer_us[i] & 0xff00 >> 8)) >> (bitDepth - 8), 0, 255);
             }
-        } else {
-            for (qint64 i = 0; i < width * height; i++) {
+        }
+        else
+        {
+            for (qint64 i = 0; i < width * height; i++)
+            {
                 bufferShow[i] = CLIP3(buffer_us[i] >> (bitDepth - 8), 0, 255);
             }
         }
-    } else if (pixSize == 4) {
-        unsigned int* buffer_ui = (unsigned int*)buffer;
-        if (order == RawFileInfoDlg::RAW_BIG_ENDIAN) {
-            for (qint64 i = 0; i < width * height; i++) {
+    }
+    else if (pixSize == 4)
+    {
+        unsigned int *buffer_ui = (unsigned int *)buffer;
+        if (order == RawFileInfoDlg::RAW_BIG_ENDIAN)
+        {
+            for (qint64 i = 0; i < width * height; i++)
+            {
                 bufferShow[i] = CLIP3(((buffer_ui[i] & 0x000000ff << 24) | (buffer_ui[i] & 0x0000ff00 << 8) | (buffer_ui[i] & 0x00ff0000 >> 8) | (buffer_ui[i] & 0xff000000 >> 24)) >> (bitDepth - 8), 0, 255);
             }
-        } else {
-            for (qint64 i = 0; i < width * height; i++) {
+        }
+        else
+        {
+            for (qint64 i = 0; i < width * height; i++)
+            {
                 bufferShow[i] = CLIP3(buffer_ui[i] >> (bitDepth - 8), 0, 255);
             }
         }

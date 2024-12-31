@@ -7,7 +7,7 @@
 #include <QFileSystemWatcher>
 #include <QDateTime>
 
-class IIPviewer : public QMainWindow
+class IIPviewer final: public QMainWindow
 {
     Q_OBJECT
 
@@ -30,7 +30,7 @@ private:
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
-    void setRawImage(QString &image, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height, int leftOrRight);
+    void setRawImage(QString &image, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
     void openGivenFileFromCmdArgv(QString image);
 
 protected:

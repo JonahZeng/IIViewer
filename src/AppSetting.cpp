@@ -104,6 +104,9 @@ void AppSettings::read(const QJsonObject& json)
     if (json.contains("raw_byte_order")) {
         rawByteOrder = RawFileInfoDlg::ByteOrderType(json["raw_byte_order"].toInt());
     }
+    if (json.contains("raw_compact")) {
+         raw_compact = json["raw_compact"].toBool();
+    }
     if (json.contains("theme")) {
         theme = json["theme"].toString();
     }
@@ -130,6 +133,8 @@ void AppSettings::write(QJsonObject& json) const
     json["raw_height"] = raw_height;
 
     json["raw_byte_order"] = int(rawByteOrder);
+
+    json["raw_compact"] = (int)raw_compact;
 
     json["theme"] = theme;
 }
