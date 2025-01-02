@@ -1047,36 +1047,43 @@ void ImageWidget::setPixmap(QString& img) // jpg, jpeg, bmp, png, pnm, pgm
     }
 }
 
-static void decompress10BitData(uint8_t* inputData, int width, int height, uint16_t* outputData)
-{ 
+static void decompress10BitData(uint8_t *inputData, int width, int height, uint16_t *outputData)
+{
     int inputSize = width * height * 10 / 8;
-    int outputSize = width * height;
+    // int outputSize = width * height;
 
-    for(int i=0; i<inputSize; i += 5)
+    for (int i = 0, j = 0; i < inputSize; i += 5, j += 4)
     {
-
+        outputData[j + 0] = (((uint16_t)(inputData[i + 1] & 0x03)) << 8) | (uint16_t)inputData[i + 0];
+        outputData[j + 1] = (((uint16_t)(inputData[i + 2] & 0x0f)) << 6) | (uint16_t)((inputData[i + 1] & 0xfc) >> 2);
+        outputData[j + 2] = (((uint16_t)(inputData[i + 3] & 0x3f)) << 4) | (uint16_t)((inputData[i + 2] & 0xf0) >> 4);
+        outputData[j + 3] = (((uint16_t)(inputData[i + 4] & 0xff)) << 2) | (uint16_t)((inputData[i + 3] & 0xc0) >> 6);
     }
 }
 
-static void decompress12BitData(uint8_t* inputData, int width, int height, uint16_t* outputData)
-{ 
+static void decompress12BitData(uint8_t *inputData, int width, int height, uint16_t *outputData)
+{
     int inputSize = width * height * 12 / 8;
-    int outputSize = width * height;
+    // int outputSize = width * height;
 
-    for(int i=0; i<inputSize; i += 5)
+    for (int i = 0, j = 0; i < inputSize; i += 3, j += 2)
     {
-
+        outputData[j + 0] = (((uint16_t)(inputData[i + 1] & 0x0f)) << 8) | (uint16_t)inputData[i + 0];
+        outputData[j + 1] = (((uint16_t)(inputData[i + 2] & 0xff)) << 4) | (uint16_t)((inputData[i + 1] & 0xf0) >> 4);
     }
 }
 
-static void decompress14BitData(uint8_t* inputData, int width, int height, uint16_t* outputData)
-{ 
+static void decompress14BitData(uint8_t *inputData, int width, int height, uint16_t *outputData)
+{
     int inputSize = width * height * 14 / 8;
-    int outputSize = width * height;
+    // int outputSize = width * height;
 
-    for(int i=0; i<inputSize; i += 5)
+    for (int i = 0, j = 0; i < inputSize; i += 7, j += 4)
     {
-
+        outputData[j + 0] = (((uint16_t)(inputData[i + 1] & 0x3f)) << 8) | (uint16_t)inputData[i + 0];
+        outputData[j + 1] = (((uint16_t)(inputData[i + 3] & 0x0f)) << 10) | (((uint16_t)(inputData[i + 2] & 0xff)) << 2) | (uint16_t)((inputData[i + 1] & 0xc0) >> 6);
+        outputData[j + 2] = (((uint16_t)(inputData[i + 5] & 0x03)) << 12) | (((uint16_t)(inputData[i + 4] & 0xff)) << 4) | (uint16_t)((inputData[i + 3] & 0xf0) >> 4);
+        outputData[j + 4] = (((uint16_t)(inputData[i + 6] & 0xff)) << 6) | (uint16_t)((inputData[i + 5] & 0xfc) >> 2);
     }
 }
 
@@ -1131,8 +1138,8 @@ void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, R
         {
             decompress14BitData(compact_buffer, width, height, (uint16_t*)buffer);
         }
-
-        delete[] compact_buffer;
+        if(compact_buffer)
+            delete[] compact_buffer;
     }
 
     if (pixSize == 1)
@@ -1382,6 +1389,24 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
                 }
             }
         }
+    } else if (tp == YuvFileInfoDlg::YuvType::YUV400) {
+        if (bitDepth > 8 && bitDepth <= 16) {
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * width * 3 + j * 3 + 2] = rgb888Buf[i * width * 3 + j * 3 + 0];
+                    rgb888Buf[i * width * 3 + j * 3 + 1] = rgb888Buf[i * width * 3 + j * 3 + 0];
+                }
+            }
+        } else if (bitDepth <= 8) {
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width + j];
+                    rgb888Buf[i * width * 3 + j * 3 + 2] = rgb888Buf[i * width * 3 + j * 3 + 0];
+                    rgb888Buf[i * width * 3 + j * 3 + 1] = rgb888Buf[i * width * 3 + j * 3 + 0];
+                }
+            }
+        }
     }
 
     for (int i = 0; i < height; i++) {
@@ -1410,6 +1435,8 @@ void ImageWidget::setPixmap(QString& img, YuvFileInfoDlg::YuvType tp, int bitDep
         total_size = pixSize * width * height * 2;
     } else if (tp == YuvFileInfoDlg::YUV420_NV12 || tp == YuvFileInfoDlg::YUV420_NV21 || tp == YuvFileInfoDlg::YUV420P_YU12 || tp == YuvFileInfoDlg::YUV420P_YV12) {
         total_size = pixSize * width * height * 3 / 2;
+    } else if(tp == YuvFileInfoDlg::YUV400) {
+        total_size = pixSize * width * height;
     }
 
     releaseBuffer();

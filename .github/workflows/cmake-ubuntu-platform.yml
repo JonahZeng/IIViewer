@@ -74,18 +74,18 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: cpack -G TGZ
 
-    - name: Upload Deb Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-          name: IIViewer ubuntu deb
-          if-no-files-found: ignore
-          path: ${{github.workspace}}/build/IIViewer-*-Linux.deb
-          compression-level: 0 # no compression
-    - name: Upload Tgz Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-          name: IIViewer ubuntu tgz
-          if-no-files-found: ignore
-          path: ${{github.workspace}}/build/IIViewer-*-Linux.tar.gz
-          compression-level: 0 # no compression
+    # - name: Upload Deb Artifacts
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #       name: IIViewer ubuntu deb
+    #       if-no-files-found: ignore
+    #       path: ${{github.workspace}}/build/IIViewer-*-Linux.deb
+    #       compression-level: 0 # no compression
+    # - name: Upload Tgz Artifacts
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #       name: IIViewer ubuntu tgz
+    #       if-no-files-found: ignore
+    #       path: ${{github.workspace}}/build/IIViewer-*-Linux.tar.gz
+    #       compression-level: 0 # no compression
 

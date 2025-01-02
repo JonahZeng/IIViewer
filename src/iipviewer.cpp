@@ -798,6 +798,10 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     {
         dlg.ui.formatComboBox->setCurrentIndex(7);
     }
+    else if (yuvtp == YuvFileInfoDlg::YUV400)
+    {
+        dlg.ui.formatComboBox->setCurrentIndex(8);
+    }
     dlg.ui.bitDepthSpinBox->setValue(settings.yuv_bitDepth);
     dlg.ui.widthLineEdit->setText(QString::asprintf("%d", settings.yuv_width));
     dlg.ui.heightLineEdit->setText(QString::asprintf("%d", settings.yuv_height));
@@ -868,6 +872,11 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     {
         tp = YuvFileInfoDlg::YUV420P_YV12;
         totalSize = width * height * pixSize * 3 / 2;
+    }
+    else if (curIdx == 8)
+    {
+        tp = YuvFileInfoDlg::YUV400;
+        totalSize = width * height * pixSize;
     }
 
     settings.yuvType = tp;
