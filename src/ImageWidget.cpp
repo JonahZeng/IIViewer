@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
+#include <stdexcept>
 
 #define CLIP3(a, mi, ma) (a < mi ? mi : (a > ma ? ma : a))
 
