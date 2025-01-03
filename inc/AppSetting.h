@@ -19,6 +19,8 @@ public:
     int raw_width;
     int raw_height;
     RawFileInfoDlg::ByteOrderType rawByteOrder;
+    bool raw_compact;
+    QString theme;
 
     bool loadSettingsFromFile();
     void dumpSettingsToFile();

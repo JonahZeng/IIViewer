@@ -4,8 +4,10 @@
 #include "AppSetting.h"
 #include "IIPviewer_ui.h"
 #include <QtWidgets/QMainWindow>
+#include <QFileSystemWatcher>
+#include <QDateTime>
 
-class IIPviewer : public QMainWindow
+class IIPviewer final: public QMainWindow
 {
     Q_OBJECT
 
@@ -20,14 +22,15 @@ public:
 
 private:
     void loadFile(QString &fileName, int scrollArea);
-    void loadYuvFile(QString &fileName, int scrollArea);
-    void loadRawFile(QString &fileName, int scrollArea);
-    void loadPnmFile(QString &fileName, int scrollArea);
-    void loadPgmFile(QString &fileName, int scrollArea);
+    void reLoadFile(int scrollArea);
+    void loadYuvFile(QString &fileName, int scrollArea, bool reload=false);
+    void loadRawFile(QString &fileName, int scrollArea, bool reload=false);
+    void loadPnmFile(QString &fileName, int scrollArea, bool reload=false);
+    void loadPgmFile(QString &fileName, int scrollArea, bool reload=false);
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
-    void setRawImage(QString &image, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height, int leftOrRight);
+    void setRawImage(QString &image, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
     void openGivenFileFromCmdArgv(QString image);
 
 protected:
@@ -78,6 +81,7 @@ public slots:
     void restoreLeftImg();
     void showImageInfo();
     void checkUpdate();
+    void openedFileChanged(const QString& filePath);
 
 signals:
     void updateExchangeBtnStatus();
@@ -88,8 +92,10 @@ public:
     Ui::IIPviewerUi ui;
     QColor penColor;
     QString workPath;
-    QSize originSize[2];
-    QString openedFile[2];
+    std::array<QSize, 2> originSize;
+    std::array<QString, 2> openedFile;
+    std::array<QDateTime, 2> openedFileLastModifiedTime;
+    QFileSystemWatcher openedFileWatcher;
     QScrollArea *masterScrollarea;
     AppSettings settings;
 };

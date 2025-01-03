@@ -41,7 +41,7 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void setPixmap(QString &img);
-    void setPixmap(QString &img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, int width, int height);
+    void setPixmap(QString &img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height);
     void setPixmap(QString &img, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize);
     void zoomIn(int zoomIdx);
     void zoomOut(int zoomIdx);
@@ -87,6 +87,9 @@ private:
     void paintYuv422YUYVPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv420NV12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     RawFileInfoDlg::BayerPixelType getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by);
 
 public:
@@ -137,4 +140,5 @@ signals:
     void inform_drag_img(QPoint, QPoint);
     void inform_zoom_in(int);
     void inform_zoom_out(int);
+    void inform_change_master();
 };

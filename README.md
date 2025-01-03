@@ -17,7 +17,7 @@ this repo is designed for open and view ISP intermediate image. we support these
 - png
 - pnm(8/10/12/14/16 bit)
 - raw(8/10/12/14/16/18/20/22/24 bit)
-- yuv(8/10/12 444-interleave4 444-plannar 22-UYVY 422-YUYV 420-NV12 420-NV21)
+- yuv(8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21)
 
 ## Usage
 download it from [release page](https://github.com/JonahZeng/IIViewer/releases), start this app on your PC, you can see this if there is no any unexpect error:
@@ -26,17 +26,19 @@ as its tips, drag any supported format image to dash rectangle，it will display
 that's all.
 
 ## Build from source code
-you should install Qt5 with necessary module first: 
-- Widgets
-- Gui
-- Core 
-- DataVisualization(**commercial license**)
-- Network(**enable ssl**)
+1. build and install OpenSSL, if you works on Windows platform, here is offical [repo](https://github.com/openssl/openssl) and build [guide](https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md), once you build and install it successed, copy its install dir to this git repo **thirdparty** directory. if you works on Linux, install OpenSSL with your software package manager like atp, yum, dnf.
+
+2. install Qt5 with necessary module:
+    - Widgets
+    - Gui
+    - Core 
+    - DataVisualization(**commercial license**)
+    - Network(**enable ssl**)
 
 if you install Qt by build from soure, here is my configuration(MinGW64 13.2.0, Qt5.15.15) for reference:
 ```bash
 .\configure -prefix {qt_source\qtbase} \
--commercial -confirm-license \
+-opensource -confirm-license \
 -openssl-runtime \
 -I {openssl3 header direcotry} \
 -L {openssl3 library directory} \
@@ -48,6 +50,10 @@ if you install Qt by build from soure, here is my configuration(MinGW64 13.2.0, 
 -skip webengine \
 -skip webglplugin \
 -skip webchannel 
+```
+MSVC build Qt5.15.16:
+```bat
+configure -prefix %CD%\qtbase -opensource -confirm-license -nomake tests -nomake examples -release -skip webview -skip webengine -skip webglplugin -skip webchannel -openssl-runtime -I {openssl3 header direcotry} -L {openssl3 library directory} -make-tool jom -platform win32-msvc
 ```
 ### windows(amd64)
 I have test it both on windows10 with mingw64 13.2.0 and windows11 with MSVC v143, Qt version >= 5.15.2.

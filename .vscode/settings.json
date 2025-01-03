@@ -1,9 +1,7 @@
 {
     "cmake.configureOnOpen": false,
     "cmake.configureArgs": [
-        "-DCMAKE_PREFIX_PATH=D:\\qt5159\\qtbase",
-        // "-DCMAKE_PREFIX_PATH=D:\\software\\qt515\\qt51515\\qtbase",
-        "-DCMAKE_INSTALL_PREFIX=.\\install"
+        "-DCMAKE_PREFIX_PATH=C:\\Qt\\qt-5.15.16\\qtbase"
     ],
     "github-actions.remote-name": "origin",
     "files.associations": {
