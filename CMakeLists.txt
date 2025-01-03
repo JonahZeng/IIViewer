@@ -33,12 +33,15 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization
 
 if(MSVC)
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/msvc/lib/cmake/OpenSSL")
+    find_package(OpenSSL CONFIG REQUIRED)
 elseif ((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/mingw64/lib/cmake/OpenSSL")
+    find_package(OpenSSL CONFIG REQUIRED)
 elseif((UNIX) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
-    set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/gcc/lib/cmake/OpenSSL")
+    # set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/gcc/lib/cmake/OpenSSL")
+    # apt install openssl libssl-devel
+    find_package(OpenSSL REQUIRED)
 endif()
-find_package(OpenSSL CONFIG REQUIRED)
 
 get_target_property(_qmake_executable Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)

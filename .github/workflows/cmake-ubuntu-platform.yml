@@ -38,6 +38,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Update system packages 
+      run: sudo apt update
+    - name: Install OpenSSL 
+      run: sudo apt install -y openssl libssl-dev
+    - name: Verify OpenSSL installation 
+      run: openssl version
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
