@@ -178,15 +178,15 @@ set(BIN_OUTPUT_DIRECTORY "$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEB
 if(WIN32)
     cmake_path(GET OPENSSL_LIBCRYPTO_SHARED FILENAME CRYPTO_DLL_NAME)
     cmake_path(GET OPENSSL_LIBSSL_SHARED FILENAME SSL_DLL_NAME)
-    # if((NOT EXISTS "${BIN_OUTPUT_DIRECTORY}/${CRYPTO_DLL_NAME}") OR (NOT EXISTS "${BIN_OUTPUT_DIRECTORY}/${SSL_DLL_NAME}"))
-    #     add_custom_command(
-    #         TARGET ${PROJECT_NAME}
-    #         POST_BUILD
-    #         COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_LIBCRYPTO_SHARED}  ${BIN_OUTPUT_DIRECTORY}
-    #         COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_LIBSSL_SHARED}  ${BIN_OUTPUT_DIRECTORY}
-    #         COMMENT "Copying OpenSSL libraries to bin directory"
-    #     )
-    # endif()
+    if((NOT EXISTS "${BIN_OUTPUT_DIRECTORY}/${CRYPTO_DLL_NAME}") OR (NOT EXISTS "${BIN_OUTPUT_DIRECTORY}/${SSL_DLL_NAME}"))
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_LIBCRYPTO_SHARED}  ${BIN_OUTPUT_DIRECTORY}
+            COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_LIBSSL_SHARED}  ${BIN_OUTPUT_DIRECTORY}
+            COMMENT "Copying OpenSSL libraries to bin directory"
+        )
+    endif()
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
