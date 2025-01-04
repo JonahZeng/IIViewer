@@ -26,13 +26,17 @@ as its tips, drag any supported format image to dash rectangle，it will display
 that's all.
 
 ## Build from source code
-1. build and install OpenSSL, if you works on Windows platform, here is offical [repo](https://github.com/openssl/openssl) and build [guide](https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md), once you build and install it successed, copy its install dir to this git repo **thirdparty** directory. if you works on Linux, install OpenSSL with your software package manager like atp, yum, dnf.
+### windows(AMD64)
+#### prepare
+1. install cmake
+2. install MSVC or MinGW64 (should support **C++17 at least**)
+3. build and install OpenSSL, here is offical [repo](https://github.com/openssl/openssl) and build [guide](https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md), once you build and install it successed, copy its install dir to this git repo **thirdparty** directory. 
 
-2. install Qt5 with necessary module:
+4. install Qt5 with necessary module:
     - Widgets
     - Gui
     - Core 
-    - DataVisualization(**commercial license**)
+    - DataVisualization
     - Network(**enable ssl**)
 
 if you install Qt by build from soure, here is my configuration(MinGW64 13.2.0, Qt5.15.15) for reference:
@@ -55,12 +59,9 @@ MSVC build Qt5.15.16:
 ```bat
 configure -prefix %CD%\qtbase -opensource -confirm-license -nomake tests -nomake examples -release -skip webview -skip webengine -skip webglplugin -skip webchannel -openssl-runtime -I {openssl3 header direcotry} -L {openssl3 library directory} -make-tool jom -platform win32-msvc
 ```
-### windows(amd64)
+#### build
 I have test it both on windows10 with mingw64 13.2.0 and windows11 with MSVC v143, Qt version >= 5.15.2.
 follow these steps:
-- install Qt5 or Qt6, cmake, MSVC or MinGW64 (should support **C++11 at least**)
-- git clone this repo
-- mk dir build, and run cmake in this directory
 ```bat
 git clone https://github.com/JonahZeng/IIViewer.git
 cd IIViewer
@@ -69,18 +70,44 @@ cd build
 cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR
 cmake --build . --config Release
 ```
-don't forget copy `libssl-3-x64.dll` and `libcrypto-3-x64.dll` to `bin/[Release|Debug]` when cmake build it finished, as you see, we enable openssl with option `-openssl-runtime` when configure/build Qt.
 
 ### linux(amd64)
-only tested it on ubuntu 20.04(cmake 3.16, Qt5.12.8, gcc 9.4.0), here are the steps:
+#### prepare
+install cmake, gcc, openssl and Qt5 
 ```bash
-sudo apt install build-essential qt5-default libqt5datavisualization5-dev cmake libssl-dev
+sudo apt install cmake build-essential libssl-dev qt5-default libqt5datavisualization5-dev qttools5-dev-tools
+```
+#### build
+these build steps had been tested on ubuntu 20.04(cmake 3.16, Qt5.12.8, gcc 9.4.0)
+```bash
 git clone https://github.com/JonahZeng/IIViewer.git
 cd IIViewer
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j 4
+```
+#### pack to Deb or AppImage
+for deb:
+```bash
+cpack -G DEB -C Release
+```
+for AppImage, you should download [linuxdeployqt](https://github.com/probonopd/linuxdeployqt/releases), and create one .desktop and .png file in `bin/Release` directory, here are the desktop file context:
+```text
+[Desktop Entry]
+Type=Application
+Name=IIViewer
+Exec=AppRun %F
+Icon=default
+Comment=isp develop image viewer
+Terminal=false
+Categories=Development;
+```
+download [linuxdeployqt](https://github.com/probonopd/linuxdeployqt/releases), and execute:
+```bash
+wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
+./linuxdeployqt-continuous-x86_64.AppImage {your-build-IIViewer-bin-file-path} -verbose=2 -bundle-non-qt-libs -appimage
 ```
 
 ### macos
