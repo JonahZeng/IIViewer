@@ -103,7 +103,7 @@ Comment=isp develop image viewer
 Terminal=false
 Categories=Development;
 ```
-download [linuxdeployqt](https://github.com/probonopd/linuxdeployqt/releases), and execute:
+download and execute linuxdeployqt:
 ```bash
 wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
 chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
