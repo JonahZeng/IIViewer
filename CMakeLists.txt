@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.4.5 LANGUAGES CXX)
+project(IIViewer VERSION 0.4.6 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
-
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_SOURCE_DIR}/bin/RelWithDebInfo)
 
 set(CXX_COMPILER_TYPE "")
 if ((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
@@ -174,7 +175,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
 endif()
 
 
-set(BIN_OUTPUT_DIRECTORY "$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>$<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>")
+set(BIN_OUTPUT_DIRECTORY  "$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>$<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:MinSizeRel>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL}>$<$<CONFIG:RelWithDebInfo>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO}>")
 if(WIN32)
     cmake_path(GET OPENSSL_LIBCRYPTO_SHARED FILENAME CRYPTO_DLL_NAME)
     cmake_path(GET OPENSSL_LIBSSL_SHARED FILENAME SSL_DLL_NAME)
@@ -194,6 +195,22 @@ if(WIN32)
     # Ensure the Qt runtime libraries are installed
     include(windeployqt)
     windeployqt(${PROJECT_NAME} "bin")
+elseif(UNIX)
+    set(_qm_translation_path "")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/translations)
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/translations)
+    endif()
+    if(NOT EXISTS ${_qm_translation_path})
+        file(MAKE_DIRECTORY ${_qm_translation_path})
+    endif()
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND "lrelease"
+        ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
+        -qm 
+        ${_qm_translation_path}/IIViewer_zh.qm
+    )
 endif()
 
 include(InstallRequiredSystemLibraries)
@@ -203,8 +220,34 @@ install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 if(WIN32)
-    install(FILES ${OPENSSL_LIBCRYPTO_SHARED} DESTINATION bin)
-    install(FILES ${OPENSSL_LIBSSL_SHARED} DESTINATION bin)
+    # install(FILES ${OPENSSL_LIBCRYPTO_SHARED} DESTINATION bin)
+    # install(FILES ${OPENSSL_LIBSSL_SHARED} DESTINATION bin)
+    # install(FILES ${BIN_OUTPUT_DIRECTORY}/translations/IIViewer_zh.qm DESTINATION bin/translations)
+    install(CODE
+    "
+        file(GLOB dll_files ${BIN_OUTPUT_DIRECTORY}/*.dll)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin FILES \${dll_files})
+        file(GLOB qm_files ${BIN_OUTPUT_DIRECTORY}/translations/*.qm)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/translations FILES \${qm_files})
+        file(GLOB style_dlls ${BIN_OUTPUT_DIRECTORY}/styles/*.dll)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/styles FILES \${style_dlls})
+        file(GLOB platform_dlls ${BIN_OUTPUT_DIRECTORY}/platforms/*.dll)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/platforms FILES \${platform_dlls})
+        file(GLOB imageformat_dlls ${BIN_OUTPUT_DIRECTORY}/imageformats/*.dll)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/imageformats FILES \${imageformat_dlls})
+        file(GLOB iconengines_dlls ${BIN_OUTPUT_DIRECTORY}/iconengines/*.dll)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/iconengines FILES \${iconengines_dlls})
+        file(GLOB bearer_dlls ${BIN_OUTPUT_DIRECTORY}/bearer/*.dll)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/bearer FILES \${bearer_dlls})
+    "
+    )
+elseif(UNIX)
+    install(CODE
+    "
+        file(GLOB qm_files ${BIN_OUTPUT_DIRECTORY}/translations/*.qm)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/translations FILES \${qm_files})
+    "
+    )
 endif()
 
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")

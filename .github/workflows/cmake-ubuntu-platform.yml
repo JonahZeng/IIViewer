@@ -79,6 +79,13 @@ jobs:
     - name: generate tgz package
       working-directory: ${{github.workspace}}/build
       run: cpack -G TGZ
+    # - name: generate AppImage package
+    #   working-directory: ${{github.workspace}}
+    #   run: |
+    #     cp ./icon/* ./bin/${{env.BUILD_TYPE}}/ && 
+    #     wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage && 
+    #     chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage && 
+    #     ./linuxdeployqt-continuous-x86_64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
 
     # - name: Upload Deb Artifacts
     #   uses: actions/upload-artifact@v4

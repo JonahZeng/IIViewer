@@ -14,6 +14,7 @@ using QtDataVisualization::QSurface3DSeries;
 
 class DataVisualDialog : public QDialog
 {
+    Q_OBJECT
 public:
     DataVisualDialog() = delete;
     DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *wg, QPoint st0, QPoint st1);

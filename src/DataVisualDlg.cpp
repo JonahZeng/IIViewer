@@ -22,11 +22,11 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
 
     graph->axisX()->setTitle("x");
     graph->axisZ()->setTitle("y");
-    graph->axisY()->setTitle("pix val");
+    graph->axisY()->setTitle(tr("pixel value"));
 
     QVBoxLayout *verticalLayout = new QVBoxLayout(this);
     QHBoxLayout *horizontalLayout = new QHBoxLayout();
-    QGroupBox *rgbGroup = new QGroupBox("selection mode");
+    QGroupBox *rgbGroup = new QGroupBox(tr("selection mode"));
     QHBoxLayout *rgbGroupLayout = new QHBoxLayout(rgbGroup);
     dispR = new QCheckBox("R");
     dispG = new QCheckBox("G");
@@ -36,21 +36,21 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
     rgbGroupLayout->addWidget(dispB);
     // rgbGroup->setLayout(rgbGroupLayout);
 
-    selectNoItem = new QRadioButton("none");
+    selectNoItem = new QRadioButton(tr("none"));
     selectNoItem->setChecked(true);
-    selectItem = new QRadioButton("item");
+    selectItem = new QRadioButton(tr("item"));
     selectItem->setChecked(false);
-    selectItemAndRow = new QRadioButton("itemAndRow");
+    selectItemAndRow = new QRadioButton(tr("itemAndRow"));
     selectItemAndRow->setChecked(false);
-    selectItemAndCol = new QRadioButton("itemAndCol");
+    selectItemAndCol = new QRadioButton(tr("itemAndCol"));
     selectItemAndCol->setChecked(false);
     selectionGroup.addButton(selectNoItem, 1);
     selectionGroup.addButton(selectItem, 2);
     selectionGroup.addButton(selectItemAndRow, 3);
     selectionGroup.addButton(selectItemAndCol, 4);
 
-    okBtn = new QPushButton("OK");
-    cancelBtn = new QPushButton("Cancel");
+    okBtn = new QPushButton(tr("OK"));
+    cancelBtn = new QPushButton(tr("Cancel"));
     verticalLayout->addWidget(container);
     horizontalLayout->addWidget(rgbGroup);
     horizontalLayout->addWidget(selectNoItem);
@@ -69,7 +69,7 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
 #endif
     // setLayout(verticalLayout);
     resize(1024, 720);
-    setWindowTitle("Data Visual");
+    setWindowTitle(tr("Data Visual"));
 
     QSurfaceDataProxy *seriesProxy0 = new QSurfaceDataProxy();
     series0 = new QSurface3DSeries(seriesProxy0);
