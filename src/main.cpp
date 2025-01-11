@@ -15,23 +15,21 @@ int main(int argc, char* argv[])
     // QCoreApplication::setOrganizationDomain("IIViewer.com");
     QCoreApplication::setApplicationName("IIViewer");
     app.setFont(QFont("Microsoft YaHei UI", 10));
-    // QString country = QLocale::countryToString(locale.country());
-    // qDebug() << "Language:" << language;
-    // qDebug() << "Country:" << country;
+
     QTranslator qt_translator; 
     QString qt_locale = QLocale::system().name();
-    qt_translator.load(QString("qt_%1").arg(qt_locale), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-    app.installTranslator(&qt_translator);
+    // qDebug() << "Language: " << qt_locale;
+    if(qt_translator.load(QString("qt_%1").arg(qt_locale), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+        app.installTranslator(&qt_translator);
 
     QTranslator translator;
-    QLocale locale; 
+    QLocale locale = QLocale::system();
     QString language = QLocale::languageToString(locale.language());
+    // qDebug() << "Language: " << language;
+    // qDebug() << "country: " << locale.country();
     if(language == QString("Chinese"))
     {
-        QDir appDir(QApplication::applicationDirPath());
-        QString zhTranslateFilePath = appDir.filePath("translations/IIViewer_zh.qm");
-        
-        if(translator.load(zhTranslateFilePath))
+        if(translator.load(QString("IIViewer_zh.qm"), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
             app.installTranslator(&translator);
     }
 

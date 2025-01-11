@@ -48,6 +48,13 @@ function(windeployqt target directory)
                 --no-opengl-sw
                 \"$<TARGET_FILE:${target}>\"
     )
+    # Run lrelease after build
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND "${_qt_bin_dir}/lrelease.exe"
+                ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
+                -qm 
+                $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
+    )
 
     # install(CODE ...) doesn't support generator expressions, but
     # file(GENERATE ...) does - store the path in a file
@@ -57,44 +64,31 @@ function(windeployqt target directory)
 
     # Before installation, run a series of commands that copy each of the Qt
     # runtime files to the appropriate directory for installation
-    install(CODE
-        "
-        file(READ \"${CMAKE_CURRENT_BINARY_DIR}/${target}_$<$<CONFIG:Release>:release>$<$<CONFIG:Debug>:debug>$<$<CONFIG:MinSizeRel>:minsizerel>$<$<CONFIG:RelWithDebInfo>:relwithdebinfo>_path\" _file)
-        execute_process(
-            COMMAND \"${_qt_bin_dir}/windeployqt.exe\"
-                    --dry-run
-                    --no-angle
-                    --no-opengl-sw
-                    --list mapping
-                    \${_file}
-            OUTPUT_VARIABLE _output
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        separate_arguments(_files WINDOWS_COMMAND \${_output})
-        while(_files)
-            list(GET _files 0 _src)
-            list(GET _files 1 _dest)
-            execute_process(
-                COMMAND \"${CMAKE_COMMAND}\" -E
-                    copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\"
-            )
-            list(REMOVE_AT _files 0 1)
-        endwhile()
-        "
-    )
-
-    # windeployqt doesn't work correctly with the system runtime libraries,
-    # so we fall back to one of CMake's own modules for copying them over
-    # set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-    # include(InstallRequiredSystemLibraries)
-    # foreach(lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-    #     get_filename_component(filename "${lib}" NAME)
-    #     add_custom_command(TARGET ${target} POST_BUILD
-    #         COMMAND "${CMAKE_COMMAND}" -E
-    #             copy_if_different "${lib}" \"$<TARGET_FILE_DIR:${target}>\"
+    # install(CODE
+    #     "
+    #     file(READ \"${CMAKE_CURRENT_BINARY_DIR}/${target}_$<$<CONFIG:Release>:release>$<$<CONFIG:Debug>:debug>$<$<CONFIG:MinSizeRel>:minsizerel>$<$<CONFIG:RelWithDebInfo>:relwithdebinfo>_path\" _file)
+    #     execute_process(
+    #         COMMAND \"${_qt_bin_dir}/windeployqt.exe\"
+    #                 --dry-run
+    #                 --no-angle
+    #                 --no-opengl-sw
+    #                 --list mapping
+    #                 \${_file}
+    #         OUTPUT_VARIABLE _output
+    #         OUTPUT_STRIP_TRAILING_WHITESPACE
     #     )
-    # endforeach()
-
+    #     separate_arguments(_files WINDOWS_COMMAND \${_output})
+    #     while(_files)
+    #         list(GET _files 0 _src)
+    #         list(GET _files 1 _dest)
+    #         execute_process(
+    #             COMMAND \"${CMAKE_COMMAND}\" -E
+    #                 copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/${directory}/\${_dest}\"
+    #         )
+    #         list(REMOVE_AT _files 0 1)
+    #     endwhile()
+    #     "
+    # )
 endfunction()
 
 mark_as_advanced(WINDEPLOYQT_EXECUTABLE)
