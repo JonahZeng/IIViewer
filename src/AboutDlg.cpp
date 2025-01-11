@@ -37,13 +37,13 @@ void AboutDlg::initUI()
 
     QHBoxLayout* hlayout = new QHBoxLayout();
     hlayout->addStretch(2);
-    QPushButton* ok_btn = new QPushButton("OK", this);
+    QPushButton* ok_btn = new QPushButton(tr("OK"), this);
     hlayout->addWidget(ok_btn);
 
     vlayout->addLayout(hlayout);
     setLayout(vlayout);
 
-    setWindowTitle("About");
+    setWindowTitle(tr("About"));
     resize(450, 300);
 
     connect(ok_btn, &QPushButton::clicked, this, &AboutDlg::accept);

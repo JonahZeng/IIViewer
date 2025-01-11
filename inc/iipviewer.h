@@ -96,6 +96,8 @@ public:
     std::array<QString, 2> openedFile;
     std::array<QDateTime, 2> openedFileLastModifiedTime;
     QFileSystemWatcher openedFileWatcher;
+    std::array<QDateTime, 2> lastFileWatcherNotifyTime; // on windows, rewrite file will notify 2 same message, record first messge path and time, ignore second message
+    std::array<QString, 2> lastFileWatcherNotifyPath;
     QScrollArea *masterScrollarea;
     AppSettings settings;
 };

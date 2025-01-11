@@ -27,6 +27,7 @@ constexpr int RIGHT_IMG_WIDGET = 1;
 
 class ImgInfoDlg : public QDialog
 {
+    // Q_OBJECT
 public:
     ImgInfoDlg(QWidget *parent)
         : QDialog(parent)
@@ -43,7 +44,7 @@ public:
         layout->addWidget(rightLabel);
         setLayout(layout);
         resize(400, 200);
-        setWindowTitle("image info");
+        setWindowTitle(tr("image info"));
     }
     ~ImgInfoDlg()
     {
@@ -100,6 +101,18 @@ public:
         {
             tmp += QString(" YUV420_NV21");
         }
+        else if (yt == YuvFileInfoDlg::YuvType::YUV420P_YU12)
+        {
+            tmp += QString(" YUV420P_YU12");
+        }
+        else if (yt == YuvFileInfoDlg::YuvType::YUV420P_YV12)
+        {
+            tmp += QString(" YUV420P_YV12");
+        }
+        else if (yt == YuvFileInfoDlg::YuvType::YUV400)
+        {
+            tmp += QString(" YUV400");
+        }
         if (left)
         {
             leftLabel->setText(filePath + tmp);
@@ -121,7 +134,9 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     originSize{QSize{0, 0}, QSize{0, 0}}, 
     openedFile{QString(), QString()},
     openedFileLastModifiedTime{QDateTime(), QDateTime()},
-    openedFileWatcher{}
+    openedFileWatcher{},
+    lastFileWatcherNotifyTime{QDateTime(), QDateTime()},
+    lastFileWatcherNotifyPath{QString(), QString()}
 {
     if (settings.loadSettingsFromFile())
     {
@@ -367,17 +382,14 @@ void IIPviewer::checkUpdate()
             //  qDebug() << currentVersion << newVersion << latestVersion;
              if (newVersion > currentVersion) {
                 QString text("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>");
-                QMessageBox msgBox(QMessageBox::Icon::Information, QString("find new version"), text, QMessageBox::StandardButton::Ok, this);
-                // msgBox.resize(200, 100);
-                // 使用 HTML 格式化文本 
-
-                // msgBox.setInformativeText(text);
+                QMessageBox msgBox(QMessageBox::Icon::Information, tr("find new version"), text, QMessageBox::StandardButton::Ok, this);
                 msgBox.exec();
+                // QMessageBox::information(this, tr("find new version"), tr("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>"), QMessageBox::StandardButton::Ok);
             } else { 
-                QMessageBox::information(this, QString("no new version"), QString("You are using the latest version"), QMessageBox::StandardButton::Ok);
+                QMessageBox::information(this, tr("no new version"), tr("You are using the latest version"), QMessageBox::StandardButton::Ok);
             } 
         } else {
-            QMessageBox::critical(this, QString("network error"), QString("Error checking for updates: %1").arg(reply->errorString()), QMessageBox::StandardButton::Ok);
+            QMessageBox::critical(this, tr("network error"), QString("Error checking for updates: %1").arg(reply->errorString()), QMessageBox::StandardButton::Ok);
         } 
         reply->deleteLater();
         manager->deleteLater();
@@ -391,10 +403,20 @@ void IIPviewer::openedFileChanged(const QString &filePath)
 {
     if(filePath == openedFile[LEFT_IMG_WIDGET])
     {
+        QDateTime curNotiyTime = QDateTime::currentDateTime();
+        if(filePath == lastFileWatcherNotifyPath[0] && lastFileWatcherNotifyTime[0].msecsTo(curNotiyTime) < 100)
+        {
+            return;
+        }
+        else
+        {
+            lastFileWatcherNotifyPath[0] = filePath;
+            lastFileWatcherNotifyTime[0] = curNotiyTime;
+        }
         auto curModifiedTime = QFileInfo(filePath).lastModified();
         if (curModifiedTime > openedFileLastModifiedTime[LEFT_IMG_WIDGET])
         {
-            auto resp = QMessageBox::information(this, QString("file changed"), QString("%1 has been changed, do you want to reload it").arg(filePath), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
+            auto resp = QMessageBox::information(this, tr("file changed"), QString("%1 has been changed, reload it?").arg(filePath), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
             if (resp == QMessageBox::StandardButton::Ok)
             {
                 reLoadFile(LEFT_IMG_WIDGET);
@@ -405,10 +427,20 @@ void IIPviewer::openedFileChanged(const QString &filePath)
     }
     else if(filePath == openedFile[RIGHT_IMG_WIDGET])
     {
+        QDateTime curNotiyTime = QDateTime::currentDateTime();
+        if(filePath == lastFileWatcherNotifyPath[1] && lastFileWatcherNotifyTime[1].msecsTo(curNotiyTime) < 100)
+        {
+            return;
+        }
+        else
+        {
+            lastFileWatcherNotifyPath[1] = filePath;
+            lastFileWatcherNotifyTime[1] = curNotiyTime;
+        }
         auto curModifiedTime = QFileInfo(filePath).lastModified();
         if (curModifiedTime > openedFileLastModifiedTime[RIGHT_IMG_WIDGET])
         {
-            auto resp = QMessageBox::information(this, QString("file changed"), QString("%1 has been changed, do you want to reload it").arg(filePath), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
+            auto resp = QMessageBox::information(this, tr("file changed"), QString("%1 has been changed, reload it?").arg(filePath), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
             if (resp == QMessageBox::StandardButton::Ok)
             {
                 reLoadFile(RIGHT_IMG_WIDGET);
@@ -462,7 +494,7 @@ void IIPviewer::restoreLeftImg()
 
 void IIPviewer::closeEvent(QCloseEvent *event)
 {
-    auto reply = QMessageBox::question(this, "Confirm", "Are you sure to quit ? ", QMessageBox::Yes | QMessageBox::No);
+    auto reply = QMessageBox::question(this, tr("Confirm"), tr("Are you sure to quit?"), QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
     if (reply == QMessageBox::Yes)
     {
         onCloseLeftFileAction();
@@ -505,7 +537,7 @@ void IIPviewer::setTitle()
 void IIPviewer::onOpenFileAction()
 {
     // QString path = settings.workPath;
-    auto fileName = QFileDialog::getOpenFileName(this, "open images", settings.workPath,
+    auto fileName = QFileDialog::getOpenFileName(this, tr("open images"), settings.workPath,
                                                  "Images files(*.jpg *JPG *.jpeg *JPEG *.png *PNG *.bmp *BMP);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;Pgm files(*.pgm *.PGM);;yuv files(*.yuv *.YUV);;All files(*.*)");
 
     if (fileName.isEmpty())
@@ -630,7 +662,7 @@ void IIPviewer::reLoadFile(int scrollArea)
         if (!reader.canRead())
         {
             QString t = QString("can not open ") + dstFn + QString(" as image!");
-            QMessageBox::information(this, "error", t, QMessageBox::StandardButton::Ok);
+            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
             return;
         }
 
@@ -640,7 +672,7 @@ void IIPviewer::reLoadFile(int scrollArea)
             {
                 if (reader.size() != originSize[1])
                 {
-                    QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                    QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                     return;
                 }
             }
@@ -656,7 +688,7 @@ void IIPviewer::reLoadFile(int scrollArea)
             {
                 if (reader.size() != originSize[0])
                 {
-                    QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                    QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                     return;
                 }
             }
@@ -686,7 +718,7 @@ void IIPviewer::reLoadFile(int scrollArea)
     }
     else
     {
-        QMessageBox::warning(this, "not support", "this format file not support yet!", QMessageBox::StandardButton::Ok);
+        QMessageBox::warning(this, tr("not support"), tr("this format file not support yet!"), QMessageBox::StandardButton::Ok);
         return;
     }
 }
@@ -700,7 +732,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
         if (!reader.canRead())
         {
             QString t = QString("can not open ") + fileName + QString(" as image!");
-            QMessageBox::information(this, "error", t, QMessageBox::StandardButton::Ok);
+            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
             return;
         }
 
@@ -710,7 +742,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
             {
                 if (reader.size() != originSize[1])
                 {
-                    QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                    QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                     return;
                 }
             }
@@ -726,7 +758,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
             {
                 if (reader.size() != originSize[0])
                 {
-                    QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                    QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                     return;
                 }
             }
@@ -756,7 +788,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
     }
     else
     {
-        QMessageBox::warning(this, "not support", "this format file not support yet!", QMessageBox::StandardButton::Ok);
+        QMessageBox::warning(this, tr("not support"), tr("this format file not support yet!"), QMessageBox::StandardButton::Ok);
         return;
     }
 }
@@ -824,7 +856,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     }
     else
     {
-        QMessageBox::warning(this, "error", "yuv bits > 16", QMessageBox::StandardButton::Ok);
+        QMessageBox::warning(this, tr("error"), tr("yuv bits > 16"), QMessageBox::StandardButton::Ok);
         return;
     }
 
@@ -888,7 +920,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     qint64 yuvFileSize = fileInfo.size();
     if (totalSize > yuvFileSize)
     {
-        QMessageBox::warning(this, "error", "yuv file size < your require", QMessageBox::StandardButton::Ok);
+        QMessageBox::warning(this, tr("error"), tr("yuv file size < your require"), QMessageBox::StandardButton::Ok);
         return;
     }
     if (scrollArea == LEFT_IMG_WIDGET)
@@ -897,7 +929,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         {
             if (QSize(width, height) != originSize[1])
             {
-                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
         }
@@ -912,7 +944,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         {
             if (QSize(width, height) != originSize[0])
             {
-                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
         }
@@ -1027,13 +1059,13 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     {
         if(width * height * bitDepth / 8 > rawFileSize)
         {
-            QMessageBox::information(this, "error", "raw file size < your input", QMessageBox::StandardButton::Ok);
+            QMessageBox::information(this, tr("error"), tr("raw file size < your input"), QMessageBox::StandardButton::Ok);
             return;
         }
     }
     else if ((qint64)pixSize * width * height > rawFileSize)
     {
-        QMessageBox::information(this, "error", "raw file size < your input", QMessageBox::StandardButton::Ok);
+        QMessageBox::information(this, tr("error"), tr("raw file size < your input"), QMessageBox::StandardButton::Ok);
         return;
     }
     if (scrollArea == LEFT_IMG_WIDGET)
@@ -1042,7 +1074,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         {
             if (QSize(width, height) != originSize[1])
             {
-                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
         }
@@ -1057,7 +1089,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         {
             if (QSize(width, height) != originSize[0])
             {
-                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
         }
@@ -1074,7 +1106,7 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
     if (!reader.canRead())
     {
         QString t = QString("can not open ") + fileName + QString(" as image!");
-        QMessageBox::information(this, "error", t, QMessageBox::StandardButton::Ok);
+        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
         return;
     }
     if (scrollArea == LEFT_IMG_WIDGET)
@@ -1083,7 +1115,7 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
         {
             if (reader.size() != originSize[1])
             {
-                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
         }
@@ -1098,7 +1130,7 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
         {
             if (reader.size() != originSize[0])
             {
-                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
         }
@@ -1115,7 +1147,7 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
     if (!reader.canRead())
     {
         QString t = QString("can not open ") + fileName + QString(" as image!");
-        QMessageBox::information(this, "error", t, QMessageBox::StandardButton::Ok);
+        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
         return;
     }
     if (scrollArea == LEFT_IMG_WIDGET)
@@ -1124,7 +1156,7 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
         {
             if (reader.size() != originSize[1])
             {
-                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
         }
@@ -1139,7 +1171,7 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
         {
             if (reader.size() != originSize[0])
             {
-                QMessageBox::warning(this, "warning", "image0 size != image1 size", QMessageBox::StandardButton::Ok);
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
         }
@@ -1709,7 +1741,7 @@ void IIPviewer::dropEvent(QDropEvent *event)
     }
     else
     {
-        QMessageBox::critical(this, "error", "At most 1 image!", QMessageBox::StandardButton::Ok);
+        QMessageBox::critical(this, tr("error"), tr("At most 1 image!"), QMessageBox::StandardButton::Ok);
     }
     emit updateExchangeBtnStatus();
     emit updateZoomLabelStatus();

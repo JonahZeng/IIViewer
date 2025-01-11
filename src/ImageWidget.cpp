@@ -838,8 +838,8 @@ void ImageWidget::paintEvent(QPaintEvent* event)
         painter.setPen(cusPen);
         painter.setRenderHint(QPainter::Antialiasing);
 
-        QRect appearRect = painter.boundingRect(QRect(0, 0, curSize.width(), curSize.height()), Qt::AlignmentFlag::AlignHCenter | Qt::AlignmentFlag::AlignVCenter, "drag image file here");
-        painter.drawText(appearRect, "drag image file here");
+        QRect appearRect = painter.boundingRect(QRect(0, 0, curSize.width(), curSize.height()), Qt::AlignmentFlag::AlignHCenter | Qt::AlignmentFlag::AlignVCenter, tr("drag image file here"));
+        painter.drawText(appearRect, tr("drag image file here"));
 
         painter.drawRoundedRect(QRect(10, 10, curSize.width() - 14, curSize.height() - 14), radius, radius);
         return;

@@ -1,5 +1,4 @@
 #include "IIPviewer_ui.h"
-
 #include <QBoxLayout>
 #include <QButtonGroup>
 #include <QGridLayout>
@@ -8,7 +7,6 @@
 #include <QMenuBar>
 #include <QValidator>
 #include <QStyleFactory>
-
 #include "iipviewer.h"
 
 Ui::IIPviewerUi::IIPviewerUi() : openFileLeftAction(nullptr), openFileRightAction(nullptr), exitAction(nullptr), 
@@ -27,8 +25,11 @@ Ui::IIPviewerUi::~IIPviewerUi() {}
 
 void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
 {
+    if(mainWindow->objectName().isEmpty()){
+        mainWindow->setObjectName(QString::fromUtf8("mainWindow"));
+    }
     QMenuBar *mbar = mainWindow->menuBar();
-    QMenu *fileMenu = mbar->addMenu("&File");
+    QMenu *fileMenu = mbar->addMenu(QApplication::translate("mainWindow", "&File", nullptr));
     toolBar = new QToolBar(mainWindow);
     toolBar->setAllowedAreas(Qt::ToolBarArea::TopToolBarArea);
     mainWindow->addToolBar(Qt::ToolBarArea::TopToolBarArea, toolBar);
@@ -36,22 +37,23 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     // QMenuBar::item:selected{background:rgb(128,128,128)}
     // QMenu{background:rgb(128,128,128)}
     // QMenu::item:selected{background-color:#654321;}");
-    openFileLeftAction = new QAction("Open files left", mainWindow);
+    openFileLeftAction = new QAction(QApplication::translate("mainWindow", "Open file in left", nullptr), mainWindow);
     openFileLeftAction->setIcon(QIcon(":/image/resource/file-earmark-left.png"));
     openFileLeftAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
-    openFileRightAction = new QAction("Open files right", mainWindow);
+    openFileRightAction = new QAction(QApplication::translate("mainWindow", "Open file in right", nullptr), mainWindow);
     openFileRightAction->setIcon(QIcon(":/image/resource/file-earmark-right.png"));
     openFileRightAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
-    reloadFileLeftAction = new QAction("Reload left image", mainWindow);
+    reloadFileLeftAction = new QAction(QApplication::translate("mainWindow", "Reload left image", nullptr), mainWindow);
     reloadFileLeftAction->setIcon(QIcon(":/image/resource/reload-left.png"));
-    reloadFileRightAction = new QAction("Reload right image", mainWindow);
+    reloadFileRightAction = new QAction(QApplication::translate("mainWindow", "Reload right image", nullptr), mainWindow);
     reloadFileRightAction->setIcon(QIcon(":/image/resource/reload-right.png"));
-    exitAction = new QAction("Exit", mainWindow);
+
+    exitAction = new QAction(QApplication::translate("mainWindow", "Exit", nullptr), mainWindow);
     exitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q));
-    closeLeftAction = new QAction("Close left image", mainWindow);
+    closeLeftAction = new QAction(QApplication::translate("mainWindow", "Close left image", nullptr), mainWindow);
     closeLeftAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L));
     closeLeftAction->setIcon(QIcon(":/image/resource/file-x.svg"));
-    closeRightAction = new QAction("Close right image", mainWindow);
+    closeRightAction = new QAction(QApplication::translate("mainWindow", "Close right image", nullptr), mainWindow);
     closeRightAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R));
     closeRightAction->setIcon(QIcon(":/image/resource/file-x.svg"));
     fileMenu->addAction(openFileLeftAction);
@@ -63,12 +65,12 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
-    QMenu *viewMenu = mbar->addMenu("&View");
-    QMenu *dockWidgetMenu = new QMenu("panal", mainWindow);
+    QMenu *viewMenu = mbar->addMenu(QApplication::translate("mainWindow", "&View", nullptr));
+    QMenu *dockWidgetMenu = new QMenu(QApplication::translate("mainWindow", "panal", nullptr), mainWindow);
     // dockWidgetMenu->setStyleSheet("QMenu{background:rgb(128,128,128)}QMenu::item:selected{background-color:#654321;}");
     viewMenu->addMenu(dockWidgetMenu);
-    dataAnalyseAction = new QAction("data analyse", mainWindow);
-    playListAction = new QAction("play list", mainWindow);
+    dataAnalyseAction = new QAction(QApplication::translate("mainWindow", "data analyse", nullptr), mainWindow);
+    playListAction = new QAction(QApplication::translate("mainWindow", "play list", nullptr), mainWindow);
     dockWidgetMenu->addAction(dataAnalyseAction);
     dockWidgetMenu->addAction(playListAction);
     dataAnalyseAction->setCheckable(true);
@@ -76,7 +78,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     playListAction->setCheckable(true);
     playListAction->setChecked(true);
 
-    QMenu *themeMenu = new QMenu("theme", mainWindow);
+    QMenu *themeMenu = new QMenu(QApplication::translate("mainWindow", "theme", nullptr), mainWindow);
     auto themeStrings = QStyleFactory::keys();
     for (auto &theme : themeStrings)
     {
@@ -95,26 +97,26 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
         themeMenu->addAction(themePtr);
     }
 
-    QMenu *settingMenu = mbar->addMenu("&Setting");
-    QMenu *toolBoxMenu = new QMenu("toolBox", mainWindow);
-    useRoiToolAction = new QAction("pen", mainWindow);
+    QMenu *settingMenu = mbar->addMenu(QApplication::translate("mainWindow", "&Setting", nullptr));
+    QMenu *mouseForMenu = new QMenu(QApplication::translate("mainWindow", "mouse for", nullptr), mainWindow);
+    useRoiToolAction = new QAction(QApplication::translate("mainWindow", "pen", nullptr), mainWindow);
     useRoiToolAction->setCheckable(true);
     useRoiToolAction->setChecked(false);
     useRoiToolAction->setIcon(QIcon(":/image/resource/bounding-box-circles.svg"));
-    useMoveToolAction = new QAction("move", mainWindow);
+    useMoveToolAction = new QAction(QApplication::translate("mainWindow", "move", nullptr), mainWindow);
     useMoveToolAction->setCheckable(true);
     useMoveToolAction->setChecked(false);
     useMoveToolAction->setIcon(QIcon(":image/resource/arrows-move.svg"));
-    toolBoxMenu->addAction(useMoveToolAction);
-    toolBoxMenu->addAction(useRoiToolAction);
-    settingMenu->addMenu(toolBoxMenu);
+    mouseForMenu->addAction(useMoveToolAction);
+    mouseForMenu->addAction(useRoiToolAction);
+    settingMenu->addMenu(mouseForMenu);
     settingMenu->addMenu(themeMenu);
 
-    QMenu *helpMenu = mbar->addMenu("&Help");
-    aboutThisAction = new QAction("About | Feedback", mainWindow);
+    QMenu *helpMenu = mbar->addMenu(QApplication::translate("mainWindow", "&Help", nullptr));
+    aboutThisAction = new QAction(QApplication::translate("mainWindow", "About | Feedback", nullptr), mainWindow);
     aboutThisAction->setIcon(QIcon(":/image/resource/info-circle.svg"));
     helpMenu->addAction(aboutThisAction);
-    checkUpdateAction = new QAction("Check update", mainWindow);
+    checkUpdateAction = new QAction(QApplication::translate("mainWindow", "Check update", nullptr), mainWindow);
     helpMenu->addAction(checkUpdateAction);
 
     toolBar->addAction(openFileLeftAction);
@@ -216,7 +218,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
 void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
 {
     dataAnalyseDockWgt = new QDockWidget(mainWindow);
-    dataAnalyseDockWgt->setWindowTitle("data analyse");
+    dataAnalyseDockWgt->setWindowTitle(QCoreApplication::translate("mainWindow", "data analysis", nullptr));
     dataAnalyseDockWgt->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     QWidget *toolBoxContainer = new QWidget();
     QVBoxLayout *vlayout = new QVBoxLayout();
@@ -228,7 +230,7 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     start_x_edit0 = new QLineEdit();
     start_x_edit0->setMaximumWidth(55);
     start_x_edit0->setValidator(imageSizeValidator);
-    QLabel *start_y_text = new QLabel("y:");
+    QLabel *start_y_text = new QLabel("start y:");
     start_y_edit0 = new QLineEdit();
     start_y_edit0->setMaximumWidth(55);
     start_y_edit0->setValidator(imageSizeValidator);
@@ -240,7 +242,7 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     end_x_edit0 = new QLineEdit();
     end_x_edit0->setMaximumWidth(55);
     end_x_edit0->setValidator(imageSizeValidator);
-    QLabel *end_y_text = new QLabel("y:");
+    QLabel *end_y_text = new QLabel("end y:");
     end_y_edit0 = new QLineEdit();
     end_y_edit0->setMaximumWidth(55);
     end_y_edit0->setValidator(imageSizeValidator);
@@ -254,8 +256,10 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     vline1->setFrameShape(QFrame::VLine);
     QVBoxLayout *syncLayout = new QVBoxLayout();
     syncRight = new QPushButton("--->");
+    syncRight->setToolTip(QCoreApplication::translate("mainWindow", "sync coordinate to right", nullptr));
     syncLeft = new QPushButton("<---");
-    clearPaintBtn = new QPushButton("clear");
+    syncLeft->setToolTip(QCoreApplication::translate("mainWindow", "sync coordinate to left", nullptr));
+    clearPaintBtn = new QPushButton(QCoreApplication::translate("mainWindow", "clear", nullptr));
     syncLayout->addWidget(syncRight);
     syncLayout->addWidget(syncLeft);
     syncLayout->addWidget(clearPaintBtn);
@@ -267,7 +271,7 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     start_x_edit1 = new QLineEdit();
     start_x_edit1->setMaximumWidth(55);
     start_x_edit1->setValidator(imageSizeValidator);
-    QLabel *start_y_text1 = new QLabel("y:");
+    QLabel *start_y_text1 = new QLabel("start y:");
     start_y_edit1 = new QLineEdit();
     start_y_edit1->setMaximumWidth(55);
     start_y_edit1->setValidator(imageSizeValidator);
@@ -279,7 +283,7 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     end_x_edit1 = new QLineEdit();
     end_x_edit1->setMaximumWidth(55);
     end_x_edit1->setValidator(imageSizeValidator);
-    QLabel *end_y_text1 = new QLabel("y:");
+    QLabel *end_y_text1 = new QLabel("end y:");
     end_y_edit1 = new QLineEdit();
     end_y_edit1->setMaximumWidth(55);
     end_y_edit1->setValidator(imageSizeValidator);
@@ -305,12 +309,12 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     vlayout->addWidget(h_line);
 
     QGridLayout *plot_btn_layout = new QGridLayout();
-    plot_rgb_contourf_line = new QPushButton("rgb contour/line");
-    plot_rgb_hist = new QPushButton("rgb hist");
-    plot_yuv_contourf_line = new QPushButton("yuv contour/line");
-    plot_yuv_hist = new QPushButton("yuv hist");
-    plot_hsv_contourf_line = new QPushButton("hsv contour/line");
-    plot_hsv_hist = new QPushButton("hsv hist");
+    plot_rgb_contourf_line = new QPushButton(QCoreApplication::translate("mainWindow", "rgb contour/line", nullptr));
+    plot_rgb_hist = new QPushButton(QCoreApplication::translate("mainWindow", "rgb hist", nullptr));
+    plot_yuv_contourf_line = new QPushButton(QCoreApplication::translate("mainWindow", "yuv contour/line", nullptr));
+    plot_yuv_hist = new QPushButton(QCoreApplication::translate("mainWindow", "yuv hist", nullptr));
+    plot_hsv_contourf_line = new QPushButton(QCoreApplication::translate("mainWindow", "hsv contour/line", nullptr));
+    plot_hsv_hist = new QPushButton(QCoreApplication::translate("mainWindow", "hsv hist", nullptr));
     plot_btn_layout->addWidget(plot_rgb_contourf_line, 0, 0, 1, 1);
     plot_btn_layout->addWidget(plot_rgb_hist, 0, 1, 1, 1);
     plot_btn_layout->addWidget(plot_yuv_contourf_line, 1, 0, 1, 1);
@@ -374,7 +378,7 @@ void Ui::IIPviewerUi::createDockWidget1(IIPviewer *mainWindow)
 {
     playListDockWgt = new QDockWidget(mainWindow);
     playListDockWgt->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    playListDockWgt->setWindowTitle("play list");
+    playListDockWgt->setWindowTitle(QApplication::translate("mainWindow", "play list", nullptr));
     // playListDockWgt.setFeatures(QDockWidget.DockWidgetClosable |
     // QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable |
     // QDockWidget.DockWidgetVerticalTitleBar)
