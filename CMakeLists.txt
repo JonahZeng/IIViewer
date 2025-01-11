@@ -195,6 +195,22 @@ if(WIN32)
     # Ensure the Qt runtime libraries are installed
     include(windeployqt)
     windeployqt(${PROJECT_NAME} "bin")
+elseif(UNIX)
+    set(_qm_translation_path "")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/translations)
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/translations)
+    endif()
+    if(NOT EXISTS ${_qm_translation_path})
+        file(MAKE_DIRECTORY ${_qm_translation_path})
+    endif()
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND "lrelease"
+        ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
+        -qm 
+        ${_qm_translation_path}/IIViewer_zh.qm
+    )
 endif()
 
 include(InstallRequiredSystemLibraries)
@@ -223,6 +239,13 @@ if(WIN32)
         file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/iconengines FILES \${iconengines_dlls})
         file(GLOB bearer_dlls ${BIN_OUTPUT_DIRECTORY}/bearer/*.dll)
         file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/bearer FILES \${bearer_dlls})
+    "
+    )
+elseif(UNIX)
+    install(CODE
+    "
+        file(GLOB qm_files ${BIN_OUTPUT_DIRECTORY}/translations/*.qm)
+        file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/translations FILES \${qm_files})
     "
     )
 endif()

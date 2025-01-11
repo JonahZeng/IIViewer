@@ -25,11 +25,12 @@ int main(int argc, char* argv[])
     QTranslator translator;
     QLocale locale = QLocale::system();
     QString language = QLocale::languageToString(locale.language());
-    // qDebug() << "Language: " << language;
-    // qDebug() << "country: " << locale.country();
+  
     if(language == QString("Chinese"))
     {
-        if(translator.load(QString("IIViewer_zh.qm"), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+        QDir appDir(QApplication::applicationDirPath());
+        QString zhTranslateFilePath = appDir.filePath("translations/IIViewer_zh.qm");
+        if(translator.load(zhTranslateFilePath))
             app.installTranslator(&translator);
     }
 

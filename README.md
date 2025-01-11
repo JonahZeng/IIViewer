@@ -1,6 +1,6 @@
 <h1 align="center">IIViewer</h1>
 <p align="center">
-    <strong>A professional tool which designed for image signal process developer</strong>
+    <strong>A thoughtful tool which designed for image signal process developer</strong>
 </p>
 <p align="center">
     <img src="./icon/64.png" alt="IIViewer icon" width="64"/>
@@ -21,7 +21,11 @@ this repo is designed for open and view ISP intermediate image. we support these
 
 ## Usage
 download it from [release page](https://github.com/JonahZeng/IIViewer/releases), start this app on your PC, you can see this if there is no any unexpect error:
+
 ![main-ui](./doc/image/main-ui.png)
+
+![ubuntu-zh-ui](./doc/image/ubuntu-zh.png)
+
 as its tips, drag any supported format image to dash rectangle，it will display the image context. when you zoom in to 96X by scroll your mouse wheel, you will see every pixel's real value.
 that's all.
 
