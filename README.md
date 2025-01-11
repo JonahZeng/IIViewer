@@ -96,22 +96,13 @@ for deb:
 ```bash
 cpack -G DEB -C Release
 ```
-for AppImage, you should download [linuxdeployqt](https://github.com/probonopd/linuxdeployqt/releases), and create one .desktop and .png file in `bin/Release` directory, here are the desktop file context:
-```text
-[Desktop Entry]
-Type=Application
-Name=IIViewer
-Exec=AppRun %F
-Icon=default
-Comment=isp develop image viewer
-Terminal=false
-Categories=Development;
-```
-download and execute linuxdeployqt:
+for AppImage, you should download [linuxdeployqt](https://github.com/probonopd/linuxdeployqt/releases) first, and then prepare a .desktop and a icon file. a default icon and desktop file are placed in `icon` directory, you can simplely copy them to bin directory and cexecute linuxdeployqt:
 ```bash
+cp ./icon/default.png ./bin/Release/ 
+cp ./icon/default.desktop ./bin/Release/ 
 wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
 chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
-./linuxdeployqt-continuous-x86_64.AppImage {your-build-IIViewer-bin-file-path} -verbose=2 -bundle-non-qt-libs -appimage
+./linuxdeployqt-continuous-x86_64.AppImage ./bin/Release/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
 ```
 
 ### macos
