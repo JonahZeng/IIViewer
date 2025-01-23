@@ -250,14 +250,14 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     paintPosLayout0->addWidget(end_x_edit0, 2, 1, 1, 1);
     paintPosLayout0->addWidget(end_y_text, 3, 0, 1, 1);
     paintPosLayout0->addWidget(end_y_edit0, 3, 1, 1, 1);
-    paintOk0 = new QPushButton("ok");
-    paintPosLayout0->addWidget(paintOk0, 4, 1, 1, 1);
+    paintOk0 = new QPushButton(QCoreApplication::translate("mainWindow", "ok", nullptr));
+    paintPosLayout0->addWidget(paintOk0, 4, 0, 1, 2);
     QFrame *vline1 = new QFrame();
     vline1->setFrameShape(QFrame::VLine);
     QVBoxLayout *syncLayout = new QVBoxLayout();
-    syncRight = new QPushButton("--->");
+    syncRight = new QPushButton("-->");
     syncRight->setToolTip(QCoreApplication::translate("mainWindow", "sync coordinate to right", nullptr));
-    syncLeft = new QPushButton("<---");
+    syncLeft = new QPushButton("<--");
     syncLeft->setToolTip(QCoreApplication::translate("mainWindow", "sync coordinate to left", nullptr));
     clearPaintBtn = new QPushButton(QCoreApplication::translate("mainWindow", "clear", nullptr));
     syncLayout->addWidget(syncRight);
@@ -292,8 +292,8 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     paintPosLayout1->addWidget(end_y_text1, 3, 0, 1, 1);
     paintPosLayout1->addWidget(end_y_edit1, 3, 1, 1, 1);
 
-    paintOk1 = new QPushButton("ok");
-    paintPosLayout1->addWidget(paintOk1, 4, 1, 1, 1);
+    paintOk1 = new QPushButton(QCoreApplication::translate("mainWindow", "ok", nullptr));
+    paintPosLayout1->addWidget(paintOk1, 4, 0, 1, 2);
 
     QHBoxLayout *paintPosLayout = new QHBoxLayout();
     paintPosLayout->addLayout(paintPosLayout0);
