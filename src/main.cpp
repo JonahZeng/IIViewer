@@ -16,6 +16,9 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("IIViewer");
     app.setFont(QFont("Microsoft YaHei UI", 10));
 
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
     QTranslator qt_translator; 
     QString qt_locale = QLocale::system().name();
     // qDebug() << "Language: " << qt_locale;

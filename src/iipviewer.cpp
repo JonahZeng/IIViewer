@@ -136,7 +136,8 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     openedFileLastModifiedTime{QDateTime(), QDateTime()},
     openedFileWatcher{},
     lastFileWatcherNotifyTime{QDateTime(), QDateTime()},
-    lastFileWatcherNotifyPath{QString(), QString()}
+    lastFileWatcherNotifyPath{QString(), QString()},
+    lastFileWatcherNotifyIsWaitProcess{false, false}
 {
     if (settings.loadSettingsFromFile())
     {
@@ -404,7 +405,7 @@ void IIPviewer::openedFileChanged(const QString &filePath)
     if(filePath == openedFile[LEFT_IMG_WIDGET])
     {
         QDateTime curNotiyTime = QDateTime::currentDateTime();
-        if(filePath == lastFileWatcherNotifyPath[0] && lastFileWatcherNotifyTime[0].msecsTo(curNotiyTime) < 100)
+        if(filePath == lastFileWatcherNotifyPath[0] && (lastFileWatcherNotifyTime[0].msecsTo(curNotiyTime) < 100 || lastFileWatcherNotifyIsWaitProcess[0]))
         {
             return;
         }
@@ -416,19 +417,21 @@ void IIPviewer::openedFileChanged(const QString &filePath)
         auto curModifiedTime = QFileInfo(filePath).lastModified();
         if (curModifiedTime > openedFileLastModifiedTime[LEFT_IMG_WIDGET])
         {
-            auto resp = QMessageBox::information(this, tr("file changed"), QString("%1 has been changed, reload it?").arg(filePath), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
+            lastFileWatcherNotifyIsWaitProcess[0] = true;
+            auto resp = QMessageBox::information(this, tr("file changed"), filePath + tr(" has been changed, reload it?"), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
             if (resp == QMessageBox::StandardButton::Ok)
             {
                 reLoadFile(LEFT_IMG_WIDGET);
                 masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
                 openedFileLastModifiedTime[LEFT_IMG_WIDGET] = curModifiedTime;
             }
+            lastFileWatcherNotifyIsWaitProcess[0] = false;
         }
     }
     else if(filePath == openedFile[RIGHT_IMG_WIDGET])
     {
         QDateTime curNotiyTime = QDateTime::currentDateTime();
-        if(filePath == lastFileWatcherNotifyPath[1] && lastFileWatcherNotifyTime[1].msecsTo(curNotiyTime) < 100)
+        if(filePath == lastFileWatcherNotifyPath[1] && (lastFileWatcherNotifyTime[1].msecsTo(curNotiyTime) < 100 || lastFileWatcherNotifyIsWaitProcess[1]))
         {
             return;
         }
@@ -440,13 +443,15 @@ void IIPviewer::openedFileChanged(const QString &filePath)
         auto curModifiedTime = QFileInfo(filePath).lastModified();
         if (curModifiedTime > openedFileLastModifiedTime[RIGHT_IMG_WIDGET])
         {
-            auto resp = QMessageBox::information(this, tr("file changed"), QString("%1 has been changed, reload it?").arg(filePath), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
+            lastFileWatcherNotifyIsWaitProcess[1] = true;
+            auto resp = QMessageBox::information(this, tr("file changed"), filePath + tr(" has been changed, reload it?"), QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::No);
             if (resp == QMessageBox::StandardButton::Ok)
             {
                 reLoadFile(RIGHT_IMG_WIDGET);
                 masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
                 openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = curModifiedTime;
             }
+            lastFileWatcherNotifyIsWaitProcess[1] = false;
         }
     }
     else
@@ -738,6 +743,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
 
         if (scrollArea == LEFT_IMG_WIDGET)
         {
+            onCloseLeftFileAction();
             if (!openedFile[1].isEmpty())
             {
                 if (reader.size() != originSize[1])
@@ -754,6 +760,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
         }
         else if (scrollArea == RIGHT_IMG_WIDGET)
         {
+            onCloseRightFileAction();
             if (openedFile[0].length() > 0)
             {
                 if (reader.size() != originSize[0])
@@ -925,6 +932,10 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     }
     if (scrollArea == LEFT_IMG_WIDGET)
     {
+        if(!reload)
+        {
+            onCloseLeftFileAction();
+        }
         if (!openedFile[1].isEmpty())
         {
             if (QSize(width, height) != originSize[1])
@@ -940,6 +951,10 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
+        if(!reload)
+        {
+            onCloseRightFileAction();
+        }
         if (!openedFile[0].isEmpty())
         {
             if (QSize(width, height) != originSize[0])
@@ -989,7 +1004,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         dlg.ui.BitDepthComboBox->setCurrentText(QString::asprintf("%d", settings.raw_bitDepth));
     else
         dlg.ui.BitDepthComboBox->setCurrentText(QString::asprintf("%d-comp", settings.raw_bitDepth));
-    dlg.ui.BitDepthComboBox->setCurrentText(QString::asprintf("%d", settings.raw_bitDepth));
+
     dlg.ui.WidthLineEdit->setText(QString::asprintf("%d", settings.raw_width));
     dlg.ui.HeightLineEdit->setText(QString::asprintf("%d", settings.raw_height));
     int reply = dlg.exec();
@@ -1070,6 +1085,10 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     }
     if (scrollArea == LEFT_IMG_WIDGET)
     {
+        if(!reload)
+        {
+            onCloseLeftFileAction();
+        }
         if (!openedFile[1].isEmpty())
         {
             if (QSize(width, height) != originSize[1])
@@ -1085,6 +1104,10 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
+        if(!reload)
+        {
+            onCloseRightFileAction();
+        }
         if (!openedFile[0].isEmpty())
         {
             if (QSize(width, height) != originSize[0])
@@ -1111,6 +1134,10 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
     }
     if (scrollArea == LEFT_IMG_WIDGET)
     {
+        if(!reload)
+        {
+            onCloseLeftFileAction();
+        }
         if (!openedFile[1].isEmpty())
         {
             if (reader.size() != originSize[1])
@@ -1126,6 +1153,10 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
+        if(!reload)
+        {
+            onCloseRightFileAction();
+        }
         if (openedFile[0].length() > 0)
         {
             if (reader.size() != originSize[0])
@@ -1152,6 +1183,10 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
     }
     if (scrollArea == LEFT_IMG_WIDGET)
     {
+        if(!reload)
+        {
+            onCloseLeftFileAction();
+        }
         if (!openedFile[1].isEmpty())
         {
             if (reader.size() != originSize[1])
@@ -1167,6 +1202,10 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
+        if(!reload)
+        {
+            onCloseRightFileAction();
+        }
         if (openedFile[0].length() > 0)
         {
             if (reader.size() != originSize[0])
@@ -1717,8 +1756,7 @@ void IIPviewer::dropEvent(QDropEvent *event)
             auto fileName0 = urlList[0].toLocalFile();
             if (fileName0.isEmpty())
                 return;
-            onCloseLeftFileAction(); // 这里删除关闭文件监控
-            loadFile(fileName0, LEFT_IMG_WIDGET);
+            loadFile(fileName0, LEFT_IMG_WIDGET); // 这里删除关闭文件监控
             setTitle();
             masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
             openedFileWatcher.addPath(fileName0); // 添加新文件监控
@@ -1729,8 +1767,7 @@ void IIPviewer::dropEvent(QDropEvent *event)
             auto fileName0 = urlList[0].toLocalFile();
             if (fileName0.isEmpty())
                 return;
-            onCloseRightFileAction(); // 这里删除关闭文件监控
-            loadFile(fileName0, RIGHT_IMG_WIDGET);
+            loadFile(fileName0, RIGHT_IMG_WIDGET); // 这里删除关闭文件监控
             setTitle();
             masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
             openedFileWatcher.addPath(fileName0); // 添加新文件监控

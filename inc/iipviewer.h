@@ -98,6 +98,7 @@ public:
     QFileSystemWatcher openedFileWatcher;
     std::array<QDateTime, 2> lastFileWatcherNotifyTime; // on windows, rewrite file will notify 2 same message, record first messge path and time, ignore second message
     std::array<QString, 2> lastFileWatcherNotifyPath;
+    std::array<bool, 2> lastFileWatcherNotifyIsWaitProcess;
     QScrollArea *masterScrollarea;
     AppSettings settings;
 };

@@ -32,7 +32,7 @@ that's all.
 ## Build from source code
 ### windows(AMD64)
 #### prepare
-1. install cmake
+1. install cmake(>=3.20)
 2. install MSVC or MinGW64 (should support **C++17 at least**)
 3. build and install OpenSSL, here is offical [repo](https://github.com/openssl/openssl) and build [guide](https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md), once you build and install it successed, copy its install dir to this git repo **thirdparty** directory. 
 
@@ -75,14 +75,15 @@ cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR
 cmake --build . --config Release
 ```
 
-### linux(amd64)
+### linux(amd64 & arm64)
 #### prepare
-install cmake, gcc, openssl and Qt5 
+install gcc, openssl and Qt5 
 ```bash
 sudo apt install cmake build-essential libssl-dev qt5-default libqt5datavisualization5-dev qttools5-dev-tools
 ```
+install cmake by download from [newest release ](https://github.com/Kitware/CMake/releases) or build from source.
 #### build
-these build steps had been tested on ubuntu 20.04(cmake 3.16, Qt5.12.8, gcc 9.4.0)
+these build steps had been tested on ubuntu 20.04(cmake 3.31, Qt5.12.8, gcc 9.4.0)
 ```bash
 git clone https://github.com/JonahZeng/IIViewer.git
 cd IIViewer
