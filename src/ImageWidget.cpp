@@ -1060,17 +1060,28 @@ void ImageWidget::setPixmap(QString& img) // jpg, jpeg, bmp, png, pnm, pgm
         input_f.close();
 
         unsigned char* bufferShow = pixMap->bits();
-        qint64 total_cnt = width * height;
+        int bytesperline = pixMap->bytesPerLine();
 
-        if (pixSize == 1) {
-            for (qint64 i = 0; i < total_cnt; i++) {
-                bufferShow[i] = buffer[i];
+        if (pixSize == 1)
+        {
+            for (qint64 i = 0; i < height; i++)
+            {
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * bytesperline + j] = buffer[i * width + j];
+                }
             }
-        } else if (pixSize == 2) {
-            unsigned short* buffer_us = (unsigned short*)buffer;
-            for (qint64 i = 0; i < total_cnt; i++) {
-                buffer_us[i] = ((buffer_us[i] & 0xff00) >> 8) | ((buffer_us[i] & 0x00ff) << 8);
-                bufferShow[i] = buffer_us[i] >> (bitDepth - 8);
+        }
+        else if (pixSize == 2)
+        {
+            unsigned short *buffer_us = (unsigned short *)buffer;
+            for (qint64 i = 0; i < height; i++)
+            {
+                for (qint64 j = 0; j < width; j++)
+                {
+                    buffer_us[i * width + j] = ((buffer_us[i * width + j] & 0xff00) >> 8) | ((buffer_us[i * width + j] & 0x00ff) << 8);
+                    bufferShow[i * bytesperline + j] = buffer_us[i * width + j] >> (bitDepth - 8);
+                }
             }
         }
 
@@ -1138,30 +1149,70 @@ void ImageWidget::setPixmap(QString& img) // jpg, jpeg, bmp, png, pnm, pgm
         releaseBuffer();
 
         unsigned char* buffer = nullptr;
-        if (isGray) {
+        if (isGray)
+        {
             buffer = new unsigned char[pixSize * width * height];
             pixMap = new QImage(width, height, QImage::Format_Grayscale8);
-            input_f.read((char*)buffer, qint64(pixSize) * width * height);
+            input_f.read((char *)buffer, qint64(pixSize) * width * height);
             input_f.close();
-        } else {
+
+            int bytesperline = pixMap->bytesPerLine();
+            unsigned char *bufferShow = pixMap->bits();
+
+            if (pixSize == 1)
+            {
+                for (qint64 i = 0; i < height; i++)
+                {
+                    for (qint64 j = 0; j < width; j++)
+                    {
+                        bufferShow[i * bytesperline + j] = buffer[i * width + j];
+                    }
+                }
+            }
+            else if (pixSize == 2)
+            {
+                unsigned short *buffer_us = (unsigned short *)buffer;
+                for (qint64 i = 0; i < height; i++)
+                {
+                    for (qint64 j = 0; j < width; j++)
+                    {
+                        buffer_us[i * width + j] = ((buffer_us[i * width + j] & 0xff00) >> 8) | ((buffer_us[i * width + j] & 0x00ff) << 8);
+                        bufferShow[i * bytesperline + j] = buffer_us[i * width + j] >> (bitDepth - 8);
+                    }
+                }
+            }
+        }
+        else
+        {
             buffer = new unsigned char[pixSize * width * height * 3];
             pixMap = new QImage(width, height, QImage::Format_RGB888);
-            input_f.read((char*)buffer, qint64(pixSize) * width * height * 3);
+            input_f.read((char *)buffer, qint64(pixSize) * width * height * 3);
             input_f.close();
-        }
 
-        unsigned char* bufferShow = pixMap->bits();
-        qint64 total_cnt = width * height * (isGray ? 1 : 3);
-
-        if (pixSize == 1) {
-            for (qint64 i = 0; i < total_cnt; i++) {
-                bufferShow[i] = buffer[i];
+            int bytesperline = pixMap->bytesPerLine();
+            unsigned char *bufferShow = pixMap->bits();
+ 
+            if (pixSize == 1)
+            {
+                for (qint64 i = 0; i < height; i++)
+                {
+                    for (qint64 j = 0; j < width * 3; j++)
+                    {
+                        bufferShow[i * bytesperline + j] = buffer[i * width * 3 + j];
+                    }
+                }
             }
-        } else if (pixSize == 2) {
-            unsigned short* buffer_us = (unsigned short*)buffer;
-            for (qint64 i = 0; i < total_cnt; i++) {
-                buffer_us[i] = ((buffer_us[i] & 0xff00) >> 8) | ((buffer_us[i] & 0x00ff) << 8);
-                bufferShow[i] = buffer_us[i] >> (bitDepth - 8);
+            else if (pixSize == 2)
+            {
+                unsigned short *buffer_us = (unsigned short *)buffer;
+                for (qint64 i = 0; i < height; i++)
+                {
+                    for (qint64 j = 0; j < width * 3; j++)
+                    {
+                        buffer_us[i * width * 3 + j] = ((buffer_us[i * width * 3 + j] & 0xff00) >> 8) | ((buffer_us[i * width * 3 + j] & 0x00ff) << 8);
+                        bufferShow[i * bytesperline + j] = buffer_us[i * width * 3 + j] >> (bitDepth - 8);
+                    }
+                }
             }
         }
 
@@ -1296,11 +1347,15 @@ void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, R
             delete[] compact_buffer;
     }
 
+    int buffer_show_width = pixMap->bytesPerLine();
     if (pixSize == 1)
     {
-        for (qint64 i = 0; i < width * height; i++)
+        for (qint64 i = 0; i <height; i++)
         {
-            bufferShow[i] = buffer[i];
+            for (qint64 j = 0; j <width; j++)
+            {
+                bufferShow[i * buffer_show_width + j] = buffer[i * width + j];
+            }
         }
     }
     else if (pixSize == 2)
@@ -1308,16 +1363,22 @@ void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, R
         unsigned short *buffer_us = (unsigned short *)buffer;
         if (order == RawFileInfoDlg::RAW_BIG_ENDIAN)
         {
-            for (qint64 i = 0; i < width * height; i++)
+            for (qint64 i = 0; i < height; i++)
             {
-                bufferShow[i] = CLIP3(((buffer_us[i] & 0x00ff << 8) | (buffer_us[i] & 0xff00 >> 8)) >> (bitDepth - 8), 0, 255);
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * buffer_show_width + j] = CLIP3(((buffer_us[i * width + j] & 0x00ff << 8) | (buffer_us[i * width + j] & 0xff00 >> 8)) >> (bitDepth - 8), 0, 255);
+                }
             }
         }
         else
         {
-            for (qint64 i = 0; i < width * height; i++)
+            for (qint64 i = 0; i < height; i++)
             {
-                bufferShow[i] = CLIP3(buffer_us[i] >> (bitDepth - 8), 0, 255);
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * buffer_show_width + j] = CLIP3(buffer_us[i * width + j] >> (bitDepth - 8), 0, 255);
+                }
             }
         }
     }
@@ -1326,16 +1387,22 @@ void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, R
         unsigned int *buffer_ui = (unsigned int *)buffer;
         if (order == RawFileInfoDlg::RAW_BIG_ENDIAN)
         {
-            for (qint64 i = 0; i < width * height; i++)
+            for (qint64 i = 0; i < height; i++)
             {
-                bufferShow[i] = CLIP3(((buffer_ui[i] & 0x000000ff << 24) | (buffer_ui[i] & 0x0000ff00 << 8) | (buffer_ui[i] & 0x00ff0000 >> 8) | (buffer_ui[i] & 0xff000000 >> 24)) >> (bitDepth - 8), 0, 255);
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * buffer_show_width + j] = CLIP3(((buffer_ui[i * width + j] & 0x000000ff << 24) | (buffer_ui[i * width + j] & 0x0000ff00 << 8) | (buffer_ui[i * width + j] & 0x00ff0000 >> 8) | (buffer_ui[i * width + j] & 0xff000000 >> 24)) >> (bitDepth - 8), 0, 255);
+                }
             }
         }
         else
         {
-            for (qint64 i = 0; i < width * height; i++)
+            for (qint64 i = 0; i < height; i++)
             {
-                bufferShow[i] = CLIP3(buffer_ui[i] >> (bitDepth - 8), 0, 255);
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * buffer_show_width + j] = CLIP3(buffer_ui[i * width + j] >> (bitDepth - 8), 0, 255);
+                }
             }
         }
     }
@@ -1357,23 +1424,23 @@ void ImageWidget::setPixmap(QString& img, RawFileInfoDlg::BayerPatternType by, R
     repaint();
 }
 
-static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, int bitDepth, int width, int height, YuvFileInfoDlg::YuvType tp)
+static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, int bitDepth, int width, int height, YuvFileInfoDlg::YuvType tp, int wholepixperline)
 {
     if (tp == YuvFileInfoDlg::YuvType::YUV444_INTERLEAVE) {
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width * 3 + j * 3 + 0] >> (bitDepth - 8);
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 3 + j * 3 + 1] >> (bitDepth - 8);
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 3 + j * 3 + 2] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width * 3 + j * 3 + 0] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 3 + j * 3 + 1] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 3 + j * 3 + 2] >> (bitDepth - 8);
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width * 3 + j * 3 + 0];
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[i * width * 3 + j * 3 + 1];
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[i * width * 3 + j * 3 + 2];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width * 3 + j * 3 + 0];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 3 + j * 3 + 1];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 3 + j * 3 + 2];
                 }
             }
         }
@@ -1381,17 +1448,17 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height * 2 + i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height * 2 + i * width + j] >> (bitDepth - 8);
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[width * height + i * width + j];
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[width * height * 2 + i * width + j];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + i * width + j];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height * 2 + i * width + j];
                 }
             }
         }
@@ -1399,26 +1466,26 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8);
                     if (j % 2 == 0) {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8); // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 2] >> (bitDepth - 8); // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 2] >> (bitDepth - 8); // v
                     } else {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 - 2] >> (bitDepth - 8); // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8); // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 - 2] >> (bitDepth - 8); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8); // v
                     }
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width * 2 + j * 2 + 1];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width * 2 + j * 2 + 1];
                     if (j % 2 == 0) {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2]; // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 2]; // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2]; // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 2]; // v
                     } else {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 - 2]; // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2]; // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 - 2]; // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2]; // v
                     }
                 }
             }
@@ -1427,26 +1494,26 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8);
                     if (j % 2 == 0) {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8); // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 3] >> (bitDepth - 8); // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 3] >> (bitDepth - 8); // v
                     } else {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 - 1] >> (bitDepth - 8); // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8); // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 - 1] >> (bitDepth - 8); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8); // v
                     }
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width * 2 + j * 2];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width * 2 + j * 2];
                     if (j % 2 == 0) {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 + 1]; // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 3]; // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 + 1]; // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 3]; // v
                     } else {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 - 1]; // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 1]; // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 - 1]; // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 1]; // v
                     }
                 }
             }
@@ -1455,26 +1522,26 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
                     if (j % 2 == 0) {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8); // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j + 1] >> (bitDepth - 8); // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j + 1] >> (bitDepth - 8); // v
                     } else {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j - 1] >> (bitDepth - 8); // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8); // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j - 1] >> (bitDepth - 8); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8); // v
                     }
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width + j];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
                     if (j % 2 == 0) {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j]; // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j + 1]; // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j]; // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j + 1]; // v
                     } else {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j - 1]; // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j]; // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j - 1]; // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j]; // v
                     }
                 }
             }
@@ -1483,26 +1550,26 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
                     if (j % 2 == 0) {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j + 1] >> (bitDepth - 8); // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8); // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j + 1] >> (bitDepth - 8); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8); // v
                     } else {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8); // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j - 1] >> (bitDepth - 8); // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width + j - 1] >> (bitDepth - 8); // v
                     }
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width + j];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
                     if (j % 2 == 0) {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j + 1]; // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j]; // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j + 1]; // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j]; // v
                     } else {
-                        rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j]; // u
-                        rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j - 1]; // v
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j]; // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j - 1]; // v
                     }
                 }
             }
@@ -1511,17 +1578,17 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
                 }
             }
         }
@@ -1529,17 +1596,17 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t*)yuvBuf)[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t*)yuvBuf)[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = yuvBuf[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
                 }
             }
         }
@@ -1547,17 +1614,17 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         if (bitDepth > 8 && bitDepth <= 16) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = rgb888Buf[i * width * 3 + j * 3 + 0];
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = rgb888Buf[i * width * 3 + j * 3 + 0];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t*)yuvBuf)[i * width + j] >> (bitDepth - 8);
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
                 }
             }
         } else if (bitDepth <= 8) {
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rgb888Buf[i * width * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    rgb888Buf[i * width * 3 + j * 3 + 2] = rgb888Buf[i * width * 3 + j * 3 + 0];
-                    rgb888Buf[i * width * 3 + j * 3 + 1] = rgb888Buf[i * width * 3 + j * 3 + 0];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
                 }
             }
         }
@@ -1565,16 +1632,16 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            short y = rgb888Buf[i * width * 3 + j * 3 + 0];
-            short cb = (short)(rgb888Buf[i * width * 3 + j * 3 + 1]) - 128;
-            short cr = (short)(rgb888Buf[i * width * 3 + j * 3 + 2]) - 128;
+            short y = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
+            short cb = (short)(rgb888Buf[i * wholepixperline * 3 + j * 3 + 1]) - 128;
+            short cr = (short)(rgb888Buf[i * wholepixperline * 3 + j * 3 + 2]) - 128;
             short r = y + 1.403f * cr;
             short g = y - 0.714f * cr - 0.344f * cb;
             short b = y + 1.773f * cb;
 
-            rgb888Buf[i * width * 3 + j * 3 + 0] = CLIP3(r, 0, 255);
-            rgb888Buf[i * width * 3 + j * 3 + 1] = CLIP3(g, 0, 255);
-            rgb888Buf[i * width * 3 + j * 3 + 2] = CLIP3(b, 0, 255);
+            rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = CLIP3(r, 0, 255);
+            rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = CLIP3(g, 0, 255);
+            rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = CLIP3(b, 0, 255);
         }
     }
 }
@@ -1597,6 +1664,7 @@ void ImageWidget::setPixmap(QString& img, YuvFileInfoDlg::YuvType tp, int bitDep
 
     unsigned char* buffer = new unsigned char[total_size];
     pixMap = new QImage(width, height, QImage::Format_RGB888);
+    int entirpixperline = pixMap->bytesPerLine() / 3;
     unsigned char* bufferShow = pixMap->bits();
 
     QFile yuvFile(img);
@@ -1604,7 +1672,7 @@ void ImageWidget::setPixmap(QString& img, YuvFileInfoDlg::YuvType tp, int bitDep
     yuvFile.read((char*)buffer, total_size);
     yuvFile.close();
 
-    convertYUV2RGB888(buffer, bufferShow, bitDepth, width, height, tp);
+    convertYUV2RGB888(buffer, bufferShow, bitDepth, width, height, tp, entirpixperline);
 
     rawDataPtr = nullptr;
     rawDataBit = 0;
