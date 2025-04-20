@@ -109,8 +109,11 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     useMoveToolAction->setIcon(QIcon(":image/resource/arrows-move.svg"));
     mouseForMenu->addAction(useMoveToolAction);
     mouseForMenu->addAction(useRoiToolAction);
+
+    sysOptionAction = new QAction(QApplication::translate("mainWindow", "options", nullptr), mainWindow);
     settingMenu->addMenu(mouseForMenu);
     settingMenu->addMenu(themeMenu);
+    settingMenu->addAction(sysOptionAction);
 
     QMenu *helpMenu = mbar->addMenu(QApplication::translate("mainWindow", "&Help", nullptr));
     aboutThisAction = new QAction(QApplication::translate("mainWindow", "About | Feedback", nullptr), mainWindow);

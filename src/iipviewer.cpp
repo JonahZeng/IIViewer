@@ -202,6 +202,7 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
 
     connect(ui.useMoveToolAction, &QAction::triggered, this, &IIPviewer::onUseMoveAction);
     connect(ui.useRoiToolAction, &QAction::triggered, this, &IIPviewer::onUseRoiAction);
+    connect(ui.sysOptionAction, &QAction::triggered, this, &IIPviewer::onSysOptionAction);
 
     connect(ui.paintOk0, &QPushButton::clicked, this, &IIPviewer::handleInputPaintPos0);
     connect(ui.paintOk1, &QPushButton::clicked, this, &IIPviewer::handleInputPaintPos1);
@@ -308,6 +309,11 @@ void IIPviewer::onUseRoiAction(bool check)
         ui.penWidthAction->setVisible(false);
         // ui.toolBar->update();
     }
+}
+
+void IIPviewer::onSysOptionAction(bool check)
+{
+
 }
 
 void IIPviewer::onUseMoveAction(bool check)

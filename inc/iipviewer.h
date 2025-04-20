@@ -45,6 +45,7 @@ public slots:
     void setTheme();
     void onUseRoiAction(bool check);
     void onUseMoveAction(bool check);
+    void onSysOptionAction(bool check);
     void toggleDataAnalyseDockWgt(bool checked);
     void togglePlayListDockWgt(bool checked);
     void syncRightPos();
