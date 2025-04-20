@@ -108,3 +108,10 @@ chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
 
 ### macos
 I didn't have any mac device, but I'm sure compile this project on macos would not be diffcult since this project use cross-platform build tool(cmake).
+
+## Translation
+
+```bash
+lupdate ./src/main.cpp ./src/iipviewer.cpp ./inc/iipviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h  ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp -ts ./translations/IIViewer_zh.ts
+```
+
