@@ -14,5 +14,6 @@
         <file>resource/bounding-box-circles.svg</file>
         <file>resource/reload-left.png</file>
         <file>resource/reload-right.png</file>
+        <file>resource/update_version.svg</file>
     </qresource>
 </RCC>

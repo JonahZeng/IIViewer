@@ -120,6 +120,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     aboutThisAction->setIcon(QIcon(":/image/resource/info-circle.svg"));
     helpMenu->addAction(aboutThisAction);
     checkUpdateAction = new QAction(QApplication::translate("mainWindow", "Check update", nullptr), mainWindow);
+    checkUpdateAction->setIcon(QIcon(":/image/resource/update_version.svg"));
     helpMenu->addAction(checkUpdateAction);
 
     toolBar->addAction(openFileLeftAction);
@@ -158,8 +159,9 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     
 
     mainWidget = new QFrame();
-    //    mainWidget->setFrameStyle(QFrame::Box | QFrame::Sunken);
-    mainWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    // mainWidget->setFrameStyle(QFrame::Box | QFrame::Sunken);
+    // mainWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    mainWidget->setFrameStyle(QFrame::NoFrame);
     QHBoxLayout *scrollAreaLayout = new QHBoxLayout();
     scrollAreaLayout->setContentsMargins(0, 0, 0, 0);
     mainWidget->setLayout(scrollAreaLayout);

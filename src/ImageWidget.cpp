@@ -1630,18 +1630,20 @@ static void convertYUV2RGB888(unsigned char* yuvBuf, unsigned char* rgb888Buf, i
         }
     }
 
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            short y = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
-            short cb = (short)(rgb888Buf[i * wholepixperline * 3 + j * 3 + 1]) - 128;
-            short cr = (short)(rgb888Buf[i * wholepixperline * 3 + j * 3 + 2]) - 128;
-            short r = y + 1.403f * cr;
-            short g = y - 0.714f * cr - 0.344f * cb;
-            short b = y + 1.773f * cb;
+    if(tp != YuvFileInfoDlg::YuvType::YUV400){
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                short y = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
+                short cb = (short)(rgb888Buf[i * wholepixperline * 3 + j * 3 + 1]) - 128;
+                short cr = (short)(rgb888Buf[i * wholepixperline * 3 + j * 3 + 2]) - 128;
+                short r = y + 1.403f * cr;
+                short g = y - 0.714f * cr - 0.344f * cb;
+                short b = y + 1.773f * cb;
 
-            rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = CLIP3(r, 0, 255);
-            rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = CLIP3(g, 0, 255);
-            rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = CLIP3(b, 0, 255);
+                rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = CLIP3(r, 0, 255);
+                rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = CLIP3(g, 0, 255);
+                rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = CLIP3(b, 0, 255);
+            }
         }
     }
 }
