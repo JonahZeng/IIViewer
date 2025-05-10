@@ -7,7 +7,7 @@
 #include <QMenuBar>
 #include <QValidator>
 #include <QStyleFactory>
-#include "iipviewer.h"
+#include "IIPviewer.h"
 
 Ui::IIPviewerUi::IIPviewerUi() : openFileLeftAction(nullptr), openFileRightAction(nullptr), exitAction(nullptr), 
     closeLeftAction(nullptr), closeRightAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), // aboutQtAction(nullptr), 

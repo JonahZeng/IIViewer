@@ -1,4 +1,4 @@
-#include "iipviewer.h"
+#include "IIPviewer.h"
 #include <QApplication>
 #include <QMessageBox>
 // #include <QDebug>

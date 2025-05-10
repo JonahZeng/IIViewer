@@ -114,7 +114,7 @@ I didn't have any mac device, but I'm sure compile this project on macos would n
 - use `linguist` to translate the .ts file, and public it to a .qm file
 - load specific .qm file when the software startup, based on the user's region and language
 ```bash
-lupdate ./src/main.cpp ./src/iipviewer.cpp ./inc/iipviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h  ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp -ts ./translations/IIViewer_zh.ts
+lupdate.exe ./src/main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h  ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp ./src/IIPOptionDialog.cpp ./inc/IIPOptionDialog.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.ui ./inc/YuvFileInfoDlg.ui -ts ./translations/IIViewer_zh.ts
 ```
 
 ## font render on windows

@@ -63,129 +63,162 @@
     </message>
 </context>
 <context>
+    <name>IIPOptionDialog</name>
+    <message>
+        <location filename="../inc/IIPOptionDialog.ui" line="14"/>
+        <source>Option</source>
+        <translation>选项</translation>
+    </message>
+    <message>
+        <location filename="../inc/IIPOptionDialog.ui" line="35"/>
+        <source>yuv</source>
+        <translation>yuv</translation>
+    </message>
+    <message>
+        <location filename="../inc/IIPOptionDialog.ui" line="41"/>
+        <source>display UV pixel value mode:</source>
+        <translation>显示UV像素值模式</translation>
+    </message>
+    <message>
+        <location filename="../inc/IIPOptionDialog.ui" line="49"/>
+        <source>substract half max value, 0 present gray</source>
+        <translation>减去值域一半，0代表纯灰</translation>
+    </message>
+    <message>
+        <location filename="../inc/IIPOptionDialog.ui" line="54"/>
+        <source>keep the value, half max value present gray</source>
+        <translation>保留原像素值，值域的一半表示纯灰</translation>
+    </message>
+    <message>
+        <location filename="../inc/IIPOptionDialog.ui" line="63"/>
+        <source>other</source>
+        <translation>其他</translation>
+    </message>
+</context>
+<context>
     <name>IIPviewer</name>
     <message>
-        <location filename="../src/iipviewer.cpp" line="392"/>
+        <location filename="../src/IIPviewer.cpp" line="400"/>
         <source>find new version</source>
         <translation>发现新版本</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="396"/>
+        <location filename="../src/IIPviewer.cpp" line="404"/>
         <source>no new version</source>
         <translation>没有更新的版本</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="396"/>
+        <location filename="../src/IIPviewer.cpp" line="404"/>
         <source>You are using the latest version</source>
         <translation>已经是最新版本</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="399"/>
+        <location filename="../src/IIPviewer.cpp" line="407"/>
         <source>network error</source>
         <translation>网络错误</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="427"/>
-        <location filename="../src/iipviewer.cpp" line="453"/>
+        <location filename="../src/IIPviewer.cpp" line="435"/>
+        <location filename="../src/IIPviewer.cpp" line="461"/>
         <source>file changed</source>
         <translation>文件被外部修改</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="427"/>
-        <location filename="../src/iipviewer.cpp" line="453"/>
+        <location filename="../src/IIPviewer.cpp" line="435"/>
+        <location filename="../src/IIPviewer.cpp" line="461"/>
         <source> has been changed, reload it?</source>
         <translation> 被外部修改，是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="508"/>
+        <location filename="../src/IIPviewer.cpp" line="516"/>
         <source>Confirm</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="508"/>
+        <location filename="../src/IIPviewer.cpp" line="516"/>
         <source>Are you sure to quit?</source>
         <translation>确定退出？</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="551"/>
+        <location filename="../src/IIPviewer.cpp" line="559"/>
         <source>open images</source>
         <translation>打开图像文件</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="676"/>
-        <location filename="../src/iipviewer.cpp" line="746"/>
-        <location filename="../src/iipviewer.cpp" line="872"/>
-        <location filename="../src/iipviewer.cpp" line="936"/>
-        <location filename="../src/iipviewer.cpp" line="1083"/>
-        <location filename="../src/iipviewer.cpp" line="1089"/>
-        <location filename="../src/iipviewer.cpp" line="1138"/>
-        <location filename="../src/iipviewer.cpp" line="1187"/>
-        <location filename="../src/iipviewer.cpp" line="1787"/>
+        <location filename="../src/IIPviewer.cpp" line="684"/>
+        <location filename="../src/IIPviewer.cpp" line="754"/>
+        <location filename="../src/IIPviewer.cpp" line="881"/>
+        <location filename="../src/IIPviewer.cpp" line="945"/>
+        <location filename="../src/IIPviewer.cpp" line="1092"/>
+        <location filename="../src/IIPviewer.cpp" line="1098"/>
+        <location filename="../src/IIPviewer.cpp" line="1147"/>
+        <location filename="../src/IIPviewer.cpp" line="1196"/>
+        <location filename="../src/IIPviewer.cpp" line="1797"/>
         <source>error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="686"/>
-        <location filename="../src/iipviewer.cpp" line="702"/>
-        <location filename="../src/iipviewer.cpp" line="757"/>
-        <location filename="../src/iipviewer.cpp" line="774"/>
-        <location filename="../src/iipviewer.cpp" line="949"/>
-        <location filename="../src/iipviewer.cpp" line="968"/>
-        <location filename="../src/iipviewer.cpp" line="1102"/>
-        <location filename="../src/iipviewer.cpp" line="1121"/>
-        <location filename="../src/iipviewer.cpp" line="1151"/>
-        <location filename="../src/iipviewer.cpp" line="1170"/>
-        <location filename="../src/iipviewer.cpp" line="1200"/>
-        <location filename="../src/iipviewer.cpp" line="1219"/>
+        <location filename="../src/IIPviewer.cpp" line="694"/>
+        <location filename="../src/IIPviewer.cpp" line="710"/>
+        <location filename="../src/IIPviewer.cpp" line="765"/>
+        <location filename="../src/IIPviewer.cpp" line="782"/>
+        <location filename="../src/IIPviewer.cpp" line="958"/>
+        <location filename="../src/IIPviewer.cpp" line="977"/>
+        <location filename="../src/IIPviewer.cpp" line="1111"/>
+        <location filename="../src/IIPviewer.cpp" line="1130"/>
+        <location filename="../src/IIPviewer.cpp" line="1160"/>
+        <location filename="../src/IIPviewer.cpp" line="1179"/>
+        <location filename="../src/IIPviewer.cpp" line="1209"/>
+        <location filename="../src/IIPviewer.cpp" line="1228"/>
         <source>warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="686"/>
-        <location filename="../src/iipviewer.cpp" line="702"/>
-        <location filename="../src/iipviewer.cpp" line="757"/>
-        <location filename="../src/iipviewer.cpp" line="774"/>
-        <location filename="../src/iipviewer.cpp" line="949"/>
-        <location filename="../src/iipviewer.cpp" line="968"/>
-        <location filename="../src/iipviewer.cpp" line="1102"/>
-        <location filename="../src/iipviewer.cpp" line="1121"/>
-        <location filename="../src/iipviewer.cpp" line="1151"/>
-        <location filename="../src/iipviewer.cpp" line="1170"/>
-        <location filename="../src/iipviewer.cpp" line="1200"/>
-        <location filename="../src/iipviewer.cpp" line="1219"/>
+        <location filename="../src/IIPviewer.cpp" line="694"/>
+        <location filename="../src/IIPviewer.cpp" line="710"/>
+        <location filename="../src/IIPviewer.cpp" line="765"/>
+        <location filename="../src/IIPviewer.cpp" line="782"/>
+        <location filename="../src/IIPviewer.cpp" line="958"/>
+        <location filename="../src/IIPviewer.cpp" line="977"/>
+        <location filename="../src/IIPviewer.cpp" line="1111"/>
+        <location filename="../src/IIPviewer.cpp" line="1130"/>
+        <location filename="../src/IIPviewer.cpp" line="1160"/>
+        <location filename="../src/IIPviewer.cpp" line="1179"/>
+        <location filename="../src/IIPviewer.cpp" line="1209"/>
+        <location filename="../src/IIPviewer.cpp" line="1228"/>
         <source>image0 size != image1 size</source>
         <translation>图像0的尺寸！=图像1的尺寸</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="732"/>
-        <location filename="../src/iipviewer.cpp" line="804"/>
+        <location filename="../src/IIPviewer.cpp" line="740"/>
+        <location filename="../src/IIPviewer.cpp" line="812"/>
         <source>not support</source>
         <translation>不支持</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="732"/>
-        <location filename="../src/iipviewer.cpp" line="804"/>
+        <location filename="../src/IIPviewer.cpp" line="740"/>
+        <location filename="../src/IIPviewer.cpp" line="812"/>
         <source>this format file not support yet!</source>
         <translation>该格式文件尚未支持！</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="872"/>
+        <location filename="../src/IIPviewer.cpp" line="881"/>
         <source>yuv bits &gt; 16</source>
         <translation>yuv位深 &gt; 16</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="936"/>
+        <location filename="../src/IIPviewer.cpp" line="945"/>
         <source>yuv file size &lt; your require</source>
         <translation>yuv文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="1083"/>
-        <location filename="../src/iipviewer.cpp" line="1089"/>
+        <location filename="../src/IIPviewer.cpp" line="1092"/>
+        <location filename="../src/IIPviewer.cpp" line="1098"/>
         <source>raw file size &lt; your input</source>
         <translation>raw文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/iipviewer.cpp" line="1787"/>
+        <location filename="../src/IIPviewer.cpp" line="1797"/>
         <source>At most 1 image!</source>
         <translation>最多打开一个图像！</translation>
     </message>
@@ -193,8 +226,8 @@
 <context>
     <name>ImageWidget</name>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="841"/>
-        <location filename="../src/ImageWidget.cpp" line="842"/>
+        <location filename="../src/ImageWidget.cpp" line="1047"/>
+        <location filename="../src/ImageWidget.cpp" line="1048"/>
         <source>drag image file here</source>
         <translation>拖动图像文件到这里</translation>
     </message>
@@ -202,7 +235,7 @@
 <context>
     <name>ImgInfoDlg</name>
     <message>
-        <location filename="../src/iipviewer.cpp" line="47"/>
+        <location filename="../src/IIPviewer.cpp" line="48"/>
         <source>image info</source>
         <translation>图像信息</translation>
     </message>
@@ -210,104 +243,131 @@
 <context>
     <name>RawFileInfoDialog</name>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="35"/>
         <source>Raw File Info</source>
-        <translation type="vanished">Raw文件信息</translation>
+        <translation>Raw文件信息</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="47"/>
         <source>Bayer Pattern</source>
-        <translation type="vanished">拜耳格式</translation>
+        <translation>拜耳格式</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="53"/>
         <source>RGGB</source>
-        <translation type="vanished">RGGB</translation>
+        <translation>RGGB</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="63"/>
         <source>GRBG</source>
-        <translation type="vanished">GRBG</translation>
+        <translation>GRBG</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="70"/>
         <source>GBRG</source>
-        <translation type="vanished">GBRG</translation>
+        <translation>GBRG</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="77"/>
         <source>BGGR</source>
-        <translation type="vanished">BGGR</translation>
+        <translation>BGGR</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="99"/>
         <source>Byte Order</source>
-        <translation type="vanished">字节序</translation>
+        <translation>字节序</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="111"/>
         <source>little</source>
-        <translation type="vanished">小端</translation>
+        <translation>小端</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="118"/>
         <source>big</source>
-        <translation type="vanished">大端</translation>
+        <translation>大端</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="130"/>
         <source>Bit Depth:</source>
-        <translation type="vanished">位深：</translation>
+        <translation>位深：</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="140"/>
+        <location filename="../inc/RawFileInfoDlg.ui" line="162"/>
         <source>12</source>
-        <translation type="vanished">12</translation>
+        <translation>12</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="147"/>
         <source>8</source>
-        <translation type="vanished">8</translation>
+        <translation>8</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="152"/>
         <source>10</source>
-        <translation type="vanished">10</translation>
+        <translation>10</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="157"/>
         <source>10-comp</source>
-        <translation type="vanished">10-comp</translation>
+        <translation>10-comp</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="167"/>
         <source>12-comp</source>
-        <translation type="vanished">12-comp</translation>
+        <translation>12-comp</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="172"/>
         <source>14</source>
-        <translation type="vanished">14</translation>
+        <translation>14</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="177"/>
         <source>14-comp</source>
-        <translation type="vanished">14-comp</translation>
+        <translation>14-comp</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="182"/>
         <source>16</source>
-        <translation type="vanished">16</translation>
+        <translation>16</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="187"/>
         <source>18</source>
-        <translation type="vanished">18</translation>
+        <translation>18</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="192"/>
         <source>20</source>
-        <translation type="vanished">20</translation>
+        <translation>20</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="197"/>
         <source>22</source>
-        <translation type="vanished">22</translation>
+        <translation>22</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="202"/>
         <source>24</source>
-        <translation type="vanished">24</translation>
+        <translation>24</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="210"/>
         <source>Width:</source>
-        <translation type="vanished">宽度：</translation>
+        <translation>宽度：</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="217"/>
+        <location filename="../inc/RawFileInfoDlg.ui" line="234"/>
         <source>D0000</source>
-        <translation type="vanished">D0000</translation>
+        <translation>D0000</translation>
     </message>
     <message>
+        <location filename="../inc/RawFileInfoDlg.ui" line="227"/>
         <source>Height:</source>
-        <translation type="vanished">高度：</translation>
+        <translation>高度：</translation>
     </message>
 </context>
 <context>
@@ -369,7 +429,7 @@
     </message>
     <message>
         <location filename="../src/IIPviewer_ui.cpp" line="73"/>
-        <location filename="../src/IIPviewer_ui.cpp" line="384"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="386"/>
         <source>play list</source>
         <translation>播放列表</translation>
     </message>
@@ -419,58 +479,58 @@
         <translation>检查升级</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="224"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="226"/>
         <source>data analysis</source>
         <translation>数据分析</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="256"/>
-        <location filename="../src/IIPviewer_ui.cpp" line="298"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="258"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="300"/>
         <source>ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="262"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="264"/>
         <source>sync coordinate to right</source>
         <translation>同步坐标到右侧</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="264"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="266"/>
         <source>sync coordinate to left</source>
         <translation>同步坐标到左侧</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="265"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="267"/>
         <source>clear</source>
         <translation>清除选区</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="315"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="317"/>
         <source>rgb contour/line</source>
         <translation>rgb数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="316"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="318"/>
         <source>rgb hist</source>
         <translation>rgb直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="317"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="319"/>
         <source>yuv contour/line</source>
         <translation>yuv数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="318"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="320"/>
         <source>yuv hist</source>
         <translation>yuv直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="319"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="321"/>
         <source>hsv contour/line</source>
         <translation>hsv数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="320"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="322"/>
         <source>hsv hist</source>
         <translation>hsv直方图</translation>
     </message>
@@ -478,64 +538,80 @@
 <context>
     <name>yuvInfoDialog</name>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="20"/>
         <source>YUV info setting</source>
-        <translation type="vanished">YUV信息设置</translation>
+        <translation>YUV信息设置</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="28"/>
         <source>width:</source>
-        <translation type="vanished">宽度：</translation>
+        <translation>宽度：</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="35"/>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="58"/>
         <source>D0000</source>
-        <translation type="vanished">D0000</translation>
+        <translation>D0000</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="45"/>
         <source>height:</source>
-        <translation type="vanished">高度：</translation>
+        <translation>高度：</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="71"/>
         <source>bit depth:</source>
-        <translation type="vanished">位深：</translation>
+        <translation>位深：</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="91"/>
         <source>format:</source>
-        <translation type="vanished">格式：</translation>
+        <translation>格式：</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="99"/>
         <source>YUV444_INTERLEAVE</source>
-        <translation type="vanished">YUV444_INTERLEAVE</translation>
+        <translation>YUV444_INTERLEAVE</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="104"/>
         <source>YUV444_PLANAR</source>
-        <translation type="vanished">YUV444_PLANAR</translation>
+        <translation>YUV444_PLANAR</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="109"/>
         <source>YUV422_UYVY</source>
-        <translation type="vanished">YUV422_UYVY</translation>
+        <translation>YUV422_UYVY</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="114"/>
         <source>YUV422_YUYV</source>
-        <translation type="vanished">YUV422_YUYV</translation>
+        <translation>YUV422_YUYV</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="119"/>
         <source>YUV420_NV12</source>
-        <translation type="vanished">YUV420_NV12</translation>
+        <translation>YUV420_NV12</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="124"/>
         <source>YUV420_NV21</source>
-        <translation type="vanished">YUV420_NV21</translation>
+        <translation>YUV420_NV21</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="129"/>
         <source>YUV420P_YU12</source>
-        <translation type="vanished">YUV420P_YU12</translation>
+        <translation>YUV420P_YU12</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="134"/>
         <source>YUV420P_YV12</source>
-        <translation type="vanished">YUV420P_YV12</translation>
+        <translation>YUV420P_YV12</translation>
     </message>
     <message>
+        <location filename="../inc/YuvFileInfoDlg.ui" line="139"/>
         <source>YUV400</source>
-        <translation type="vanished">YUV420P_YV12</translation>
+        <translation>YUV420P_YV12</translation>
     </message>
 </context>
 </TS>
