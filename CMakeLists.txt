@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.4.6 LANGUAGES CXX)
+project(IIViewer VERSION 0.4.7 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -101,18 +101,21 @@ message(STATUS "Git user is ${GIT_USER}")
 configure_file (config.h.in ${CMAKE_SOURCE_DIR}/inc/config.h)
 
 set(PROJECT_SOURCES
-        ${CMAKE_SOURCE_DIR}/src/main.cpp
-        ${CMAKE_SOURCE_DIR}/src/iipviewer.cpp
-        ${CMAKE_SOURCE_DIR}/inc/iipviewer.h
+        ${CMAKE_SOURCE_DIR}/src/Main.cpp
+        ${CMAKE_SOURCE_DIR}/src/IIPviewer.cpp
+        ${CMAKE_SOURCE_DIR}/inc/IIPviewer.h
         ${CMAKE_SOURCE_DIR}/src/AboutDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/AboutDlg.h
-        ${CMAKE_SOURCE_DIR}/src/iipviewer.rc
-        ${CMAKE_SOURCE_DIR}/src/iipviewer.qrc
+        ${CMAKE_SOURCE_DIR}/src/IIPviewer.rc
+        ${CMAKE_SOURCE_DIR}/src/IIPviewer.qrc
         ${CMAKE_SOURCE_DIR}/src/ImageWidget.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
         ${CMAKE_SOURCE_DIR}/src/RawFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.ui
+        ${CMAKE_SOURCE_DIR}/inc/IIPOptionDialog.h
+        ${CMAKE_SOURCE_DIR}/inc/IIPOptionDialog.ui
+        ${CMAKE_SOURCE_DIR}/src/IIPOptionDialog.cpp
         ${CMAKE_SOURCE_DIR}/src/IIPviewer_ui.cpp
         ${CMAKE_SOURCE_DIR}/inc/IIPviewer_ui.h
         ${CMAKE_SOURCE_DIR}/src/YuvFileInfoDlg.cpp
@@ -149,8 +152,10 @@ else()
                 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-subsystem,console")
             endif()
         endif()
+        target_compile_options(${PROJECT_NAME} PRIVATE /W4)
     elseif(UNIX)
         add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
     endif()
 endif()
 

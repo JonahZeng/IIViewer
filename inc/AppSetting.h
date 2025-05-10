@@ -21,6 +21,7 @@ public:
     RawFileInfoDlg::ByteOrderType rawByteOrder;
     bool raw_compact;
     QString theme;
+    int uv_value_disp_mode;
 
     bool loadSettingsFromFile();
     void dumpSettingsToFile();

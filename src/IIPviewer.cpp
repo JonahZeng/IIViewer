@@ -1,7 +1,8 @@
-#include "iipviewer.h"
+#include "config.h"
+#include "IIPviewer.h"
 #include "AboutDlg.h"
 #include "DataVisualDlg.h"
-#include "config.h"
+#include "IIPOptionDialog.h"
 #include <QApplication>
 #include <QColorDialog>
 #include <QDir>
@@ -202,6 +203,7 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
 
     connect(ui.useMoveToolAction, &QAction::triggered, this, &IIPviewer::onUseMoveAction);
     connect(ui.useRoiToolAction, &QAction::triggered, this, &IIPviewer::onUseRoiAction);
+    connect(ui.sysOptionAction, &QAction::triggered, this, &IIPviewer::onSysOptionAction);
 
     connect(ui.paintOk0, &QPushButton::clicked, this, &IIPviewer::handleInputPaintPos0);
     connect(ui.paintOk1, &QPushButton::clicked, this, &IIPviewer::handleInputPaintPos1);
@@ -307,6 +309,18 @@ void IIPviewer::onUseRoiAction(bool check)
         ui.penColorSetAction->setVisible(false);
         ui.penWidthAction->setVisible(false);
         // ui.toolBar->update();
+    }
+}
+
+void IIPviewer::onSysOptionAction(bool check)
+{
+    Q_UNUSED(check);
+    IIPOptionDialog dlg(this);
+    int resp = dlg.exec();
+    if(resp == IIPOptionDialog::DialogCode::Accepted)
+    {
+        int mode_idx = dlg.ui.uv_pix_value_mode_comboBox->currentIndex();
+        this->settings.uv_value_disp_mode = mode_idx;
     }
 }
 
@@ -805,6 +819,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     YuvFileInfoDlg dlg(this);
 
     auto yuvtp = settings.yuvType;
+    int uv_disp_mode = settings.uv_value_disp_mode;
     if (yuvtp == YuvFileInfoDlg::YUV444_INTERLEAVE)
     {
         dlg.ui.formatComboBox->setCurrentIndex(0);
@@ -946,7 +961,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
-        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
+        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, uv_disp_mode, LEFT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
@@ -965,7 +980,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
-        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
+        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, uv_disp_mode, RIGHT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
@@ -1235,10 +1250,11 @@ void IIPviewer::setRawImage(QString &imageName, RawFileInfoDlg::BayerPatternType
     ui.imageLabel[leftOrRight]->setPixmap(imageName, by, order, bitDepth, compact, width, height);
 }
 
-void IIPviewer::setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)
+void IIPviewer::setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int uv_disp_mode, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
+    ui.imageLabel[leftOrRight]->uv_disp_mode = uv_disp_mode;
     ui.imageLabel[leftOrRight]->setPixmap(imageName, tp, bitDepth, width, height, pixSize);
 }
 

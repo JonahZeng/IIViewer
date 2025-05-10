@@ -38,6 +38,7 @@ namespace Ui
         QAction *checkUpdateAction;
         QAction *useRoiToolAction;
         QAction *useMoveToolAction;
+        QAction *sysOptionAction;
         QPushButton *penColorSetBtn;
         QAction* penColorSetAction;
         QSpinBox *penWidthSbox;

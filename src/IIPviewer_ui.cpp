@@ -7,7 +7,7 @@
 #include <QMenuBar>
 #include <QValidator>
 #include <QStyleFactory>
-#include "iipviewer.h"
+#include "IIPviewer.h"
 
 Ui::IIPviewerUi::IIPviewerUi() : openFileLeftAction(nullptr), openFileRightAction(nullptr), exitAction(nullptr), 
     closeLeftAction(nullptr), closeRightAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), // aboutQtAction(nullptr), 
@@ -109,14 +109,18 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     useMoveToolAction->setIcon(QIcon(":image/resource/arrows-move.svg"));
     mouseForMenu->addAction(useMoveToolAction);
     mouseForMenu->addAction(useRoiToolAction);
+
+    sysOptionAction = new QAction(QApplication::translate("mainWindow", "options", nullptr), mainWindow);
     settingMenu->addMenu(mouseForMenu);
     settingMenu->addMenu(themeMenu);
+    settingMenu->addAction(sysOptionAction);
 
     QMenu *helpMenu = mbar->addMenu(QApplication::translate("mainWindow", "&Help", nullptr));
     aboutThisAction = new QAction(QApplication::translate("mainWindow", "About | Feedback", nullptr), mainWindow);
     aboutThisAction->setIcon(QIcon(":/image/resource/info-circle.svg"));
     helpMenu->addAction(aboutThisAction);
     checkUpdateAction = new QAction(QApplication::translate("mainWindow", "Check update", nullptr), mainWindow);
+    checkUpdateAction->setIcon(QIcon(":/image/resource/update_version.svg"));
     helpMenu->addAction(checkUpdateAction);
 
     toolBar->addAction(openFileLeftAction);
@@ -155,8 +159,9 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     
 
     mainWidget = new QFrame();
-    //    mainWidget->setFrameStyle(QFrame::Box | QFrame::Sunken);
-    mainWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    // mainWidget->setFrameStyle(QFrame::Box | QFrame::Sunken);
+    // mainWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    mainWidget->setFrameStyle(QFrame::NoFrame);
     QHBoxLayout *scrollAreaLayout = new QHBoxLayout();
     scrollAreaLayout->setContentsMargins(0, 0, 0, 0);
     mainWidget->setLayout(scrollAreaLayout);

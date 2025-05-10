@@ -108,3 +108,15 @@ chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
 
 ### macos
 I didn't have any mac device, but I'm sure compile this project on macos would not be diffcult since this project use cross-platform build tool(cmake).
+
+## Translation
+- use `lupdate` to scan all the source codes and generate a .ts file
+- use `linguist` to translate the .ts file, and public it to a .qm file
+- load specific .qm file when the software startup, based on the user's region and language
+```bash
+lupdate.exe ./src/main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h  ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp ./src/IIPOptionDialog.cpp ./inc/IIPOptionDialog.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.ui ./inc/YuvFileInfoDlg.ui -ts ./translations/IIViewer_zh.ts
+```
+
+## font render on windows
+if you use 4k monitor and enable high dpi, you will see alise around the font. Fortunately, there is a simple solution:
+create a environment variable named `QT_QPA_PLATFORM`, the value set to `windows:fontengine=freetype`.
