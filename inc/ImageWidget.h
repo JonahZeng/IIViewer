@@ -120,6 +120,7 @@ public:
     RawFileInfoDlg::ByteOrderType rawByteOrderType;
     YuvFileInfoDlg::YuvType yuvType;
     OpenedImageType openedImgType;
+    int uv_disp_mode;
 
 private:
     QImage *pixMapBak;

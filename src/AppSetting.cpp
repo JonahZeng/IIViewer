@@ -17,6 +17,7 @@ AppSettings::AppSettings()
     raw_width = 0;
     raw_height = 0;
     rawByteOrder = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+    uv_value_disp_mode = 0; // 0:0=gray 1: half-max=gray 
     theme = QStyleFactory::keys().first();
 }
 
@@ -31,22 +32,29 @@ bool AppSettings::loadSettingsFromFile()
     const QChar sep = QDir::separator();
 
     QDir directory(QDir::homePath());
-    if (!directory.exists(appConfigDir)) {
+    if (!directory.exists(appConfigDir))
+    {
         directory.mkpath(appConfigDir);
     }
     QString targetJsonPath = directory.filePath(appConfigDir + sep + appName + ".json");
     QFileInfo info(targetJsonPath);
-    if (info.exists() && info.isFile()) {
+    if (info.exists() && info.isFile())
+    {
         QFile jf(targetJsonPath);
-        if (jf.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (jf.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
             auto context = jf.readAll();
             read(QJsonDocument::fromJson(context).object());
             jf.close();
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
@@ -58,13 +66,15 @@ void AppSettings::dumpSettingsToFile()
     const QChar sep = QDir::separator();
 
     QDir directory(QDir::homePath());
-    if (!directory.exists(appConfigDir)) {
+    if (!directory.exists(appConfigDir))
+    {
         directory.mkpath(appConfigDir);
     }
     QString targetJsonPath = directory.filePath(appConfigDir + sep + appName + ".json");
 
     QFile jf(targetJsonPath);
-    if (jf.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    if (jf.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
         QJsonObject targetObj;
         write(targetObj);
         jf.write(QJsonDocument(targetObj).toJson());
@@ -74,41 +84,57 @@ void AppSettings::dumpSettingsToFile()
 
 void AppSettings::read(const QJsonObject& json)
 {
-    if (json.contains("workPath")) {
+    if (json.contains("workPath"))
+    {
         workPath = json["workPath"].toString();
     }
-    if (json.contains("yuvType")) {
+    if (json.contains("yuvType"))
+    {
         yuvType = YuvFileInfoDlg::YuvType(json["yuvType"].toInt());
     }
-    if (json.contains("yuv_bitDepth")) {
+    if (json.contains("yuv_bitDepth"))
+    {
         yuv_bitDepth = json["yuv_bitDepth"].toInt();
     }
-    if (json.contains("yuv_width")) {
+    if (json.contains("yuv_width"))
+    {
         yuv_width = json["yuv_width"].toInt();
     }
-    if (json.contains("yuv_height")) {
+    if (json.contains("yuv_height"))
+    {
         yuv_height = json["yuv_height"].toInt();
     }
-    if (json.contains("rawByType")) {
+    if (json.contains("rawByType"))
+    {
         rawByType = RawFileInfoDlg::BayerPatternType(json["rawByType"].toInt());
     }
-    if (json.contains("raw_bitDepth")) {
+    if (json.contains("raw_bitDepth"))
+    {
         raw_bitDepth = json["raw_bitDepth"].toInt();
     }
-    if (json.contains("raw_width")) {
+    if (json.contains("raw_width"))
+    {
         raw_width = json["raw_width"].toInt();
     }
-    if (json.contains("raw_height")) {
+    if (json.contains("raw_height"))
+    {
         raw_height = json["raw_height"].toInt();
     }
-    if (json.contains("raw_byte_order")) {
+    if (json.contains("raw_byte_order"))
+    {
         rawByteOrder = RawFileInfoDlg::ByteOrderType(json["raw_byte_order"].toInt());
     }
-    if (json.contains("raw_compact")) {
-         raw_compact = json["raw_compact"].toBool();
+    if (json.contains("raw_compact"))
+    {
+        raw_compact = json["raw_compact"].toBool();
     }
-    if (json.contains("theme")) {
+    if (json.contains("theme"))
+    {
         theme = json["theme"].toString();
+    }
+    if (json.contains("uv_value_disp_mode"))
+    {
+        uv_value_disp_mode = json["uv_value_disp_mode"].toInt();
     }
 }
 
@@ -137,4 +163,6 @@ void AppSettings::write(QJsonObject& json) const
     json["raw_compact"] = (int)raw_compact;
 
     json["theme"] = theme;
+
+    json["uv_value_disp_mode"] = uv_value_disp_mode;
 }

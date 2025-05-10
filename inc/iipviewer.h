@@ -29,7 +29,7 @@ private:
     void loadPgmFile(QString &fileName, int scrollArea, bool reload=false);
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
-    void setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
+    void setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int uv_disp_mode, int leftOrRight);
     void setRawImage(QString &image, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
     void openGivenFileFromCmdArgv(QString image);
 
