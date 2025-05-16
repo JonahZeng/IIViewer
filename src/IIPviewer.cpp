@@ -312,18 +312,6 @@ void IIPviewer::onUseRoiAction(bool check)
     }
 }
 
-void IIPviewer::onSysOptionAction(bool check)
-{
-    Q_UNUSED(check);
-    IIPOptionDialog dlg(this);
-    int resp = dlg.exec();
-    if(resp == IIPOptionDialog::DialogCode::Accepted)
-    {
-        int mode_idx = dlg.ui.uv_pix_value_mode_comboBox->currentIndex();
-        this->settings.uv_value_disp_mode = mode_idx;
-    }
-}
-
 void IIPviewer::onUseMoveAction(bool check)
 {
     if (check)
@@ -338,6 +326,18 @@ void IIPviewer::onUseMoveAction(bool check)
     {
         ui.imageLabel[LEFT_IMG_WIDGET]->setMouseActionNone();
         ui.imageLabel[RIGHT_IMG_WIDGET]->setMouseActionNone();
+    }
+}
+
+void IIPviewer::onSysOptionAction(bool check)
+{
+    Q_UNUSED(check);
+    IIPOptionDialog dlg(this);
+    int resp = dlg.exec();
+    if(resp == IIPOptionDialog::DialogCode::Accepted)
+    {
+        int mode_idx = dlg.ui.uv_pix_value_mode_comboBox->currentIndex();
+        this->settings.uv_value_disp_mode = mode_idx;
     }
 }
 
@@ -1455,14 +1455,14 @@ void IIPviewer::flushPaintPosEdit1(QPointF startPt, QPointF endPt)
 
 void IIPviewer::handleInputPaintPos0()
 {
-    if (ui.imageLabel[0]->pixMap == nullptr)
+    if (ui.imageLabel[LEFT_IMG_WIDGET]->pixMap == nullptr)
         return;
     if (ui.start_x_edit0->text().length() == 0 || ui.start_y_edit0->text().length() == 0 || ui.end_x_edit0->text().length() == 0 || ui.end_y_edit0->text().length() == 0)
         return;
     else
     {
-        int maxWidth = ui.imageLabel[0]->pixMap->width();
-        int maxHeight = ui.imageLabel[0]->pixMap->height();
+        int maxWidth = ui.imageLabel[LEFT_IMG_WIDGET]->pixMap->width();
+        int maxHeight = ui.imageLabel[LEFT_IMG_WIDGET]->pixMap->height();
         int start_x = ui.start_x_edit0->text().toInt();
         start_x = start_x >= maxWidth ? maxWidth : start_x;
         int start_y = ui.start_y_edit0->text().toInt();
@@ -1472,23 +1472,26 @@ void IIPviewer::handleInputPaintPos0()
         int end_y = ui.end_y_edit0->text().toInt();
         end_y = end_y >= maxHeight ? maxHeight : end_y;
         float scale_ratio = ui.imageLabel[0]->zoomList[ui.imageLabel[0]->zoomIdx];
-        ui.imageLabel[0]->paintCoordinates[0] = QPoint(start_x * scale_ratio, start_y * scale_ratio);
-        ui.imageLabel[0]->paintCoordinates[1] = QPoint(end_x * scale_ratio, end_y * scale_ratio);
-        ui.imageLabel[0]->paintEnd = true;
-        ui.imageLabel[0]->repaint();
+        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint(start_x * scale_ratio, start_y * scale_ratio);
+        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint(end_x * scale_ratio, end_y * scale_ratio);
+        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint(start_x, start_y);
+        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint(end_x, end_y);
+        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0f;
+        ui.imageLabel[LEFT_IMG_WIDGET]->paintEnd = true;
+        ui.imageLabel[LEFT_IMG_WIDGET]->repaint();
     }
 }
 
 void IIPviewer::handleInputPaintPos1()
 {
-    if (ui.imageLabel[1]->pixMap == nullptr)
+    if (ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap == nullptr)
         return;
     if (ui.start_x_edit1->text().length() == 0 || ui.start_y_edit1->text().length() == 0 || ui.end_x_edit1->text().length() == 0 || ui.end_y_edit1->text().length() == 0)
         return;
     else
     {
-        int maxWidth = ui.imageLabel[1]->pixMap->width();
-        int maxHeight = ui.imageLabel[1]->pixMap->height();
+        int maxWidth = ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap->width();
+        int maxHeight = ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap->height();
         int start_x = ui.start_x_edit1->text().toInt();
         start_x = start_x >= maxWidth ? maxWidth : start_x;
         int start_y = ui.start_y_edit1->text().toInt();
@@ -1498,10 +1501,13 @@ void IIPviewer::handleInputPaintPos1()
         int end_y = ui.end_y_edit1->text().toInt();
         end_y = end_y >= maxHeight ? maxHeight : end_y;
         float scale_ratio = ui.imageLabel[1]->zoomList[ui.imageLabel[1]->zoomIdx];
-        ui.imageLabel[1]->paintCoordinates[0] = QPoint(start_x * scale_ratio, start_y * scale_ratio);
-        ui.imageLabel[1]->paintCoordinates[1] = QPoint(end_x * scale_ratio, end_y * scale_ratio);
-        ui.imageLabel[1]->paintEnd = true;
-        ui.imageLabel[1]->repaint();
+        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint(start_x * scale_ratio, start_y * scale_ratio);
+        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint(end_x * scale_ratio, end_y * scale_ratio);
+        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint(start_x, start_y);
+        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint(end_x, end_y);
+        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0f;
+        ui.imageLabel[RIGHT_IMG_WIDGET]->paintEnd = true;
+        ui.imageLabel[RIGHT_IMG_WIDGET]->repaint();
     }
 }
 
@@ -1641,10 +1647,10 @@ void IIPviewer::clearPaint()
     ui.start_y_edit0->clear();
     ui.end_x_edit0->clear();
     ui.end_y_edit0->clear();
-    ui.imageLabel[0]->paintCoordinates[0] = QPoint();
-    ui.imageLabel[0]->paintCoordinates[1] = QPoint();
-    ui.imageLabel[1]->paintCoordinates[0] = QPoint();
-    ui.imageLabel[1]->paintCoordinates[1] = QPoint();
+    ui.imageLabel[0]->ptCodInfo.paintCoordinates[0] = QPoint();
+    ui.imageLabel[0]->ptCodInfo.paintCoordinates[1] = QPoint();
+    ui.imageLabel[1]->ptCodInfo.paintCoordinates[0] = QPoint();
+    ui.imageLabel[1]->ptCodInfo.paintCoordinates[1] = QPoint();
     ui.imageLabel[0]->repaint();
     ui.imageLabel[1]->repaint();
 }

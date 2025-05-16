@@ -26,6 +26,12 @@ enum MouseActionType
     DRAG_IMG_ACTION = 1
 };
 
+struct PaintCoordinateInfo {
+    std::array<QPoint, 2> paintCoordinates;
+    std::array<QPoint, 2> originPaintCoordinates;
+    float originScaleRatio;
+};
+
 #define ZOOM_LIST_LENGTH 13
 
 class ImageWidget : public QWidget
@@ -97,7 +103,7 @@ public:
     MouseActionType mouseAction;
     QColor penColor;
     int penWidth;
-    std::array<QPoint, 2> paintCoordinates;
+    PaintCoordinateInfo ptCodInfo;
     bool paintBegin;
     bool paintEnd;
     bool doDragImg;

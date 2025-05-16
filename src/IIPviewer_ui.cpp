@@ -79,6 +79,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     playListAction->setChecked(true);
 
     QMenu *themeMenu = new QMenu(QApplication::translate("mainWindow", "theme", nullptr), mainWindow);
+    themeMenu->setIcon(QIcon(":image/resource/skin.svg"));
     auto themeStrings = QStyleFactory::keys();
     for (auto &theme : themeStrings)
     {
@@ -109,8 +110,10 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     useMoveToolAction->setIcon(QIcon(":image/resource/arrows-move.svg"));
     mouseForMenu->addAction(useMoveToolAction);
     mouseForMenu->addAction(useRoiToolAction);
+    mouseForMenu->setIcon(QIcon(":/image/resource/mouse.svg"));
 
     sysOptionAction = new QAction(QApplication::translate("mainWindow", "options", nullptr), mainWindow);
+    sysOptionAction->setIcon(QIcon(":/image/resource/options.svg"));
     settingMenu->addMenu(mouseForMenu);
     settingMenu->addMenu(themeMenu);
     settingMenu->addAction(sysOptionAction);

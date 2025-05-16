@@ -17,10 +17,11 @@ this repo is designed for open and view ISP intermediate image. we support these
 - png
 - pnm(8/10/12/14/16 bit)
 - raw(8/10/12/14/16/18/20/22/24 bit)
+- mipi-raw(10/12/14 bit)
 - yuv(8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)
 
 ## Usage
-download it from [release page](https://github.com/JonahZeng/IIViewer/releases), start this app on your PC, you can see this if there is no any unexpect error:
+download it from [release page](https://github.com/JonahZeng/IIViewer/releases)(we provide precompiled x64 exe and deb file), start this app on your PC, you can see this if no unexpect error occurred:
 
 ![main-ui](./doc/image/main-ui.png)
 
@@ -97,7 +98,7 @@ for deb:
 ```bash
 cpack -G DEB -C Release
 ```
-for AppImage, you should download [linuxdeployqt](https://github.com/probonopd/linuxdeployqt/releases) first, and then prepare a .desktop and a icon file. a default icon and desktop file are placed in `icon` directory, you can simplely copy them to bin directory and cexecute linuxdeployqt:
+for AppImage, you should download [linuxdeployqt](https://github.com/probonopd/linuxdeployqt/releases) first, and then prepare a .desktop and a icon file. a default icon and desktop file are placed in `icon` directory, you can simplely copy them to bin directory and execute linuxdeployqt:
 ```bash
 cp ./icon/default.png ./bin/Release/ 
 cp ./icon/default.desktop ./bin/Release/ 
@@ -118,5 +119,5 @@ lupdate.exe ./src/main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.
 ```
 
 ## font render on windows
-if you use 4k monitor and enable high dpi, you will see alise around the font. Fortunately, there is a simple solution:
-create a environment variable named `QT_QPA_PLATFORM`, the value set to `windows:fontengine=freetype`.
+if you use 4k monitor and enable high dpi, you will see alise around the font. Fortunately, we have a simple solution:
+create a environment variable named `QT_QPA_PLATFORM`, set the value to `windows:fontengine=freetype`, restart the application.
