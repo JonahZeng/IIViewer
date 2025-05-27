@@ -1,0 +1,63 @@
+name: CMake on a macOS platform
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.ui'
+      - '**/*.cmake'
+      - '**/*.cpp'
+      - '**/*.rc'
+      - '**/*.qrc'
+      - 'CMakeLists.txt'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.ui'
+      - '**/*.cmake'
+      - '**/*.cpp'
+      - '**/*.rc'
+      - '**/*.qrc'
+      - 'CMakeLists.txt'
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '5.15.2'
+        host: 'mac'
+        target: 'desktop'
+        cache: true
+        modules: 'qtcharts qtdatavis3d'
+        install-deps: 'true'
+
+    - uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build
+
+    - name: Install
+      run: cmake --install ${{github.workspace}}/build
+
+    - name: Create DMG package
+      working-directory: ${{github.workspace}}/build
+      run: |
+        mkdir -p IIViewer.app/Contents/MacOS
+        mkdir -p IIViewer.app/Contents/Resources
+        cp -r install/* IIViewer.app/Contents/MacOS/
+        cp ${{github.workspace}}/icon/IIViewer_256.png IIViewer.app/Contents/Resources/icon.icns
+        create-dmg IIViewer.app

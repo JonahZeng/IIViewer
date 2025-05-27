@@ -10,9 +10,9 @@ on:
       - '**/*.hpp'
       - '**/*.ui'
       - '**/*.cmake'
-      - '*.cpp'
-      - '*.rc'
-      - '*.qrc'
+      - '**/*.cpp'
+      - '**/*.rc'
+      - '**/*.qrc'
       - 'CMakeLists.txt'
   pull_request:
     branches: [ "main" ]
@@ -21,9 +21,9 @@ on:
       - '**/*.hpp'
       - '**/*.ui'
       - '**/*.cmake'
-      - '*.cpp'
-      - '*.rc'
-      - '*.qrc'
+      - '**/*.cpp'
+      - '**/*.rc'
+      - '**/*.qrc'
       - 'CMakeLists.txt'
 
 env:
