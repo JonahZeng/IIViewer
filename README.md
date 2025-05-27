@@ -9,7 +9,7 @@
 <p align="center">
     <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-windows-platform.yml?label=Windows build" alt="Windows Build Status"/>
     <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-ubuntu-platform.yml?label=Ubuntu build" alt="Ubuntu Build Status"/>
-    <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-macos-platform.yml?label=MacOS build" alt="Ubuntu Build Status"/>
+    <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-macos-platform.yml?label=MacOS build" alt="MacOS Build Status"/>
 </p>
 
 ## About
