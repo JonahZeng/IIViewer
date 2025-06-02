@@ -38,6 +38,7 @@ jobs:
         version: '5.15.2'
         host: 'mac'
         target: 'desktop'
+        arch: 'arm64'
         cache: true
         modules: 'qtcharts qtdatavis3d'
         install-deps: 'true'
