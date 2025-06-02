@@ -200,7 +200,7 @@ if(WIN32)
     # Ensure the Qt runtime libraries are installed
     include(windeployqt)
     windeployqt(${PROJECT_NAME} "bin")
-elseif(UNIX)
+elseif(UNIX AND NOT APPLE)
     set(_qm_translation_path "")
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/translations)
@@ -212,6 +212,23 @@ elseif(UNIX)
     endif()
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND "lrelease"
+        ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
+        -qm 
+        ${_qm_translation_path}/IIViewer_zh.qm
+    )
+elseif(APPLE)
+    set(_qm_translation_path "")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/translations)
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/translations)
+    endif()
+    if(NOT EXISTS ${_qm_translation_path})
+        file(MAKE_DIRECTORY ${_qm_translation_path})
+    endif()
+    set(LRELEASE_EXECUTABLE "$(brew --prefix qt@5)/bin/lrelease")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${LRELEASE_EXECUTABLE}
         ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
         -qm 
         ${_qm_translation_path}/IIViewer_zh.qm
