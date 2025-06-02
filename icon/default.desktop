@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=IIViewer
-Exec=AppRun %F
-Icon=default
-Comment=isp develop image viewer
-Terminal=false
-Categories=Development;
-X-AppImage-Version=452431c

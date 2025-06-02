@@ -9,7 +9,14 @@
 #define CLIP3(a, mi, ma) (a < mi ? mi : (a > ma ? ma : a))
 
 ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, QWidget *parent)
-    : QWidget(parent), parentScroll(parentScroll), mouseAction(NONE_ACTION), penColor(color), penWidth(penWidth), paintCoordinates{QPoint(0, 0), QPoint(0, 0)}, paintBegin(false), paintEnd(false), doDragImg(false), imgDragStartPos(0, 0), imgDragEndPos(0, 0), pixMap(nullptr), zoomIdx(2), zoomList{0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 12.0, 16.0, 24.0, 32.0, 48.0, 64.0, 96.0}, zoomTextRect(), pixValPaintRect(), rawDataPtr(nullptr), rawDataBit(0), pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0), yuvDataPtr(nullptr), yuvDataBit(0), rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW), openedImgType(UNKNOW_IMG), uv_disp_mode(0)
+    : QWidget(parent), parentScroll(parentScroll), mouseAction(NONE_ACTION), penColor(color), penWidth(penWidth), 
+    ptCodInfo {{QPoint(0, 0), QPoint(0, 0)}, {QPoint(0, 0), QPoint(0, 0)}, 1.0},
+    paintBegin(false), paintEnd(false), doDragImg(false), imgDragStartPos(0, 0), imgDragEndPos(0, 0), pixMap(nullptr), 
+    zoomIdx(2), zoomList{0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 12.0, 16.0, 24.0, 32.0, 48.0, 64.0, 96.0}, 
+    zoomTextRect(), pixValPaintRect(), rawDataPtr(nullptr), rawDataBit(0), 
+    pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0), 
+    yuvDataPtr(nullptr), yuvDataBit(0), rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW), 
+    openedImgType(UNKNOW_IMG), uv_disp_mode(0)
 {
 }
 
@@ -1060,8 +1067,9 @@ void ImageWidget::paintEvent(QPaintEvent *event)
         QPen pen(penColor);
         pen.setWidth(penWidth);
         painter.setPen(pen);
-        painter.drawRect(paintCoordinates[0].x(), paintCoordinates[0].y(),
-                         paintCoordinates[1].x() - paintCoordinates[0].x(), paintCoordinates[1].y() - paintCoordinates[0].y());
+        painter.drawRect(ptCodInfo.paintCoordinates[0].x(), ptCodInfo.paintCoordinates[0].y(),
+        ptCodInfo.paintCoordinates[1].x() - ptCodInfo.paintCoordinates[0].x(), ptCodInfo.paintCoordinates[1].y() - ptCodInfo.paintCoordinates[0].y());
+        // qDebug() << ptCodInfo.paintCoordinates[0].x() << ", " << ptCodInfo.paintCoordinates[0].y() << "; " << ptCodInfo.paintCoordinates[1].x() - ptCodInfo.paintCoordinates[0].x() << ", " << ptCodInfo.paintCoordinates[1].y() - ptCodInfo.paintCoordinates[0].y();
     }
     if (scaleRatio >= 96.0)
     {
@@ -1154,22 +1162,25 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
     {
         paintBegin = true;
         paintEnd = false;
-        paintCoordinates[0] = event->pos();
+        ptCodInfo.paintCoordinates[0] = event->pos();
         float scale_ratio = zoomList[zoomIdx];
         if (scale_ratio >= 1.0)
         {
-            if (paintCoordinates[0].x() % int(scale_ratio) > 0)
+            if (ptCodInfo.paintCoordinates[0].x() % int(scale_ratio) > 0)
             {
-                int newX = (paintCoordinates[0].x() / int(scale_ratio)) * int(scale_ratio);
-                paintCoordinates[0].setX(newX);
+                int newX = (ptCodInfo.paintCoordinates[0].x() / int(scale_ratio)) * int(scale_ratio);
+                ptCodInfo.paintCoordinates[0].setX(newX);
             }
-            if (paintCoordinates[0].y() % int(scale_ratio) > 0)
+            if (ptCodInfo.paintCoordinates[0].y() % int(scale_ratio) > 0)
             {
-                int newY = (paintCoordinates[0].y() / int(scale_ratio)) * int(scale_ratio);
-                paintCoordinates[0].setY(newY);
+                int newY = (ptCodInfo.paintCoordinates[0].y() / int(scale_ratio)) * int(scale_ratio);
+                ptCodInfo.paintCoordinates[0].setY(newY);
             }
-            emit inform_real_Pos(paintCoordinates[0] / scale_ratio, paintCoordinates[1] / scale_ratio);
         }
+        ptCodInfo.originPaintCoordinates[0].setX(ptCodInfo.paintCoordinates[0].x());
+        ptCodInfo.originPaintCoordinates[0].setY(ptCodInfo.paintCoordinates[0].y());
+        ptCodInfo.originScaleRatio = scale_ratio;
+        emit inform_real_Pos(ptCodInfo.paintCoordinates[0] / scale_ratio, ptCodInfo.paintCoordinates[1] / scale_ratio);
     }
     else if (event->button() == Qt::LeftButton && mouseAction == MouseActionType::DRAG_IMG_ACTION)
     {
@@ -1187,22 +1198,25 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
     {
         paintBegin = false;
         paintEnd = true;
-        paintCoordinates[1] = event->pos();
+        ptCodInfo.paintCoordinates[1] = event->pos();
         float scale_ratio = zoomList[zoomIdx];
         if (scale_ratio >= 1.0)
         {
-            if (paintCoordinates[1].x() % int(scale_ratio) > 0)
+            if (ptCodInfo.paintCoordinates[1].x() % int(scale_ratio) > 0)
             {
-                int newX = ((paintCoordinates[1].x() / int(scale_ratio)) + 1) * int(scale_ratio);
-                paintCoordinates[1].setX(newX);
+                int newX = ((ptCodInfo.paintCoordinates[1].x() / int(scale_ratio)) + 1) * int(scale_ratio);
+                ptCodInfo.paintCoordinates[1].setX(newX);
             }
-            if (paintCoordinates[1].y() % int(scale_ratio) > 0)
+            if (ptCodInfo.paintCoordinates[1].y() % int(scale_ratio) > 0)
             {
-                int newY = ((paintCoordinates[1].y() / int(scale_ratio)) + 1) * int(scale_ratio);
-                paintCoordinates[1].setY(newY);
+                int newY = ((ptCodInfo.paintCoordinates[1].y() / int(scale_ratio)) + 1) * int(scale_ratio);
+                ptCodInfo.paintCoordinates[1].setY(newY);
             }
         }
-        emit inform_real_Pos(paintCoordinates[0] / scale_ratio, paintCoordinates[1] / scale_ratio);
+        ptCodInfo.originPaintCoordinates[1].setX(ptCodInfo.paintCoordinates[1].x());
+        ptCodInfo.originPaintCoordinates[1].setY(ptCodInfo.paintCoordinates[1].y());
+        ptCodInfo.originScaleRatio = scale_ratio;
+        emit inform_real_Pos(ptCodInfo.paintCoordinates[0] / scale_ratio, ptCodInfo.paintCoordinates[1] / scale_ratio);
     }
     else if (event->button() == Qt::LeftButton && mouseAction == MouseActionType::DRAG_IMG_ACTION)
     {
@@ -1219,22 +1233,25 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
     }
     if (paintBegin)
     {
-        paintCoordinates[1] = event->pos();
+        ptCodInfo.paintCoordinates[1] = event->pos();
         float scale_ratio = zoomList[zoomIdx];
         if (scale_ratio >= 1.0)
         {
-            if (paintCoordinates[1].x() % int(scale_ratio) > 0)
+            if (ptCodInfo.paintCoordinates[1].x() % int(scale_ratio) > 0)
             {
-                int newX = ((paintCoordinates[1].x() / int(scale_ratio)) + 1) * int(scale_ratio);
-                paintCoordinates[1].setX(newX);
+                int newX = ((ptCodInfo.paintCoordinates[1].x() / int(scale_ratio)) + 1) * int(scale_ratio);
+                ptCodInfo.paintCoordinates[1].setX(newX);
             }
-            if (paintCoordinates[1].y() % int(scale_ratio) > 0)
+            if (ptCodInfo.paintCoordinates[1].y() % int(scale_ratio) > 0)
             {
-                int newY = ((paintCoordinates[1].y() / int(scale_ratio)) + 1) * int(scale_ratio);
-                paintCoordinates[1].setY(newY);
+                int newY = ((ptCodInfo.paintCoordinates[1].y() / int(scale_ratio)) + 1) * int(scale_ratio);
+                ptCodInfo.paintCoordinates[1].setY(newY);
             }
         }
-        emit inform_real_Pos(paintCoordinates[0] / scale_ratio, paintCoordinates[1] / scale_ratio);
+        ptCodInfo.originPaintCoordinates[1].setX(ptCodInfo.paintCoordinates[1].x());
+        ptCodInfo.originPaintCoordinates[1].setY(ptCodInfo.paintCoordinates[1].y());
+        ptCodInfo.originScaleRatio = scale_ratio;
+        emit inform_real_Pos(ptCodInfo.paintCoordinates[0] / scale_ratio, ptCodInfo.paintCoordinates[1] / scale_ratio);
         repaint();
     }
     if (doDragImg && pixMap != nullptr)
@@ -2104,11 +2121,12 @@ void ImageWidget::zoomIn(int newZoomIdx)
 {
     if (newZoomIdx <= ZOOM_LIST_LENGTH - 1)
     {
-        float oldScaleRatio = zoomList[this->zoomIdx];
+        float oldScaleRatio = ptCodInfo.originScaleRatio;
         this->zoomIdx = newZoomIdx;
         float scaleRatio = zoomList[this->zoomIdx];
-        paintCoordinates[0] = paintCoordinates[0] * scaleRatio / oldScaleRatio;
-        paintCoordinates[1] = paintCoordinates[1] * scaleRatio / oldScaleRatio;
+        ptCodInfo.paintCoordinates[0] = ptCodInfo.originPaintCoordinates[0] * scaleRatio / oldScaleRatio;
+        ptCodInfo.paintCoordinates[1] = ptCodInfo.originPaintCoordinates[1] * scaleRatio / oldScaleRatio;
+
         if (pixMap != nullptr)
         {
             QSize originSize = pixMap->size();
@@ -2121,11 +2139,12 @@ void ImageWidget::zoomOut(int newZoomIdx)
 {
     if (newZoomIdx >= 0)
     {
-        float oldScaleRatio = zoomList[this->zoomIdx];
+        float oldScaleRatio = ptCodInfo.originScaleRatio;
         this->zoomIdx = newZoomIdx;
         float scaleRatio = zoomList[this->zoomIdx];
-        paintCoordinates[0] = paintCoordinates[0] * scaleRatio / oldScaleRatio;
-        paintCoordinates[1] = paintCoordinates[1] * scaleRatio / oldScaleRatio;
+        ptCodInfo.paintCoordinates[0] = ptCodInfo.originPaintCoordinates[0] * scaleRatio / oldScaleRatio;
+        ptCodInfo.paintCoordinates[1] = ptCodInfo.originPaintCoordinates[1] * scaleRatio / oldScaleRatio;
+
         if (pixMap != nullptr)
         {
             QSize originSize = pixMap->size();
@@ -2165,8 +2184,10 @@ void ImageWidget::processWheelZoom(QWheelEvent *event, int zoomDelta)
     zoomIdx = zoomIdx < 0 ? 0 : zoomIdx;
     zoomIdx = zoomIdx > ZOOM_LIST_LENGTH - 1 ? ZOOM_LIST_LENGTH - 1 : zoomIdx;
     float scaleRatio = zoomList[zoomIdx];
-    paintCoordinates[0] = paintCoordinates[0] * scaleRatio / oldScaleRatio;
-    paintCoordinates[1] = paintCoordinates[1] * scaleRatio / oldScaleRatio;
+    float originPtSclRatio = ptCodInfo.originScaleRatio;
+    ptCodInfo.paintCoordinates[0] = ptCodInfo.originPaintCoordinates[0] * scaleRatio / originPtSclRatio;
+    ptCodInfo.paintCoordinates[1] = ptCodInfo.originPaintCoordinates[1] * scaleRatio / originPtSclRatio;
+
     QSize originSize = pixMap->size();
 
     int new_img_pt_x = pix_ind_x * scaleRatio; // img widget coordinate

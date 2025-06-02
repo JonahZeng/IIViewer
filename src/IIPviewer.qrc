@@ -15,5 +15,8 @@
         <file>resource/reload-left.png</file>
         <file>resource/reload-right.png</file>
         <file>resource/update_version.svg</file>
+        <file>resource/mouse.svg</file>
+        <file>resource/options.svg</file>
+        <file>resource/skin.svg</file>
     </qresource>
 </RCC>

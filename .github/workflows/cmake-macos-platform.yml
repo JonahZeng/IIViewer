@@ -1,0 +1,96 @@
+name: CMake on a macOS platform
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.ui'
+      - '**/*.cmake'
+      - '**/*.cpp'
+      - '**/*.rc'
+      - '**/*.qrc'
+      - 'CMakeLists.txt'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.ui'
+      - '**/*.cmake'
+      - '**/*.cpp'
+      - '**/*.rc'
+      - '**/*.qrc'
+      - 'CMakeLists.txt'
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    # steps:
+    # - name: Install Qt
+    #   uses: jurplel/install-qt-action@v4
+    #   with:
+    #     version: '5.15.10'
+    #     host: 'mac'
+    #     target: 'desktop'
+    #     arch: 'arm64'
+    #     cache: true
+    #     modules: 'qtcharts qtdatavis3d'
+    #     install-deps: 'true'
+
+    steps:
+    - name: Install Homebrew
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    - name: Install Qt5 (ARM64)
+      run: |
+        brew install qt@5
+        echo 'export PATH="$(brew --prefix qt@5)/bin:$PATH"' >> $GITHUB_ENV
+        echo 'export LDFLAGS="-L$(brew --prefix qt@5)/lib"' >> $GITHUB_ENV
+        echo 'export CPPFLAGS="-I$(brew --prefix qt@5)/include"' >> $GITHUB_ENV
+        echo 'export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"' >> $GITHUB_ENV
+        echo 'export Qt5_DIR="$(brew --prefix qt@5)/lib/cmake/Qt5"' >> $GITHUB_ENV
+
+    - name: Verify Qt Installation
+      run: |
+        file $(brew --prefix qt@5)/lib/QtWidgets.framework/Versions/5/QtWidgets
+        ls $(brew --prefix qt@5)/lib/cmake/Qt5
+
+    - name: Install create-dmg
+      run: |
+        brew install create-dmg
+        ls $(brew --prefix create-dmg)/bin
+
+    - uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5) -DLRELEASE_EXECUTABLE=$(brew --prefix qt@5)/bin/lrelease
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build
+
+    - name: Install
+      run: cmake --install ${{github.workspace}}/build
+
+    - name: Create DMG package
+      working-directory: ${{github.workspace}}/build
+      run: |
+        mkdir -p IIViewer.app/Contents/MacOS
+        mkdir -p IIViewer.app/Contents/Resources
+        cp -r install/* IIViewer.app/Contents/MacOS/
+        cp ${{github.workspace}}/icon/IIViewer_256.png IIViewer.app/Contents/Resources/icon.icns
+        $(brew --prefix create-dmg)/bin/create-dmg \
+        --volname "IIViewer Installer" \
+        --window-pos 200 120 \
+        --window-size 600 400 \
+        --icon-size 100 \
+        --app-drop-link 500 200 \
+        IIViewer.dmg \
+        IIViewer.app
+

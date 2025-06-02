@@ -5,11 +5,16 @@
     <name>AboutDlg</name>
     <message>
         <location filename="../src/AboutDlg.cpp" line="40"/>
+        <source>Copy Info</source>
+        <translation>复制信息</translation>
+    </message>
+    <message>
+        <location filename="../src/AboutDlg.cpp" line="41"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../src/AboutDlg.cpp" line="46"/>
+        <location filename="../src/AboutDlg.cpp" line="49"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
@@ -153,7 +158,7 @@
         <location filename="../src/IIPviewer.cpp" line="1098"/>
         <location filename="../src/IIPviewer.cpp" line="1147"/>
         <location filename="../src/IIPviewer.cpp" line="1196"/>
-        <location filename="../src/IIPviewer.cpp" line="1797"/>
+        <location filename="../src/IIPviewer.cpp" line="1803"/>
         <source>error</source>
         <translation>错误</translation>
     </message>
@@ -218,7 +223,7 @@
         <translation>raw文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="1797"/>
+        <location filename="../src/IIPviewer.cpp" line="1803"/>
         <source>At most 1 image!</source>
         <translation>最多打开一个图像！</translation>
     </message>
@@ -226,8 +231,8 @@
 <context>
     <name>ImageWidget</name>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="1047"/>
-        <location filename="../src/ImageWidget.cpp" line="1048"/>
+        <location filename="../src/ImageWidget.cpp" line="1054"/>
+        <location filename="../src/ImageWidget.cpp" line="1055"/>
         <source>drag image file here</source>
         <translation>拖动图像文件到这里</translation>
     </message>
@@ -429,7 +434,7 @@
     </message>
     <message>
         <location filename="../src/IIPviewer_ui.cpp" line="73"/>
-        <location filename="../src/IIPviewer_ui.cpp" line="386"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="389"/>
         <source>play list</source>
         <translation>播放列表</translation>
     </message>
@@ -439,98 +444,98 @@
         <translation>主题</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="100"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="101"/>
         <source>&amp;Setting</source>
         <translation>设置(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="101"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="102"/>
         <source>mouse for</source>
         <translation>鼠标作用</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="102"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="103"/>
         <source>pen</source>
         <translation>绘制</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="106"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="107"/>
         <source>move</source>
         <translation>拖动</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="113"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="115"/>
         <source>options</source>
         <translation>选项</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="118"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="121"/>
         <source>&amp;Help</source>
         <translation>帮助(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="119"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="122"/>
         <source>About | Feedback</source>
         <translation>关于 | 反馈</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="122"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="125"/>
         <source>Check update</source>
         <translation>检查升级</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="226"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="229"/>
         <source>data analysis</source>
         <translation>数据分析</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="258"/>
-        <location filename="../src/IIPviewer_ui.cpp" line="300"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="261"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="303"/>
         <source>ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="264"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="267"/>
         <source>sync coordinate to right</source>
         <translation>同步坐标到右侧</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="266"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="269"/>
         <source>sync coordinate to left</source>
         <translation>同步坐标到左侧</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="267"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="270"/>
         <source>clear</source>
         <translation>清除选区</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="317"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="320"/>
         <source>rgb contour/line</source>
         <translation>rgb数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="318"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="321"/>
         <source>rgb hist</source>
         <translation>rgb直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="319"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="322"/>
         <source>yuv contour/line</source>
         <translation>yuv数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="320"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="323"/>
         <source>yuv hist</source>
         <translation>yuv直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="321"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="324"/>
         <source>hsv contour/line</source>
         <translation>hsv数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="322"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="325"/>
         <source>hsv hist</source>
         <translation>hsv直方图</translation>
     </message>
