@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-windows-platform.yml?label=Windows build" alt="Windows Build Status"/>
-    <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-ubuntu-platform.yml?label=Ubuntu build" alt="Ubuntu Build Status"/>
-    <img src="https://img.shields.io/github/actions/workflow/status/JonahZeng/IIViewer/cmake-macos-platform.yml?label=MacOS build" alt="MacOS Build Status"/>
+    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-windows-platform.yml/badge.svg?branch=main" alt="Windows Build"/>
+    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-ubuntu-platform.yml/badge.svg?branch=main" alt="Ubuntu Build"/>
+    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-macos-platform.yml/badge.svg?branch=main" alt="MacOS Build"/>
 </p>
 
 ## About
