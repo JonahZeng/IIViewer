@@ -42,20 +42,26 @@ jobs:
     #     cache: true
     #     modules: 'qtcharts qtdatavis3d'
     #     install-deps: 'true'
+
     steps:
     - name: Install Homebrew
       run: |
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    - name: Install Qt5 (ARM64)
+    - name: Install Qt5 (ARM64) using Homebrew
       run: |
         brew install qt@5
-        echo "export PATH=\"$(brew --prefix qt@5)/bin:$PATH\"" >> $GITHUB_ENV
-        echo "export Qt5_DIR=\"$(brew --prefix qt@5)\"" >> $GITHUB_ENV
+        echo 'export PATH="$(brew --prefix qt@5)/bin:$PATH"' >> $GITHUB_ENV
+        echo 'export LDFLAGS="-L$(brew --prefix qt@5)/lib"' >> $GITHUB_ENV
+        echo 'export CPPFLAGS="-I$(brew --prefix qt@5)/include"' >> $GITHUB_ENV
+        echo 'export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"' >> $GITHUB_ENV
+        echo 'export Qt5_DIR="$(brew --prefix qt@5)/lib/cmake/Qt5"' >> $GITHUB_ENV
 
     - name: Verify Qt Installation
       run: |
         file $(brew --prefix qt@5)/lib/QtWidgets.framework/Versions/5/QtWidgets
+        ls $(brew --prefix qt@5)/lib/cmake/Qt5
+
 
     - uses: actions/checkout@v4
 
