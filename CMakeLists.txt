@@ -226,7 +226,6 @@ elseif(APPLE)
     if(NOT EXISTS ${_qm_translation_path})
         file(MAKE_DIRECTORY ${_qm_translation_path})
     endif()
-    set(LRELEASE_EXECUTABLE "$(brew --prefix qt@5)/bin/lrelease")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${LRELEASE_EXECUTABLE}
         ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
