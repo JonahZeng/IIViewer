@@ -520,7 +520,7 @@
         <translation>rgb直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="322/>
+        <location filename="../src/IIPviewer_ui.cpp" line="322"/>
         <source>yuv contour/line</source>
         <translation>yuv数据折线</translation>
     </message>
