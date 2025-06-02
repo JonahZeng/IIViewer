@@ -48,7 +48,7 @@ jobs:
       run: |
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    - name: Install Qt5 (ARM64) using Homebrew
+    - name: Install Qt5 (ARM64)
       run: |
         brew install qt@5
         echo 'export PATH="$(brew --prefix qt@5)/bin:$PATH"' >> $GITHUB_ENV
@@ -62,6 +62,10 @@ jobs:
         file $(brew --prefix qt@5)/lib/QtWidgets.framework/Versions/5/QtWidgets
         ls $(brew --prefix qt@5)/lib/cmake/Qt5
 
+    - name: Install create-dmg
+      run: |
+        brew install create-dmg
+        ls $(brew --prefix create-dmg)/bin
 
     - uses: actions/checkout@v4
 
@@ -81,4 +85,4 @@ jobs:
         mkdir -p IIViewer.app/Contents/Resources
         cp -r install/* IIViewer.app/Contents/MacOS/
         cp ${{github.workspace}}/icon/IIViewer_256.png IIViewer.app/Contents/Resources/icon.icns
-        create-dmg IIViewer.app
+        $(brew --prefix create-dmg)/bin/create-dmg IIViewer.app
