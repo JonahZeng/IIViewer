@@ -85,4 +85,12 @@ jobs:
         mkdir -p IIViewer.app/Contents/Resources
         cp -r install/* IIViewer.app/Contents/MacOS/
         cp ${{github.workspace}}/icon/IIViewer_256.png IIViewer.app/Contents/Resources/icon.icns
-        $(brew --prefix create-dmg)/bin/create-dmg IIViewer.app
+        $(brew --prefix create-dmg)/bin/create-dmg \
+        --dmgpath IIViewer.dmg \
+        --volname "IIViewer Installer" \
+        --window-pos 200 120 \
+        --window-size 600 400 \
+        --icon-size 100 \
+        --app-drop-link 500 200 \
+        IIViewer.app
+
