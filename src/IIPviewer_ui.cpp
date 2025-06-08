@@ -229,6 +229,8 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     dataAnalyseDockWgt->setWindowTitle(QCoreApplication::translate("mainWindow", "data analysis", nullptr));
     dataAnalyseDockWgt->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     QWidget *toolBoxContainer = new QWidget();
+    // QFrame *toolBoxContainer = new QFrame();
+    // toolBoxContainer->setFrameShape(QFrame::Shape::Box);
     QVBoxLayout *vlayout = new QVBoxLayout();
     toolBoxContainer->setLayout(vlayout);
     dataAnalyseDockWgt->setWidget(toolBoxContainer);

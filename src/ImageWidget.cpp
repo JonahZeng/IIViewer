@@ -30,29 +30,97 @@ static const RawFileInfoDlg::BayerPixelType type_GRBG[4] = {RawFileInfoDlg::PIX_
 static const RawFileInfoDlg::BayerPixelType type_GBRG[4] = {RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR};
 static const RawFileInfoDlg::BayerPixelType type_BGGR[4] = {RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R};
 
+static const RawFileInfoDlg::BayerPixelType type_RGG_IR[16] = {
+    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y
+};
+static const RawFileInfoDlg::BayerPixelType type_BGG_IR[16] = {
+    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y
+};
+static const RawFileInfoDlg::BayerPixelType type_GR_IR_G[16] = {
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB
+};
+static const RawFileInfoDlg::BayerPixelType type_GB_IR_G[16] = {
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR
+};
+static const RawFileInfoDlg::BayerPixelType type_G_IR_RG[16] = {
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR
+};
+static const RawFileInfoDlg::BayerPixelType type_G_IR_BG[16] = {
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB
+};
+static const RawFileInfoDlg::BayerPixelType type_IR_GGR[16] = {
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R
+};
+static const RawFileInfoDlg::BayerPixelType type_IR_GGB[16] = {
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B
+};
+
+static const RawFileInfoDlg::BayerPixelType* type_rgbir[8] = {
+    type_RGG_IR, type_BGG_IR, type_GR_IR_G, type_GB_IR_G, type_G_IR_RG, type_G_IR_BG, type_IR_GGR, type_IR_GGB
+};
+
+
 RawFileInfoDlg::BayerPixelType ImageWidget::getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by)
 {
-    uint32_t pos = ((y & 0x1) << 1) + (x & 0x1);
+    if (by >= RawFileInfoDlg::BayerPatternType::RGGB && by <= RawFileInfoDlg::BayerPatternType::BGGR)
+    {
+        uint32_t pos = ((y & 0x1) << 1) + (x & 0x1);
 
-    const RawFileInfoDlg::BayerPixelType *type = type_RGGB;
-    if (by == RawFileInfoDlg::BayerPatternType::RGGB)
-    {
-        type = type_RGGB;
-    }
-    else if (by == RawFileInfoDlg::BayerPatternType::GRBG)
-    {
-        type = type_GRBG;
-    }
-    else if (by == RawFileInfoDlg::BayerPatternType::GBRG)
-    {
-        type = type_GBRG;
-    }
-    else if (by == RawFileInfoDlg::BayerPatternType::BGGR)
-    {
-        type = type_BGGR;
-    }
+        const RawFileInfoDlg::BayerPixelType *type = type_RGGB;
+        if (by == RawFileInfoDlg::BayerPatternType::RGGB)
+        {
+            type = type_RGGB;
+        }
+        else if (by == RawFileInfoDlg::BayerPatternType::GRBG)
+        {
+            type = type_GRBG;
+        }
+        else if (by == RawFileInfoDlg::BayerPatternType::GBRG)
+        {
+            type = type_GBRG;
+        }
+        else if (by == RawFileInfoDlg::BayerPatternType::BGGR)
+        {
+            type = type_BGGR;
+        }
 
-    return type[pos];
+        return type[pos];
+    }
+    else if(by >= RawFileInfoDlg::BayerPatternType::RGGIR && by <= RawFileInfoDlg::BayerPatternType::IRGGB)
+    {
+        uint32_t pos = ((y & 0x11) << 2) + (x & 0x11);
+        const RawFileInfoDlg::BayerPixelType *type = type_rgbir[by - RawFileInfoDlg::BayerPatternType::RGGIR];
+        return type[pos];
+    }
+    else if(by == RawFileInfoDlg::BayerPatternType::MONO)
+    {
+        return RawFileInfoDlg::BayerPixelType::PIX_Y;
+    }
+    return RawFileInfoDlg::BayerPixelType::PIX_UNKNOW;
 }
 
 void ImageWidget::paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft)
@@ -111,9 +179,17 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                 {
                     painter.setPen(QColor(0, 255, 0));
                 }
-                if (pixType == RawFileInfoDlg::BayerPixelType::PIX_B)
+                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_B)
                 {
                     painter.setPen(QColor(0, 0, 255));
+                }
+                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_Y)
+                {
+                    painter.setPen(QColor(200, 200, 200));
+                }
+                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_IR)
+                {
+                    painter.setPen(QColor(128, 128, 128));
                 }
                 unsigned int gray = 0;
                 if (rawDataBit <= 8)
@@ -1287,7 +1363,7 @@ void ImageWidget::wheelEvent(QWheelEvent *event)
     event->accept();
 }
 
-void ImageWidget::setPixmap(QString &img) // jpg, jpeg, bmp, png, pnm, pgm
+void ImageWidget::setPixmap(QString &img) // jpg, jpeg, bmp, png, pnm, pgm, tiff
 {
     if (img.endsWith(".pgm", Qt::CaseInsensitive))
     {

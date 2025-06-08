@@ -3,6 +3,7 @@
 #include "YuvFileInfoDlg.h"
 #include <QJsonObject>
 #include <QString>
+#include <QColor>
 
 class AppSettings
 {
@@ -22,6 +23,8 @@ public:
     bool raw_compact;
     QString theme;
     int uv_value_disp_mode;
+    int pix_val_bg_index;
+    QColor pix_val_cus_bg_color;
 
     bool loadSettingsFromFile();
     void dumpSettingsToFile();

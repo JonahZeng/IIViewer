@@ -12,6 +12,15 @@ public:
         GRBG = 1,
         GBRG = 2,
         BGGR = 3,
+        RGGIR = 4,
+        BGGIR = 5,
+        GRIRG = 6,
+        GBIRG = 7,
+        GIRRG = 8,
+        GIRBG = 9,
+        IRGGR = 10,
+        IRGGB = 11,
+        MONO = 12,
         BAYER_UNKNOW = -1
     };
     enum BayerPixelType
@@ -20,6 +29,9 @@ public:
         PIX_GR = 1,
         PIX_GB = 2,
         PIX_B = 3,
+        PIX_IR = 4,
+        PIX_Y = 5,
+        PIX_UNKNOW = -1
     };
     enum ByteOrderType
     {

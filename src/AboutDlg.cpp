@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QGuiApplication>
 #include <QClipboard>
+#include <QMessageBox>
 
 AboutDlg::AboutDlg(QWidget* parent)
     : QDialog(parent), copy_btn(nullptr), label(nullptr)
@@ -58,4 +59,5 @@ void AboutDlg::onCopyInfo()
     QString info = label->text();
     QClipboard* clipboard = QGuiApplication::clipboard();
     clipboard->setText(info);
+    QMessageBox::information(this, tr("copy version info"), tr("copy info to clipboard successed!"), QMessageBox::StandardButton::Ok);
 }

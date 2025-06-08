@@ -127,6 +127,8 @@ public:
     YuvFileInfoDlg::YuvType yuvType;
     OpenedImageType openedImgType;
     int uv_disp_mode;
+    int paint_pix_val_bg_color_index;
+    QColor paint_pix_val_cus_bg_color;
 
 private:
     QImage *pixMapBak;

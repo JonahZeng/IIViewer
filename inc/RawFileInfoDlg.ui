@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>440</width>
-    <height>400</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -47,6 +47,13 @@
       <string>Bayer Pattern</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="GBRGRadioButton">
+        <property name="text">
+         <string>GBRG</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QRadioButton" name="RGGBRadioButton">
         <property name="text">
@@ -57,6 +64,48 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="1">
+       <widget class="QRadioButton" name="GBIRGRadioButton">
+        <property name="text">
+         <string>GB-IR-G</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QRadioButton" name="GIRBGRadioButton">
+        <property name="text">
+         <string>G-IR-BG</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QRadioButton" name="GRIRGRadioButton">
+        <property name="text">
+         <string>GR-IR-G</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QRadioButton" name="IRGGBRadioButton">
+        <property name="text">
+         <string>IR-GGB</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QRadioButton" name="RGGIRRadioButton">
+        <property name="text">
+         <string>RGG-IR</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QRadioButton" name="GIRRGRadioButton">
+        <property name="text">
+         <string>G-IR-RG</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QRadioButton" name="GRBGRadioButton">
         <property name="text">
@@ -64,17 +113,31 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="GBRGRadioButton">
-        <property name="text">
-         <string>GBRG</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
        <widget class="QRadioButton" name="BGGRRadioButton">
         <property name="text">
          <string>BGGR</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QRadioButton" name="BGGIRRadioButton">
+        <property name="text">
+         <string>BGG-IR</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QRadioButton" name="IRGGRRadioButton">
+        <property name="text">
+         <string>IR-GGR</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QRadioButton" name="MONORadioButton">
+        <property name="text">
+         <string>MONO</string>
         </property>
        </widget>
       </item>

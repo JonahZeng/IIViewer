@@ -17,9 +17,12 @@ this repo is designed for open and view ISP intermediate image. we support these
 - jpg
 - bmp
 - png
+- tiff
+- pgm(8/10/12/14/16 bit)
 - pnm(8/10/12/14/16 bit)
 - raw(8/10/12/14/16/18/20/22/24 bit)
 - mipi-raw(10/12/14 bit)
+- rgbir-raw(8/10/12/14/16/18/20/22/24 bit)
 - yuv(8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)
 
 ## Usage
@@ -120,6 +123,10 @@ I didn't have any mac device, but I'm sure compile this project on macos would n
 lupdate.exe ./src/main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h  ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp ./src/IIPOptionDialog.cpp ./inc/IIPOptionDialog.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.ui ./inc/YuvFileInfoDlg.ui -ts ./translations/IIViewer_zh.ts
 ```
 
-## font render on windows
+## HiDPI font render on windows
 if you use 4k monitor and enable high dpi, you will see alise around the font. Fortunately, we have a simple solution:
 create a environment variable named `QT_QPA_PLATFORM`, set the value to `windows:fontengine=freetype`, restart the application.
+
+## Sponsor
+WeChat Pay:
+![sponsor](./doc/image/sponsor.png)
