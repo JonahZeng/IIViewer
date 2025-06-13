@@ -18,5 +18,7 @@
         <file>resource/mouse.svg</file>
         <file>resource/options.svg</file>
         <file>resource/skin.svg</file>
+        <file>resource/single_rect.svg</file>
+        <file>resource/double_rect.svg</file>
     </qresource>
 </RCC>

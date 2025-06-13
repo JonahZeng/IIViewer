@@ -1,6 +1,8 @@
 #pragma once
 #include "RawFileInfoDlg.h"
 #include "YuvFileInfoDlg.h"
+#include "IIPOptionDialog.h"
+#include "AppSetting.h"
 #include <QColor>
 #include <QEvent>
 #include <QImage>
@@ -126,7 +128,7 @@ public:
     RawFileInfoDlg::ByteOrderType rawByteOrderType;
     YuvFileInfoDlg::YuvType yuvType;
     OpenedImageType openedImgType;
-    int uv_disp_mode;
+    AppSettings* appSettings;
 
 private:
     QImage *pixMapBak;

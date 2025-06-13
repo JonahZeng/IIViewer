@@ -136,6 +136,31 @@ void AppSettings::read(const QJsonObject& json)
     {
         uv_value_disp_mode = json["uv_value_disp_mode"].toInt();
     }
+    if (json.contains("pix_val_bg_index"))
+    {
+        pix_val_bg_index = (IIPOptionDialog::PaintPixValBgColor)json["pix_val_bg_index"].toInt();
+    }
+    if (json.contains("pix_val_cus_bg_color"))
+    {
+        pix_val_cus_bg_color.setNamedColor(json["pix_val_cus_bg_color"].toString());
+    }
+    if (json.contains("workAreaDoubleImgMode"))
+    {
+        workAreaDoubleImgMode = json["workAreaDoubleImgMode"].toBool();
+    }
+    if (json.contains("windowGeometry"))
+    {
+        windowGeometry = QRect(
+            json["windowGeometry_x"].toInt(),
+            json["windowGeometry_y"].toInt(),
+            json["windowGeometry_width"].toInt(),
+            json["windowGeometry_height"].toInt()
+        );
+    }
+    if (json.contains("windowScreenName"))
+    {
+        windowScreenName = json["windowScreenName"].toString();
+    }
 }
 
 void AppSettings::write(QJsonObject& json) const
@@ -165,4 +190,19 @@ void AppSettings::write(QJsonObject& json) const
     json["theme"] = theme;
 
     json["uv_value_disp_mode"] = uv_value_disp_mode;
+
+    json["pix_val_bg_index"] = (int)pix_val_bg_index;
+
+    json["pix_val_cus_bg_color"] = pix_val_cus_bg_color.name(QColor::HexArgb);
+
+    json["workAreaDoubleImgMode"] = workAreaDoubleImgMode;
+    json["windowGeometry"] = !windowGeometry.isNull();
+    if (!windowGeometry.isNull())
+    {
+        json["windowGeometry_x"] = windowGeometry.x();
+        json["windowGeometry_y"] = windowGeometry.y();
+        json["windowGeometry_width"] = windowGeometry.width();
+        json["windowGeometry_height"] = windowGeometry.height();
+    }
+    json["windowScreenName"] = windowScreenName;
 }

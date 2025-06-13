@@ -16,7 +16,7 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
     zoomTextRect(), pixValPaintRect(), rawDataPtr(nullptr), rawDataBit(0), 
     pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0), 
     yuvDataPtr(nullptr), yuvDataBit(0), rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW), 
-    openedImgType(UNKNOW_IMG), uv_disp_mode(0)
+    openedImgType(UNKNOW_IMG)
 {
 }
 
@@ -30,42 +30,168 @@ static const RawFileInfoDlg::BayerPixelType type_GRBG[4] = {RawFileInfoDlg::PIX_
 static const RawFileInfoDlg::BayerPixelType type_GBRG[4] = {RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR};
 static const RawFileInfoDlg::BayerPixelType type_BGGR[4] = {RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R};
 
+static const RawFileInfoDlg::BayerPixelType type_RGG_IR[16] = {
+    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y
+};
+static const RawFileInfoDlg::BayerPixelType type_BGG_IR[16] = {
+    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y
+};
+static const RawFileInfoDlg::BayerPixelType type_GR_IR_G[16] = {
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB
+};
+static const RawFileInfoDlg::BayerPixelType type_GB_IR_G[16] = {
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR
+};
+static const RawFileInfoDlg::BayerPixelType type_G_IR_RG[16] = {
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR
+};
+static const RawFileInfoDlg::BayerPixelType type_G_IR_BG[16] = {
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB
+};
+static const RawFileInfoDlg::BayerPixelType type_IR_GGR[16] = {
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R
+};
+static const RawFileInfoDlg::BayerPixelType type_IR_GGB[16] = {
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
+    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B
+};
+
+static const RawFileInfoDlg::BayerPixelType* type_rgbir[8] = {
+    type_RGG_IR, type_BGG_IR, type_GR_IR_G, type_GB_IR_G, type_G_IR_RG, type_G_IR_BG, type_IR_GGR, type_IR_GGB
+};
+
+
 RawFileInfoDlg::BayerPixelType ImageWidget::getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by)
 {
-    uint32_t pos = ((y & 0x1) << 1) + (x & 0x1);
+    if (by >= RawFileInfoDlg::BayerPatternType::RGGB && by <= RawFileInfoDlg::BayerPatternType::BGGR)
+    {
+        uint32_t pos = ((y & 0x1) << 1) + (x & 0x1);
 
-    const RawFileInfoDlg::BayerPixelType *type = type_RGGB;
-    if (by == RawFileInfoDlg::BayerPatternType::RGGB)
-    {
-        type = type_RGGB;
-    }
-    else if (by == RawFileInfoDlg::BayerPatternType::GRBG)
-    {
-        type = type_GRBG;
-    }
-    else if (by == RawFileInfoDlg::BayerPatternType::GBRG)
-    {
-        type = type_GBRG;
-    }
-    else if (by == RawFileInfoDlg::BayerPatternType::BGGR)
-    {
-        type = type_BGGR;
-    }
+        const RawFileInfoDlg::BayerPixelType *type = type_RGGB;
+        if (by == RawFileInfoDlg::BayerPatternType::RGGB)
+        {
+            type = type_RGGB;
+        }
+        else if (by == RawFileInfoDlg::BayerPatternType::GRBG)
+        {
+            type = type_GRBG;
+        }
+        else if (by == RawFileInfoDlg::BayerPatternType::GBRG)
+        {
+            type = type_GBRG;
+        }
+        else if (by == RawFileInfoDlg::BayerPatternType::BGGR)
+        {
+            type = type_BGGR;
+        }
 
-    return type[pos];
+        return type[pos];
+    }
+    else if(by >= RawFileInfoDlg::BayerPatternType::RGGIR && by <= RawFileInfoDlg::BayerPatternType::IRGGB)
+    {
+        uint32_t pos = ((y & 0x11) << 2) + (x & 0x11);
+        const RawFileInfoDlg::BayerPixelType *type = type_rgbir[by - RawFileInfoDlg::BayerPatternType::RGGIR];
+        return type[pos];
+    }
+    else if(by == RawFileInfoDlg::BayerPatternType::MONO)
+    {
+        return RawFileInfoDlg::BayerPixelType::PIX_Y;
+    }
+    return RawFileInfoDlg::BayerPixelType::PIX_UNKNOW;
 }
 
 void ImageWidget::paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft)
 {
-    QImage roiImage = pixMap->copy(viewTopLeftPix.x(), viewTopLeftPix.y(), viewPixWidth, viewPixHeight);
+    int start_x = viewTopLeftPix.x();
+    int start_y = viewTopLeftPix.y();
+
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
 
     painter.setPen(QColor(255, 0, 0));
     for (int h = 0; h < viewPixHeight; h++)
     {
         for (int w = 0; w < viewPixWidth; w++)
         {
-            QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
-            painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", roiImage.pixelColor(w, h).red()));
+            QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
+            painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", pixMap->pixelColor(start_x + w, start_y + h).red()));
         }
     }
     painter.setPen(QColor(0, 255, 0));
@@ -73,8 +199,8 @@ void ImageWidget::paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, i
     {
         for (int w = 0; w < viewPixWidth; w++)
         {
-            QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
-            painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", roiImage.pixelColor(w, h).green()));
+            QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
+            painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", pixMap->pixelColor(start_x + w, start_y + h).green()));
         }
     }
     painter.setPen(QColor(0, 0, 255));
@@ -82,8 +208,8 @@ void ImageWidget::paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, i
     {
         for (int w = 0; w < viewPixWidth; w++)
         {
-            QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
-            painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", roiImage.pixelColor(w, h).blue()));
+            QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
+            painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", pixMap->pixelColor(start_x + w, start_y + h).blue()));
         }
     }
 }
@@ -92,6 +218,63 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
 {
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
+
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 32, 64, 32);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
 
     int rawWidth = pixMap->width();
     int rawHeight = pixMap->height();
@@ -111,9 +294,17 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                 {
                     painter.setPen(QColor(0, 255, 0));
                 }
-                if (pixType == RawFileInfoDlg::BayerPixelType::PIX_B)
+                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_B)
                 {
                     painter.setPen(QColor(0, 0, 255));
+                }
+                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_Y)
+                {
+                    painter.setPen(QColor(200, 200, 200));
+                }
+                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_IR)
+                {
+                    painter.setPen(QColor(128, 128, 128));
                 }
                 unsigned int gray = 0;
                 if (rawDataBit <= 8)
@@ -137,9 +328,12 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                     }
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 96);
-
-                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("%d", gray));
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 32, 64, 32);
+                
+                QFont font = painter.font();
+                font.setPixelSize(12); // 减小字体大小确保不超出
+                painter.setFont(font);
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap | Qt::TextWrapAnywhere, QString::asprintf("%d", gray));
             }
         }
     }
@@ -149,6 +343,63 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
 {
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
+
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
 
     int pnmWidth = pixMap->width();
     int pnmHeight = pixMap->height();
@@ -174,9 +425,9 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                         gray = ((unsigned short *)pnmDataPtr)[(yStart + h) * pnmWidth + (xStart + w)];
                     }
 
-                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 32, 64, 32);
 
-                    painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", gray));
+                    painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("%d", gray));
                 }
             }
         }
@@ -200,9 +451,9 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                     r = ((unsigned short *)pnmDataPtr)[(yStart + h) * pnmWidth * 3 + (xStart + w) * 3];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", r));
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("%d", r));
             }
         }
     }
@@ -224,9 +475,9 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                     g = ((unsigned short *)pnmDataPtr)[(yStart + h) * pnmWidth * 3 + (xStart + w) * 3 + 1];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", g));
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("%d", g));
             }
         }
     }
@@ -247,9 +498,9 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                     b = ((unsigned short *)pnmDataPtr)[(yStart + h) * pnmWidth * 3 + (xStart + w) * 3 + 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", b));
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("%d", b));
             }
         }
     }
@@ -259,6 +510,63 @@ void ImageWidget::paintPgmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
 {
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
+
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 32, 64, 32);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
 
     int pgmWidth = pixMap->width();
     int pgmHeight = pixMap->height();
@@ -280,7 +588,7 @@ void ImageWidget::paintPgmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                     gray = ((unsigned short *)pgmDataPtr)[(yStart + h) * pgmWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 32);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", gray));
             }
@@ -293,8 +601,67 @@ void ImageWidget::paintYuv444InterleavePixVal(QPoint &viewTopLeftPix, QPainter &
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
+
+    int uv_disp_mode = appSettings->uv_value_disp_mode;
 
     painter.setPen(QColor(200, 200, 200));
     for (int h = 0; h < viewPixHeight; h++)
@@ -313,9 +680,9 @@ void ImageWidget::paintYuv444InterleavePixVal(QPoint &viewTopLeftPix, QPainter &
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 3 + (xStart + w) * 3];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("Y:%d", y));
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("Y:%d", y));
             }
         }
     }
@@ -337,9 +704,9 @@ void ImageWidget::paintYuv444InterleavePixVal(QPoint &viewTopLeftPix, QPainter &
                     u = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 3 + (xStart + w) * 3 + 1];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
             }
         }
     }
@@ -360,9 +727,9 @@ void ImageWidget::paintYuv444InterleavePixVal(QPoint &viewTopLeftPix, QPainter &
                     v = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 3 + (xStart + w) * 3 + 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("V:%d", uv_disp_mode == 0 ? (int)v - (1 << (yuvDataBit - 1)) : (int)v));
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("V:%d", uv_disp_mode == 0 ? (int)v - (1 << (yuvDataBit - 1)) : (int)v));
             }
         }
     }
@@ -373,8 +740,67 @@ void ImageWidget::paintYuv444PlanarPixVal(QPoint &viewTopLeftPix, QPainter &pain
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
+
+    int uv_disp_mode = appSettings->uv_value_disp_mode;
 
     painter.setPen(QColor(200, 200, 200));
     for (int h = 0; h < viewPixHeight; h++)
@@ -393,7 +819,7 @@ void ImageWidget::paintYuv444PlanarPixVal(QPoint &viewTopLeftPix, QPainter &pain
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("Y:%d", y));
             }
@@ -417,7 +843,7 @@ void ImageWidget::paintYuv444PlanarPixVal(QPoint &viewTopLeftPix, QPainter &pain
                     u = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + (yStart + h) * yuvWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
             }
@@ -440,7 +866,7 @@ void ImageWidget::paintYuv444PlanarPixVal(QPoint &viewTopLeftPix, QPainter &pain
                     v = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight * 2 + (yStart + h) * yuvWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("V:%d", uv_disp_mode == 0 ? (int)v - (1 << (yuvDataBit - 1)) : (int)v));
             }
@@ -453,8 +879,67 @@ void ImageWidget::paintYuv422UYVYPixVal(QPoint &viewTopLeftPix, QPainter &painte
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
+
+    int uv_disp_mode = appSettings->uv_value_disp_mode;
 
     painter.setPen(QColor(200, 200, 200));
     for (int h = 0; h < viewPixHeight; h++)
@@ -473,7 +958,7 @@ void ImageWidget::paintYuv422UYVYPixVal(QPoint &viewTopLeftPix, QPainter &painte
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2 + 1];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 32);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("Y:%d", y));
             }
@@ -504,7 +989,7 @@ void ImageWidget::paintYuv422UYVYPixVal(QPoint &viewTopLeftPix, QPainter &painte
                     u = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 32, 64, 32);
 
                 if ((xStart & 0x1) == 0x0)
                 {
@@ -541,7 +1026,7 @@ void ImageWidget::paintYuv422UYVYPixVal(QPoint &viewTopLeftPix, QPainter &painte
                     v = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 32, 64, 32);
 
                 if ((xStart & 0x1) == 0x0)
                 {
@@ -561,8 +1046,67 @@ void ImageWidget::paintYuv422YUYVPixVal(QPoint &viewTopLeftPix, QPainter &painte
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
+
+    int uv_disp_mode = appSettings->uv_value_disp_mode;
 
     painter.setPen(QColor(200, 200, 200));
     for (int h = 0; h < viewPixHeight; h++)
@@ -581,7 +1125,7 @@ void ImageWidget::paintYuv422YUYVPixVal(QPoint &viewTopLeftPix, QPainter &painte
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 32);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("Y:%d", y));
             }
@@ -612,7 +1156,7 @@ void ImageWidget::paintYuv422YUYVPixVal(QPoint &viewTopLeftPix, QPainter &painte
                     u = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2 + 1];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 32, 64, 32);
                 if ((xStart & 0x1) == 0x0)
                 {
                     painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
@@ -648,7 +1192,7 @@ void ImageWidget::paintYuv422YUYVPixVal(QPoint &viewTopLeftPix, QPainter &painte
                     v = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth * 2 + (xStart + w) * 2 + 1];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 32, 64, 32);
 
                 if ((xStart & 0x1) == 0x0)
                 {
@@ -671,8 +1215,67 @@ void ImageWidget::paintYuv420NV12PixVal(QPoint &viewTopLeftPix, QPainter &painte
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
+
+    int uv_disp_mode = appSettings->uv_value_disp_mode;
 
     painter.setPen(QColor(200, 200, 200));
     for (int h = 0; h < viewPixHeight; h++)
@@ -691,7 +1294,7 @@ void ImageWidget::paintYuv420NV12PixVal(QPoint &viewTopLeftPix, QPainter &painte
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("Y:%d", y));
             }
@@ -717,7 +1320,7 @@ void ImageWidget::paintYuv420NV12PixVal(QPoint &viewTopLeftPix, QPainter &painte
                         u = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w)];
                     }
 
-                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
 
                     painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
                 }
@@ -743,7 +1346,7 @@ void ImageWidget::paintYuv420NV12PixVal(QPoint &viewTopLeftPix, QPainter &painte
                         v = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w) + 1];
                     }
 
-                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
+                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
 
                     painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("V:%d", uv_disp_mode == 0 ? (int)v - (1 << (yuvDataBit - 1)) : (int)v));
                 }
@@ -757,8 +1360,67 @@ void ImageWidget::paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painte
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
+
+    int uv_disp_mode = appSettings->uv_value_disp_mode;
 
     painter.setPen(QColor(200, 200, 200));
     for (int h = 0; h < viewPixHeight; h++)
@@ -777,7 +1439,7 @@ void ImageWidget::paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painte
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("Y:%d", y));
             }
@@ -803,7 +1465,7 @@ void ImageWidget::paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painte
                         u = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w) + 1];
                     }
 
-                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
 
                     painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
                 }
@@ -829,7 +1491,7 @@ void ImageWidget::paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painte
                         v = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w)];
                     }
 
-                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
+                    QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
 
                     painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("V:%d", uv_disp_mode == 0 ? (int)v - (1 << (yuvDataBit - 1)) : (int)v));
                 }
@@ -843,8 +1505,67 @@ void ImageWidget::paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &paint
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
+
+    int uv_disp_mode = appSettings->uv_value_disp_mode;
 
     painter.setPen(QColor(200, 200, 200));
     for (int h = 0; h < viewPixHeight; h++)
@@ -863,9 +1584,9 @@ void ImageWidget::paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &paint
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter, QString::asprintf("Y:%d", y));
+                painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter | Qt::TextWordWrap, QString::asprintf("Y:%d", y));
             }
         }
     }
@@ -887,9 +1608,9 @@ void ImageWidget::paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &paint
                     u = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth / 2 + (xStart + w) / 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
+                painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter | Qt::TextWordWrap, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
             }
         }
     }
@@ -910,9 +1631,9 @@ void ImageWidget::paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &paint
                     v = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + yuvWidth * yuvHeight / 4 + ((yStart + h) / 2) * yuvWidth / 2 + (xStart + w) / 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
 
-                painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter, QString::asprintf("V:%d", uv_disp_mode == 0 ? (int)v - (1 << (yuvDataBit - 1)) : (int)v));
+                painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter | Qt::TextWordWrap, QString::asprintf("V:%d", uv_disp_mode == 0 ? (int)v - (1 << (yuvDataBit - 1)) : (int)v));
             }
         }
     }
@@ -923,8 +1644,67 @@ void ImageWidget::paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &paint
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
+
+    int uv_disp_mode = appSettings->uv_value_disp_mode;
 
     painter.setPen(QColor(200, 200, 200));
     for (int h = 0; h < viewPixHeight; h++)
@@ -943,7 +1723,7 @@ void ImageWidget::paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &paint
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
 
                 painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter, QString::asprintf("Y:%d", y));
             }
@@ -967,7 +1747,7 @@ void ImageWidget::paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &paint
                     v = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth / 2 + (xStart + w) / 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 32, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
 
                 painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter, QString::asprintf("U:%d", uv_disp_mode == 0 ? (int)v - (1 << (yuvDataBit - 1)) : (int)v));
             }
@@ -990,7 +1770,7 @@ void ImageWidget::paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &paint
                     u = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + yuvWidth * yuvHeight / 4 + ((yStart + h) / 2) * yuvWidth / 2 + (xStart + w) / 2];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96 + 64, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
 
                 painter.drawText(pixValRect, Qt::AlignmentFlag::AlignCenter, QString::asprintf("V:%d", uv_disp_mode == 0 ? (int)u - (1 << (yuvDataBit - 1)) : (int)u));
             }
@@ -1002,6 +1782,63 @@ void ImageWidget::paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, i
 {
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
+
+    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    {
+        switch(appSettings->pix_val_bg_index)
+        {
+            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+                painter.setPen(appSettings->pix_val_cus_bg_color);
+                painter.setBrush(appSettings->pix_val_cus_bg_color);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::WHITE:
+                painter.setPen(Qt::white);
+                painter.setBrush(Qt::white);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GRAY:
+                painter.setPen(Qt::gray);
+                painter.setBrush(Qt::gray);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLACK:
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::black);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::RED:
+                painter.setPen(Qt::red);
+                painter.setBrush(Qt::red);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+                painter.setPen(Qt::yellow);
+                painter.setBrush(Qt::yellow);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::GREEN:
+                painter.setPen(Qt::green);
+                painter.setBrush(Qt::green);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::CYAN:
+                painter.setPen(Qt::cyan);
+                painter.setBrush(Qt::cyan);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::BLUE:
+                painter.setPen(Qt::blue);
+                painter.setBrush(Qt::blue);
+                break;
+            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+                painter.setPen(Qt::magenta);
+                painter.setBrush(Qt::magenta);
+                break;
+            default:
+                break;
+        }
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 32, 64, 32);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
 
     int yuvWidth = pixMap->width();
     int yuvHeight = pixMap->height();
@@ -1287,7 +2124,7 @@ void ImageWidget::wheelEvent(QWheelEvent *event)
     event->accept();
 }
 
-void ImageWidget::setPixmap(QString &img) // jpg, jpeg, bmp, png, pnm, pgm
+void ImageWidget::setPixmap(QString &img) // jpg, jpeg, bmp, png, pnm, pgm, tiff
 {
     if (img.endsWith(".pgm", Qt::CaseInsensitive))
     {

@@ -17,9 +17,12 @@ this repo is designed for open and view ISP intermediate image. we support these
 - jpg
 - bmp
 - png
+- tiff
+- pgm(8/10/12/14/16 bit)
 - pnm(8/10/12/14/16 bit)
 - raw(8/10/12/14/16/18/20/22/24 bit)
 - mipi-raw(10/12/14 bit)
+- rgbir-raw(8/10/12/14/16/18/20/22/24 bit)
 - yuv(8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)
 
 ## Usage
@@ -109,17 +112,22 @@ chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
 ./linuxdeployqt-continuous-x86_64.AppImage ./bin/Release/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
 ```
 
-### macos
-I didn't have any mac device, but I'm sure compile this project on macos would not be diffcult since this project use cross-platform build tool(cmake).
+### macos(arm64)
+I have no any mac device, but fortunately, copilot help me write a MacOS workflow yml file and it works, if you want build it on mac, see the [yml file](./.github/workflows/cmake-macos-platform.yml)
 
 ## Translation
 - use `lupdate` to scan all the source codes and generate a .ts file
 - use `linguist` to translate the .ts file, and public it to a .qm file
 - load specific .qm file when the software startup, based on the user's region and language
 ```bash
-lupdate.exe ./src/main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h  ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp ./src/IIPOptionDialog.cpp ./inc/IIPOptionDialog.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.ui ./inc/YuvFileInfoDlg.ui -ts ./translations/IIViewer_zh.ts
+lupdate.exe ./src/Main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h ./src/IIPviewer.rc ./src/IIPviewer.qrc ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.h ./inc/IIPOptionDialog.ui ./src/IIPOptionDialog.cpp ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./inc/YuvFileInfoDlg.ui ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp -ts ./translations/IIViewer_zh.ts
 ```
 
-## font render on windows
+## HiDPI font render on windows
 if you use 4k monitor and enable high dpi, you will see alise around the font. Fortunately, we have a simple solution:
 create a environment variable named `QT_QPA_PLATFORM`, set the value to `windows:fontengine=freetype`, restart the application.
+
+## Sponsor
+WeChat Pay:
+
+![sponsor](./doc/image/sponsor.png)

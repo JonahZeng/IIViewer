@@ -165,9 +165,38 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
 
     setAcceptDrops(true);
     ui.setupUi(this);
+    ui.imageLabel[LEFT_IMG_WIDGET]->appSettings = &settings;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->appSettings = &settings;
+
     QList<QScreen *> screenInfoList = QApplication::screens();
-    QRect screenRect = screenInfoList.at(0)->geometry();
-    setGeometry(screenRect.width() / 6, screenRect.height() / 6, screenRect.width() * 2 / 3, screenRect.height() * 2 / 3);
+    bool prevScreenExist = false;
+    for(auto sc: screenInfoList)
+    {
+        if(sc->name() == settings.windowScreenName)
+        {
+            prevScreenExist = true;
+            break;
+        }
+    }
+    if(!prevScreenExist)
+    {
+        QRect screenRect = screenInfoList.at(0)->geometry();
+        setGeometry(screenRect.width() / 6, screenRect.height() / 6, screenRect.width() * 2 / 3, screenRect.height() * 2 / 3);
+    }
+    else
+    {
+        // Restore window geometry from saved settings
+        QRect geometry = settings.windowGeometry;
+        
+        // Ensure window is visible on current screen
+        QScreen *screen = QApplication::screenAt(geometry.center());
+        if (screen) {
+            QRect screenRect = screen->geometry();
+            geometry = geometry.intersected(screenRect);
+        }
+        
+        setGeometry(geometry);
+    }
     setTitle();
 
     masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
@@ -204,6 +233,8 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     connect(ui.useMoveToolAction, &QAction::triggered, this, &IIPviewer::onUseMoveAction);
     connect(ui.useRoiToolAction, &QAction::triggered, this, &IIPviewer::onUseRoiAction);
     connect(ui.sysOptionAction, &QAction::triggered, this, &IIPviewer::onSysOptionAction);
+    connect(ui.workAreaSingleModeAction, &QAction::triggered, this, &IIPviewer::onSingleImgModeAction);
+    connect(ui.workAreaDoubleModeAction, &QAction::triggered, this, &IIPviewer::onDoubleImgModeAction);
 
     connect(ui.paintOk0, &QPushButton::clicked, this, &IIPviewer::handleInputPaintPos0);
     connect(ui.paintOk1, &QPushButton::clicked, this, &IIPviewer::handleInputPaintPos1);
@@ -259,6 +290,17 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     ui.playListAction->setChecked(false);
     ui.exchangeAreaPreviewBtn->setEnabled(false);
     setWindowIcon(QIcon(":image/resource/aboutlog.png"));
+
+    if(settings.workAreaDoubleImgMode)
+    {
+        ui.workAreaDoubleModeAction->setChecked(true);
+        onDoubleImgModeAction(true);
+    }
+    else
+    {
+        ui.workAreaSingleModeAction->setChecked(true);
+        onSingleImgModeAction(true);
+    }
 
     if(needOpenFilePath.length() > 0)
     {
@@ -329,15 +371,65 @@ void IIPviewer::onUseMoveAction(bool check)
     }
 }
 
+void IIPviewer::onSingleImgModeAction(bool check)
+{
+    ui.workAreaDoubleModeAction->setChecked(!check);
+    settings.workAreaDoubleImgMode = !check;
+    if(settings.workAreaDoubleImgMode)
+    {
+        ui.scrollArea[1]->show();
+        ui.scrollAreaCenterFrame->show();
+        ui.openFileRightAction->setEnabled(true);
+        ui.reloadFileRightAction->setEnabled(true);
+        ui.closeRightAction->setEnabled(true);
+    }
+    else
+    {
+        ui.scrollArea[1]->hide();
+        ui.scrollAreaCenterFrame->hide();
+        ui.openFileRightAction->setEnabled(false);
+        ui.reloadFileRightAction->setEnabled(false);
+        ui.closeRightAction->setEnabled(false);
+    }
+    ui.mainWidget->adjustSize();
+}
+
+void IIPviewer::onDoubleImgModeAction(bool check)
+{
+    ui.workAreaSingleModeAction->setChecked(!check);
+    settings.workAreaDoubleImgMode = check;
+    if(settings.workAreaDoubleImgMode)
+    {
+        ui.scrollArea[1]->show();
+        ui.scrollAreaCenterFrame->show();
+        ui.openFileRightAction->setEnabled(true);
+        ui.reloadFileRightAction->setEnabled(true);
+        ui.closeRightAction->setEnabled(true);
+    }
+    else
+    {
+        ui.scrollArea[1]->hide();
+        ui.scrollAreaCenterFrame->hide();
+        ui.openFileRightAction->setEnabled(false);
+        ui.reloadFileRightAction->setEnabled(false);
+        ui.closeRightAction->setEnabled(false);
+    }
+    ui.mainWidget->adjustSize();
+}
+
 void IIPviewer::onSysOptionAction(bool check)
 {
     Q_UNUSED(check);
     IIPOptionDialog dlg(this);
+    dlg.set_uv_disp_mode(this->settings.uv_value_disp_mode);
+    dlg.set_pix_val_bg_color_index(this->settings.pix_val_bg_index);
+    dlg.set_pix_val_custom_bg_color(this->settings.pix_val_cus_bg_color);
     int resp = dlg.exec();
     if(resp == IIPOptionDialog::DialogCode::Accepted)
     {
-        int mode_idx = dlg.ui.uv_pix_value_mode_comboBox->currentIndex();
-        this->settings.uv_value_disp_mode = mode_idx;
+        this->settings.uv_value_disp_mode = dlg.uv_disp_mode;
+        this->settings.pix_val_bg_index = dlg.pix_val_bg_color_index;
+        this->settings.pix_val_cus_bg_color = dlg.pix_val_cus_bg_color;
     }
 }
 
@@ -516,6 +608,40 @@ void IIPviewer::closeEvent(QCloseEvent *event)
     auto reply = QMessageBox::question(this, tr("Confirm"), tr("Are you sure to quit?"), QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
     if (reply == QMessageBox::Yes)
     {
+        // Save window position and screen info
+        QRect geometry = this->geometry();
+        QPoint center = geometry.center();
+        QScreen *screen = QApplication::screenAt(center);
+
+        if (screen)
+        {
+            settings.windowGeometry = geometry;
+            settings.windowScreenName = screen->name();
+
+            // Verify the screen still exists (multi-screen environment may change)
+            bool screenExists = false;
+            for (QScreen *s : QApplication::screens())
+            {
+                if (s->name() == screen->name())
+                {
+                    screenExists = true;
+                    break;
+                }
+            }
+
+            if (!screenExists)
+            {
+                // Fallback to primary screen if current screen not found
+                settings.windowScreenName = QApplication::primaryScreen()->name();
+            }
+        }
+        else
+        {
+            // No screen found at center, use primary screen
+            settings.windowGeometry = geometry;
+            settings.windowScreenName = QApplication::primaryScreen()->name();
+        }
+
         onCloseLeftFileAction();
         onCloseRightFileAction();
         QMainWindow::closeEvent(event);
@@ -557,7 +683,7 @@ void IIPviewer::onOpenFileAction()
 {
     // QString path = settings.workPath;
     auto fileName = QFileDialog::getOpenFileName(this, tr("open images"), settings.workPath,
-                                                 "Images files(*.jpg *JPG *.jpeg *JPEG *.png *PNG *.bmp *BMP);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;Pgm files(*.pgm *.PGM);;yuv files(*.yuv *.YUV);;All files(*.*)");
+        "Images files(*.jpg *JPG *.jpeg *JPEG *.png *PNG *.bmp *BMP *.tif *TIF *.tiff *TIFF);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;Pgm files(*.pgm *.PGM);;yuv files(*.yuv *.YUV);;Tiff files(*.tif *.TIF *.tiff *.TIFF);;All files(*.*)");
 
     if (fileName.isEmpty())
     {
@@ -598,7 +724,7 @@ void IIPviewer::openGivenFileFromCmdArgv(QString image)
     QFileInfo info(image);
     // qDebug() << info.suffix();
     QString suf = info.suffix().toLower();
-    if(suf == "jpg" || suf == "png" || suf == "bmp" || suf == "raw" || suf == "yuv" || suf == "pnm" || suf == "pgm")
+    if(suf == "jpg" || suf == "png" || suf == "bmp" || suf == "tif" || suf == "tiff" || suf == "raw" || suf == "yuv" || suf == "pnm" || suf == "pgm")
     {
         onCloseLeftFileAction();
         loadFile(image, LEFT_IMG_WIDGET);
@@ -744,7 +870,12 @@ void IIPviewer::reLoadFile(int scrollArea)
 
 void IIPviewer::loadFile(QString &fileName, int scrollArea)
 {
-    if (fileName.endsWith(".jpg", Qt::CaseInsensitive) || fileName.endsWith(".jpeg", Qt::CaseInsensitive) || fileName.endsWith(".png", Qt::CaseInsensitive) || fileName.endsWith(".bmp", Qt::CaseInsensitive))
+    if (fileName.endsWith(".jpg", Qt::CaseInsensitive) || 
+        fileName.endsWith(".jpeg", Qt::CaseInsensitive) || 
+        fileName.endsWith(".png", Qt::CaseInsensitive) || 
+        fileName.endsWith(".bmp", Qt::CaseInsensitive) ||
+        fileName.endsWith(".tif", Qt::CaseInsensitive) ||
+        fileName.endsWith(".tiff", Qt::CaseInsensitive))
     {
         QImageReader reader(fileName);
         reader.setAutoTransform(true);
@@ -819,7 +950,6 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     YuvFileInfoDlg dlg(this);
 
     auto yuvtp = settings.yuvType;
-    int uv_disp_mode = settings.uv_value_disp_mode;
     if (yuvtp == YuvFileInfoDlg::YUV444_INTERLEAVE)
     {
         dlg.ui.formatComboBox->setCurrentIndex(0);
@@ -961,7 +1091,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
-        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, uv_disp_mode, LEFT_IMG_WIDGET);
+        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
@@ -980,7 +1110,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
-        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, uv_disp_mode, RIGHT_IMG_WIDGET);
+        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
@@ -988,24 +1118,52 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
 void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
 {
     RawFileInfoDlg dlg(this);
-
-    auto rawBayer = settings.rawByType;
-    if (rawBayer == RawFileInfoDlg::RGGB)
+    switch (settings.rawByType)
     {
+    case RawFileInfoDlg::BayerPatternType::RGGB:
         dlg.ui.RGGBRadioButton->setChecked(true);
-    }
-    else if (rawBayer == RawFileInfoDlg::GRBG)
-    {
+        break;
+    case RawFileInfoDlg::BayerPatternType::GRBG:
         dlg.ui.GRBGRadioButton->setChecked(true);
-    }
-    else if (rawBayer == RawFileInfoDlg::GBRG)
-    {
+        break;
+    case RawFileInfoDlg::BayerPatternType::GBRG:
         dlg.ui.GBRGRadioButton->setChecked(true);
-    }
-    else if (rawBayer == RawFileInfoDlg::BGGR)
-    {
+        break;
+    case RawFileInfoDlg::BayerPatternType::BGGR:
         dlg.ui.BGGRRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::RGGIR:
+        dlg.ui.RGGIRRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::BGGIR:
+        dlg.ui.BGGIRRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::GRIRG:
+        dlg.ui.GRIRGRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::GBIRG:
+        dlg.ui.GBIRGRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::GIRRG:
+        dlg.ui.GIRRGRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::GIRBG:
+        dlg.ui.GIRBGRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::IRGGR:
+        dlg.ui.IRGGRRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::IRGGB:
+        dlg.ui.IRGGBRadioButton->setChecked(true);
+        break;
+    case RawFileInfoDlg::BayerPatternType::MONO:
+        dlg.ui.MONORadioButton->setChecked(true);
+        break;
+    
+    default:
+        break;
     }
+    
     auto byteOrder = settings.rawByteOrder;
     if (byteOrder == RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN)
     {
@@ -1027,23 +1185,60 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     {
         return;
     }
-    RawFileInfoDlg::BayerPatternType by = RawFileInfoDlg::GRBG;
+    RawFileInfoDlg::BayerPatternType by = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
     if (dlg.ui.RGGBRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::RGGB;
+        by = RawFileInfoDlg::BayerPatternType::RGGB;
     }
     else if (dlg.ui.GRBGRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::GRBG;
+        by = RawFileInfoDlg::BayerPatternType::GRBG;
     }
     else if (dlg.ui.GBRGRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::GBRG;
+        by = RawFileInfoDlg::BayerPatternType::GBRG;
     }
     else if (dlg.ui.BGGRRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BGGR;
+        by = RawFileInfoDlg::BayerPatternType::BGGR;
     }
+    else if (dlg.ui.RGGIRRadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::RGGIR;
+    }
+    else if (dlg.ui.BGGIRRadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::BGGIR;
+    }
+    else if (dlg.ui.GRIRGRadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::GRIRG;
+    }
+    else if (dlg.ui.GBIRGRadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::GBIRG;
+    }
+    else if (dlg.ui.GIRRGRadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::GIRRG;
+    }
+    else if (dlg.ui.GIRBGRadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::GIRBG;
+    }
+    else if (dlg.ui.IRGGRRadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::IRGGR;
+    }
+    else if (dlg.ui.IRGGBRadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::IRGGB;
+    }
+    else if (dlg.ui.MONORadioButton->isChecked())
+    {
+        by = RawFileInfoDlg::BayerPatternType::MONO;
+    }
+
     auto order = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
     if (dlg.ui.big_endian->isChecked())
     {
@@ -1250,11 +1445,10 @@ void IIPviewer::setRawImage(QString &imageName, RawFileInfoDlg::BayerPatternType
     ui.imageLabel[leftOrRight]->setPixmap(imageName, by, order, bitDepth, compact, width, height);
 }
 
-void IIPviewer::setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int uv_disp_mode, int leftOrRight)
+void IIPviewer::setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
-    ui.imageLabel[leftOrRight]->uv_disp_mode = uv_disp_mode;
     ui.imageLabel[leftOrRight]->setPixmap(imageName, tp, bitDepth, width, height, pixSize);
 }
 
@@ -1647,12 +1841,18 @@ void IIPviewer::clearPaint()
     ui.start_y_edit0->clear();
     ui.end_x_edit0->clear();
     ui.end_y_edit0->clear();
-    ui.imageLabel[0]->ptCodInfo.paintCoordinates[0] = QPoint();
-    ui.imageLabel[0]->ptCodInfo.paintCoordinates[1] = QPoint();
-    ui.imageLabel[1]->ptCodInfo.paintCoordinates[0] = QPoint();
-    ui.imageLabel[1]->ptCodInfo.paintCoordinates[1] = QPoint();
-    ui.imageLabel[0]->repaint();
-    ui.imageLabel[1]->repaint();
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint();
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint();
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint();
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint();
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0f;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint();
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint();
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint();
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint();
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0f;
+    ui.imageLabel[LEFT_IMG_WIDGET]->repaint();
+    ui.imageLabel[RIGHT_IMG_WIDGET]->repaint();
 }
 
 void IIPviewer::handleRightMouseBtnDrag0(QPointF startPt, QPointF endPt)

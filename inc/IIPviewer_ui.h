@@ -34,6 +34,8 @@ namespace Ui
         QAction *closeRightAction;
         QAction *dataAnalyseAction;
         QAction *playListAction;
+        QAction *workAreaSingleModeAction;
+        QAction *workAreaDoubleModeAction;
         QAction *aboutThisAction;
         QAction *checkUpdateAction;
         QAction *useRoiToolAction;
@@ -46,6 +48,7 @@ namespace Ui
         QVector<QAction *> themes;
         QFrame *mainWidget;
         std::array<QScrollArea *, 2> scrollArea;
+        QFrame *scrollAreaCenterFrame;
         std::array<QWidget *, 2> imageLabelContianer;
         std::array<ImageWidget *, 2> imageLabel;
         QLabel *zoomRatioLabel;
