@@ -7,7 +7,7 @@
 class IIPOptionDialog : public QDialog
 {
 public:
-    enum PAINT_PIX_VALUE_BG_COLOR {
+    enum PaintPixValBgColor {
         NONE = 0,
         WHITE = 1,
         GRAY = 2,
@@ -28,19 +28,24 @@ public:
     void set_uv_disp_mode(int mode)
     {
         uv_disp_mode = mode;
+        ui.uv_pix_value_mode_comboBox->setCurrentIndex(uv_disp_mode);
     }
 
-    void set_pix_val_bg_color_index(int i)
+    void set_pix_val_bg_color_index(PaintPixValBgColor i)
     {
-        pix_val_bg_color_index = (PAINT_PIX_VALUE_BG_COLOR)i;
+        pix_val_bg_color_index = i;
+        ui.paint_pix_val_bg_color_comboBox->setCurrentIndex(pix_val_bg_color_index);
     }
 
     void set_pix_val_custom_bg_color(QColor bg)
     {
         pix_val_cus_bg_color = bg;
+        QPixmap cusColorIcon(32, 32);
+        cusColorIcon.fill(pix_val_cus_bg_color);
+        ui.paint_pix_val_bg_color_comboBox->setItemIcon(PaintPixValBgColor::CUSTOM, QIcon(cusColorIcon));
     }
 
-    PAINT_PIX_VALUE_BG_COLOR pix_val_bg_color_index;
+    PaintPixValBgColor pix_val_bg_color_index;
     QColor pix_val_cus_bg_color;
     int uv_disp_mode;
 

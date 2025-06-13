@@ -67,16 +67,29 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
 
     QMenu *viewMenu = mbar->addMenu(QApplication::translate("mainWindow", "&View", nullptr));
     QMenu *dockWidgetMenu = new QMenu(QApplication::translate("mainWindow", "panal", nullptr), mainWindow);
+    QMenu *workAreaModeMenu = new QMenu(QApplication::translate("mainWindow", "img mode", nullptr), mainWindow);
     // dockWidgetMenu->setStyleSheet("QMenu{background:rgb(128,128,128)}QMenu::item:selected{background-color:#654321;}");
     viewMenu->addMenu(dockWidgetMenu);
+    viewMenu->addMenu(workAreaModeMenu);
     dataAnalyseAction = new QAction(QApplication::translate("mainWindow", "data analyse", nullptr), mainWindow);
     playListAction = new QAction(QApplication::translate("mainWindow", "play list", nullptr), mainWindow);
     dockWidgetMenu->addAction(dataAnalyseAction);
     dockWidgetMenu->addAction(playListAction);
     dataAnalyseAction->setCheckable(true);
-    dataAnalyseAction->setChecked(true);
+    dataAnalyseAction->setChecked(false);
     playListAction->setCheckable(true);
-    playListAction->setChecked(true);
+    playListAction->setChecked(false);
+
+    workAreaSingleModeAction = new QAction(QApplication::translate("mainWindow", "normal mode", nullptr), mainWindow);
+    workAreaSingleModeAction->setIcon(QIcon(":/image/resource/single_rect.svg"));
+    workAreaSingleModeAction->setCheckable(true);
+    workAreaSingleModeAction->setChecked(false);
+    workAreaDoubleModeAction = new QAction(QApplication::translate("mainWindow", "compare mode", nullptr), mainWindow);
+    workAreaDoubleModeAction->setIcon(QIcon(":/image/resource/double_rect.svg"));
+    workAreaDoubleModeAction->setCheckable(true);
+    workAreaDoubleModeAction->setChecked(true);
+    workAreaModeMenu->addAction(workAreaSingleModeAction);
+    workAreaModeMenu->addAction(workAreaDoubleModeAction);
 
     QMenu *themeMenu = new QMenu(QApplication::translate("mainWindow", "theme", nullptr), mainWindow);
     themeMenu->setIcon(QIcon(":image/resource/skin.svg"));
@@ -132,6 +145,8 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     toolBar->addAction(reloadFileRightAction);
     toolBar->addAction(closeLeftAction);
     toolBar->addAction(closeRightAction);
+    toolBar->addAction(workAreaSingleModeAction);
+    toolBar->addAction(workAreaDoubleModeAction);
     toolBar->addSeparator();
     toolBar->addAction(aboutThisAction);
     toolBar->addSeparator();
@@ -164,7 +179,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     mainWidget = new QFrame();
     // mainWidget->setFrameStyle(QFrame::Box | QFrame::Sunken);
     // mainWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    mainWidget->setFrameStyle(QFrame::NoFrame);
+    // mainWidget->setFrameStyle(QFrame::NoFrame);
     QHBoxLayout *scrollAreaLayout = new QHBoxLayout();
     scrollAreaLayout->setContentsMargins(0, 0, 0, 0);
     mainWidget->setLayout(scrollAreaLayout);
@@ -194,12 +209,14 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     imageInfoBtn->setMaximumWidth(40);
     imageInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#41a7e0} QPushButton:pressed{background-color:#a7a7a7}");
 
+    scrollAreaCenterFrame = new QFrame(mainWidget);
     QVBoxLayout *centerLayout = new QVBoxLayout();
     centerLayout->addStretch(1);
     centerLayout->addWidget(zoomRatioLabel);
     centerLayout->addWidget(exchangeAreaPreviewBtn);
     centerLayout->addWidget(imageInfoBtn);
     centerLayout->addStretch(1);
+    scrollAreaCenterFrame->setLayout(centerLayout);
 
     scrollArea[1] = new QScrollArea();
     imageLabel[1] = new ImageWidget(mainWindow->penColor, 2, scrollArea[1]);
@@ -213,7 +230,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     scrollArea[1]->setFrameShape(QFrame::NoFrame);
 
     scrollAreaLayout->addWidget(scrollArea[0], 1);
-    scrollAreaLayout->addLayout(centerLayout, 0);
+    scrollAreaLayout->addWidget(scrollAreaCenterFrame, 0);
     scrollAreaLayout->addWidget(scrollArea[1], 1);
 
     mainWindow->setCentralWidget(mainWidget);
