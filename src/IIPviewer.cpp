@@ -415,6 +415,20 @@ void IIPviewer::onDoubleImgModeAction(bool check)
         ui.closeRightAction->setEnabled(false);
     }
     ui.mainWidget->adjustSize();
+
+    if(check && ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap && ui.imageLabel[LEFT_IMG_WIDGET]->pixMap)
+    {
+        if(ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar())
+        {
+            int hval = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->value();
+            syncScrollArea0_horScBarVal(hval);
+        }
+        if(ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()) 
+        {
+            int vval = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->value();
+            syncScrollArea0_verScBarVal(vval);
+        }
+    }
 }
 
 void IIPviewer::onSysOptionAction(bool check)
