@@ -404,7 +404,7 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
     int pnmWidth = pixMap->width();
     int pnmHeight = pixMap->height();
 
-    bool isGray = pixMap->isGrayscale();
+    bool isGray = (pixMap->format() == QImage::Format_Grayscale8);
 
     if (isGray)
     {
