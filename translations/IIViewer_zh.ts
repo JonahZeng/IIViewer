@@ -750,7 +750,7 @@
     <message>
         <location filename="../inc/YuvFileInfoDlg.ui" line="139"/>
         <source>YUV400</source>
-        <translation>YUV420P_YV12</translation>
+        <translation>YUV400</translation>
     </message>
 </context>
 </TS>
