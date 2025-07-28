@@ -47,6 +47,7 @@ public:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void setPixmap(QString &img);
     void setPixmap(QString &img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height);
@@ -150,4 +151,5 @@ signals:
     void inform_zoom_in(int);
     void inform_zoom_out(int);
     void inform_change_master();
+    void inform_open_file_selector();
 };

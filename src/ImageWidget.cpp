@@ -1888,8 +1888,20 @@ void ImageWidget::paintEvent(QPaintEvent *event)
         painter.setPen(cusPen);
         painter.setRenderHint(QPainter::Antialiasing);
 
-        QRect appearRect = painter.boundingRect(QRect(0, 0, curSize.width(), curSize.height()), Qt::AlignmentFlag::AlignHCenter | Qt::AlignmentFlag::AlignVCenter, tr("drag image file here"));
-        painter.drawText(appearRect, tr("drag image file here"));
+        QFontMetrics fm(painter.font());
+        int textHeight = fm.height();
+        int spacing = textHeight / 2;
+        int totalHeight = textHeight * 3 + spacing * 2;
+        int startY = (curSize.height() - totalHeight) / 2;
+
+        QRect appearRect0 = painter.boundingRect(QRect(0, startY, curSize.width(), textHeight), Qt::AlignmentFlag::AlignHCenter, tr("drag image file here"));
+        painter.drawText(appearRect0, tr("drag image file here"));
+        
+        QRect appearRect1 = painter.boundingRect(QRect(0, startY + textHeight + spacing, curSize.width(), textHeight), Qt::AlignmentFlag::AlignHCenter, tr("or"));
+        painter.drawText(appearRect1, tr("or"));
+        
+        QRect appearRect2 = painter.boundingRect(QRect(0, startY + (textHeight + spacing) * 2, curSize.width(), textHeight), Qt::AlignmentFlag::AlignHCenter, tr("double click here"));
+        painter.drawText(appearRect2, tr("double click here"));
 
         painter.drawRoundedRect(QRect(10, 10, curSize.width() - 14, curSize.height() - 14), radius, radius);
         return;
@@ -2105,6 +2117,16 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
         imgDragEndPos = event->pos();
         emit inform_drag_img(imgDragStartPos, imgDragEndPos);
     }
+}
+
+void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event);
+    if (pixMap != nullptr)
+    {
+        return;
+    }
+    emit inform_open_file_selector();
 }
 
 void ImageWidget::wheelEvent(QWheelEvent *event)

@@ -161,6 +161,10 @@ void AppSettings::read(const QJsonObject& json)
     {
         windowScreenName = json["windowScreenName"].toString();
     }
+    if (json.contains("windowMaximized"))
+    {
+        windowMaximized = json["windowMaximized"].toBool();
+    }
 }
 
 void AppSettings::write(QJsonObject& json) const
@@ -205,4 +209,5 @@ void AppSettings::write(QJsonObject& json) const
         json["windowGeometry_height"] = windowGeometry.height();
     }
     json["windowScreenName"] = windowScreenName;
+    json["windowMaximized"] = windowMaximized;
 }

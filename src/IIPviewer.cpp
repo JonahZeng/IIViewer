@@ -195,7 +195,11 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
             geometry = geometry.intersected(screenRect);
         }
         
-        setGeometry(geometry);
+        if (settings.windowMaximized) {
+            showMaximized();
+        } else {
+            setGeometry(geometry);
+        }
     }
     setTitle();
 
@@ -260,6 +264,8 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
         {
             this->masterScrollarea = this->ui.scrollArea[RIGHT_IMG_WIDGET];
         });
+    connect(ui.imageLabel[LEFT_IMG_WIDGET], &ImageWidget::inform_open_file_selector, this, &IIPviewer::onOpenFileAction);
+    connect(ui.imageLabel[RIGHT_IMG_WIDGET], &ImageWidget::inform_open_file_selector, this, &IIPviewer::onOpenFileAction);
 
     connect(ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar(), &QScrollBar::valueChanged, this, &IIPviewer::syncScrollArea1_horScBarVal);
     connect(ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar(), &QScrollBar::valueChanged, this, &IIPviewer::syncScrollArea1_verScBarVal);
@@ -656,6 +662,9 @@ void IIPviewer::closeEvent(QCloseEvent *event)
             settings.windowScreenName = QApplication::primaryScreen()->name();
         }
 
+        // Save window maximized state
+        settings.windowMaximized = isMaximized();
+
         onCloseLeftFileAction();
         onCloseRightFileAction();
         QMainWindow::closeEvent(event);
@@ -706,7 +715,7 @@ void IIPviewer::onOpenFileAction()
 
     QFileInfo info(fileName);
     settings.workPath = info.absolutePath();
-    if (sender() == static_cast<QObject *>(ui.openFileLeftAction))
+    if (sender() == static_cast<QObject *>(ui.openFileLeftAction) || sender() == static_cast<QObject*>(ui.imageLabel[LEFT_IMG_WIDGET]))
     {
         onCloseLeftFileAction(); // 这里删除关闭文件监控
         loadFile(fileName, LEFT_IMG_WIDGET);
@@ -714,7 +723,7 @@ void IIPviewer::onOpenFileAction()
         openedFileWatcher.addPath(fileName); // 添加新文件监控
         openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(fileName).lastModified(); // 记录新文件的修改时间
     }
-    else if (sender() == static_cast<QObject *>(ui.openFileRightAction))
+    else if (sender() == static_cast<QObject *>(ui.openFileRightAction) || sender() == static_cast<QObject*>(ui.imageLabel[RIGHT_IMG_WIDGET]))
     {
         onCloseRightFileAction();
         loadFile(fileName, RIGHT_IMG_WIDGET);

@@ -29,6 +29,7 @@ public:
     bool workAreaDoubleImgMode;
     QRect windowGeometry;
     QString windowScreenName;
+    bool windowMaximized;
 
     bool loadSettingsFromFile();
     void dumpSettingsToFile();
