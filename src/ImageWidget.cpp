@@ -1,4 +1,5 @@
 #include "ImageWidget.h"
+#include "RoiDataExportDlg.h"
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
@@ -29,7 +30,7 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       openedImgType(UNKNOW_IMG),
       rightMouseContextMenu(this)
 {
-    QAction* exportPython = rightMouseContextMenu.addAction("export roi data");
+    QAction* exportPython = rightMouseContextMenu.addAction(tr("export roi data"));
     connect(exportPython, &QAction::triggered, this, &ImageWidget::exportRoiData);
 }
 
@@ -103,8 +104,20 @@ void ImageWidget::exportRoiData()
     int roi_top = qMin(ptCodInfo.originPaintCoordinates[0].y(), ptCodInfo.originPaintCoordinates[1].y()) / ptCodInfo.originScaleRatio;
     int roi_bottom = qMax(ptCodInfo.originPaintCoordinates[0].y(), ptCodInfo.originPaintCoordinates[1].y()) / ptCodInfo.originScaleRatio;
 
-    auto msg_text = QString("%1, %2, %3, %4").arg(roi_left).arg(roi_right).arg(roi_top).arg(roi_bottom);
-    QMessageBox::information(this, "roi coordinate", msg_text, QMessageBox::StandardButton::Ok);
+    // auto msg_text = QString("%1, %2, %3, %4").arg(roi_left).arg(roi_right).arg(roi_top).arg(roi_bottom);
+    // QMessageBox::information(this, "roi coordinate", msg_text, QMessageBox::StandardButton::Ok);
+
+    int pixCnt = (roi_right - roi_left) * (roi_bottom - roi_top);
+    if(pixCnt > 4096)
+    {
+        auto ans = QMessageBox::question(this, tr("warning"), tr("pixel in roi count > 4096, are you sure to export?"), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No);
+        if(ans != QMessageBox::StandardButton::Yes)
+        {
+            return;
+        }
+    }
+    RoiDataExportDlg detailDlg(this);
+    detailDlg.exec();
 }
 
 
@@ -2026,7 +2039,7 @@ void ImageWidget::paintEvent(QPaintEvent *event)
     }
 }
 
-static bool pt_in_rect(const QPoint& in_pt, const QPoint& p0, const QPoint& p1)
+static bool pointInRectangle(const QPoint& in_pt, const QPoint& p0, const QPoint& p1)
 {
     if(in_pt.x() >= qMin(p0.x(), p1.x()) && in_pt.x() < qMax(p0.x(), p1.x()))
     {
@@ -2081,7 +2094,7 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
         {
             // 如果鼠标点在roi范围内，弹出右键菜单
             QPoint cur_pos = event->pos();
-            if(pt_in_rect(cur_pos, ptCodInfo.paintCoordinates[0], ptCodInfo.paintCoordinates[1]))
+            if(pointInRectangle(cur_pos, ptCodInfo.paintCoordinates[0], ptCodInfo.paintCoordinates[1]))
             {                
                 rightMouseContextMenu.exec(event->globalPos());
             }

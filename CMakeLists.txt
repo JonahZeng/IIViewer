@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.5.0 LANGUAGES CXX)
+project(IIViewer VERSION 0.5.1 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -127,6 +127,8 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/inc/config.h
         ${CMAKE_SOURCE_DIR}/inc/AppSetting.h
         ${CMAKE_SOURCE_DIR}/src/AppSetting.cpp
+        ${CMAKE_SOURCE_DIR}/inc/RoiDataExportDlg.h
+        ${CMAKE_SOURCE_DIR}/src/RoiDataExportDlg.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -128,7 +128,7 @@ cmake --build . -j 4
 - use `linguist` to translate the .ts file, and public it to a .qm file
 - load specific .qm file when the software startup, based on the user's region and language
 ```bash
-lupdate.exe ./src/Main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h ./src/IIPviewer.rc ./src/IIPviewer.qrc ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.h ./inc/IIPOptionDialog.ui ./src/IIPOptionDialog.cpp ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./inc/YuvFileInfoDlg.ui ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp -ts ./translations/IIViewer_zh.ts
+lupdate.exe ./src/Main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h ./src/IIPviewer.rc ./src/IIPviewer.qrc ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.h ./inc/IIPOptionDialog.ui ./src/IIPOptionDialog.cpp ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./inc/YuvFileInfoDlg.ui ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp ./inc/RoiDataExportDlg.h ./src/RoiDataExportDlg.cpp -ts ./translations/IIViewer_zh.ts
 ```
 
 ## HiDPI font render on windows
