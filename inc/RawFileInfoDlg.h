@@ -3,7 +3,7 @@
 #include "ui_RawFileInfoDlg.h"
 #include <QDialog>
 
-class RawFileInfoDlg : public QDialog
+class RawFileInfoDlg final : public QDialog
 {
 public:
     enum BayerPatternType
@@ -41,7 +41,7 @@ public:
 
 public:
     RawFileInfoDlg() = delete;
-    RawFileInfoDlg(QWidget *parent);
+    explicit RawFileInfoDlg(QWidget *parent);
     ~RawFileInfoDlg();
 
 public:

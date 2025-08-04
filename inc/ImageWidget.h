@@ -37,7 +37,7 @@ struct PaintCoordinateInfo {
 
 #define ZOOM_LIST_LENGTH 13
 
-class ImageWidget : public QWidget
+class ImageWidget final : public QWidget
 {
     Q_OBJECT
 public:
@@ -102,6 +102,7 @@ private:
     void paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     RawFileInfoDlg::BayerPixelType getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by);
     void exportRoiData();
+    void exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi_bottom, int roi_left, int roi_right);
 
 public:
     QMenu rightMouseContextMenu;

@@ -109,6 +109,7 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/IIPviewer.rc
         ${CMAKE_SOURCE_DIR}/src/IIPviewer.qrc
         ${CMAKE_SOURCE_DIR}/src/ImageWidget.cpp
+        ${CMAKE_SOURCE_DIR}/src/ImageWidgetRoiExport.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
         ${CMAKE_SOURCE_DIR}/src/RawFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.h

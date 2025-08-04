@@ -1,5 +1,4 @@
 #include "ImageWidget.h"
-#include "RoiDataExportDlg.h"
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
@@ -96,30 +95,6 @@ static const RawFileInfoDlg::BayerPixelType type_IR_GGB[16] = {
 static const RawFileInfoDlg::BayerPixelType* type_rgbir[8] = {
     type_RGG_IR, type_BGG_IR, type_GR_IR_G, type_GB_IR_G, type_G_IR_RG, type_G_IR_BG, type_IR_GGR, type_IR_GGB
 };
-
-void ImageWidget::exportRoiData()
-{
-    int roi_left = qMin(ptCodInfo.originPaintCoordinates[0].x(), ptCodInfo.originPaintCoordinates[1].x()) / ptCodInfo.originScaleRatio;
-    int roi_right = qMax(ptCodInfo.originPaintCoordinates[0].x(), ptCodInfo.originPaintCoordinates[1].x()) / ptCodInfo.originScaleRatio;
-    int roi_top = qMin(ptCodInfo.originPaintCoordinates[0].y(), ptCodInfo.originPaintCoordinates[1].y()) / ptCodInfo.originScaleRatio;
-    int roi_bottom = qMax(ptCodInfo.originPaintCoordinates[0].y(), ptCodInfo.originPaintCoordinates[1].y()) / ptCodInfo.originScaleRatio;
-
-    // auto msg_text = QString("%1, %2, %3, %4").arg(roi_left).arg(roi_right).arg(roi_top).arg(roi_bottom);
-    // QMessageBox::information(this, "roi coordinate", msg_text, QMessageBox::StandardButton::Ok);
-
-    int pixCnt = (roi_right - roi_left) * (roi_bottom - roi_top);
-    if(pixCnt > 4096)
-    {
-        auto ans = QMessageBox::question(this, tr("warning"), tr("pixel in roi count > 4096, are you sure to export?"), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No);
-        if(ans != QMessageBox::StandardButton::Yes)
-        {
-            return;
-        }
-    }
-    RoiDataExportDlg detailDlg(this);
-    detailDlg.exec();
-}
-
 
 RawFileInfoDlg::BayerPixelType ImageWidget::getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by)
 {

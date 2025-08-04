@@ -12,7 +12,7 @@ using QtDataVisualization::Q3DSurface;
 using QtDataVisualization::QSurface3DSeries;
 #endif
 
-class DataVisualDialog : public QDialog
+class DataVisualDialog final : public QDialog
 {
     Q_OBJECT
 public:
