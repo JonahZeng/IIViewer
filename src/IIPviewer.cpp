@@ -131,7 +131,6 @@ private:
 
 IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     : QMainWindow(parent), ui(), 
-    penColor(0, 0, 0), 
     originSize{QSize{0, 0}, QSize{0, 0}}, 
     openedFile{QString(), QString()},
     openedFileLastModifiedTime{QDateTime(), QDateTime()},
@@ -344,6 +343,10 @@ void IIPviewer::onUseRoiAction(bool check)
         ui.useMoveToolAction->setChecked(false);
         ui.imageLabel[LEFT_IMG_WIDGET]->setMouseActionPaintRoi();
         ui.imageLabel[RIGHT_IMG_WIDGET]->setMouseActionPaintRoi();
+
+        QPixmap penColorBtnIcon(32, 32);
+        penColorBtnIcon.fill(settings.penColor);
+        ui.penColorSetBtn->setIcon(penColorBtnIcon);
 
         ui.penColorSetAction->setVisible(true);
         ui.penWidthAction->setVisible(true);
@@ -1767,16 +1770,16 @@ void IIPviewer::plotRgbHist()
 
 void IIPviewer::selectPenPaintColor()
 {
-    QColorDialog dlg(penColor, this);
+    QColorDialog dlg(settings.penColor, this);
     int reply = dlg.exec();
     if (reply == QColorDialog::DialogCode::Accepted)
     {
-        penColor = dlg.selectedColor();
-        ui.imageLabel[LEFT_IMG_WIDGET]->setPaintPenColor(penColor);
-        ui.imageLabel[RIGHT_IMG_WIDGET]->setPaintPenColor(penColor);
+        settings.penColor = dlg.selectedColor();
+        ui.imageLabel[LEFT_IMG_WIDGET]->setPaintPenColor(settings.penColor);
+        ui.imageLabel[RIGHT_IMG_WIDGET]->setPaintPenColor(settings.penColor);
     }
     QPixmap penColorBtnIcon(32, 32);
-    penColorBtnIcon.fill(penColor);
+    penColorBtnIcon.fill(settings.penColor);
     ui.penColorSetBtn->setIcon(penColorBtnIcon);
 }
 

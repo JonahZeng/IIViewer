@@ -185,7 +185,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     mainWidget->setLayout(scrollAreaLayout);
 
     scrollArea[0] = new QScrollArea();
-    imageLabel[0] = new ImageWidget(mainWindow->penColor, 2, scrollArea[0]);
+    imageLabel[0] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[0]);
     imageLabelContianer[0] = new QWidget();
     QVBoxLayout *imgLabelContianerLayout0 = new QVBoxLayout(imageLabelContianer[0]);
     imgLabelContianerLayout0->addWidget(imageLabel[0]);
@@ -219,7 +219,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     scrollAreaCenterFrame->setLayout(centerLayout);
 
     scrollArea[1] = new QScrollArea();
-    imageLabel[1] = new ImageWidget(mainWindow->penColor, 2, scrollArea[1]);
+    imageLabel[1] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[1]);
     imageLabelContianer[1] = new QWidget();
     QVBoxLayout *imgLabelContianerLayout1 = new QVBoxLayout(imageLabelContianer[1]);
     imgLabelContianerLayout1->addWidget(imageLabel[1]);

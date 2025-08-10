@@ -19,6 +19,7 @@ AppSettings::AppSettings()
     rawByteOrder = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
     uv_value_disp_mode = 0; // 0:0=gray 1: half-max=gray 
     theme = QStyleFactory::keys().first();
+    windowGeometry = QRect(0, 0, 800, 600);
 }
 
 AppSettings::~AppSettings()
@@ -150,12 +151,11 @@ void AppSettings::read(const QJsonObject& json)
     }
     if (json.contains("windowGeometry"))
     {
-        windowGeometry = QRect(
-            json["windowGeometry_x"].toInt(),
-            json["windowGeometry_y"].toInt(),
-            json["windowGeometry_width"].toInt(),
-            json["windowGeometry_height"].toInt()
-        );
+        QJsonObject winGeometryObj = json["windowGeometry"].toObject();
+        if(winGeometryObj.contains("x") && winGeometryObj.contains("y") && winGeometryObj.contains("width") && winGeometryObj.contains("height"))
+        {
+            windowGeometry = QRect(winGeometryObj["x"].toInt(), winGeometryObj["y"].toInt(), winGeometryObj["width"].toInt(), winGeometryObj["height"].toInt());
+        }
     }
     if (json.contains("windowScreenName"))
     {
@@ -164,6 +164,18 @@ void AppSettings::read(const QJsonObject& json)
     if (json.contains("windowMaximized"))
     {
         windowMaximized = json["windowMaximized"].toBool();
+    }
+    if (json.contains("penColor"))
+    {
+        QJsonObject colorObj = json["penColor"].toObject();
+        if (colorObj.contains("r") && colorObj.contains("g") &&  colorObj.contains("b"))
+        {
+            penColor.setRgb(
+                colorObj["r"].toInt(),
+                colorObj["g"].toInt(),
+                colorObj["b"].toInt()
+            );
+        }
     }
 }
 
@@ -200,14 +212,20 @@ void AppSettings::write(QJsonObject& json) const
     json["pix_val_cus_bg_color"] = pix_val_cus_bg_color.name(QColor::HexArgb);
 
     json["workAreaDoubleImgMode"] = workAreaDoubleImgMode;
-    json["windowGeometry"] = !windowGeometry.isNull();
-    if (!windowGeometry.isNull())
-    {
-        json["windowGeometry_x"] = windowGeometry.x();
-        json["windowGeometry_y"] = windowGeometry.y();
-        json["windowGeometry_width"] = windowGeometry.width();
-        json["windowGeometry_height"] = windowGeometry.height();
-    }
+
+    QJsonObject winGeometryObj;
+    winGeometryObj["x"] = windowGeometry.left();
+    winGeometryObj["y"] = windowGeometry.top();
+    winGeometryObj["width"] = windowGeometry.width();
+    winGeometryObj["height"] = windowGeometry.height();
+    json["windowGeometry"] = winGeometryObj;
+
     json["windowScreenName"] = windowScreenName;
     json["windowMaximized"] = windowMaximized;
+    
+    QJsonObject penColorObj;
+    penColorObj["r"] = penColor.red();
+    penColorObj["g"] = penColor.green();
+    penColorObj["b"] = penColor.blue();
+    json["penColor"] = penColorObj;
 }

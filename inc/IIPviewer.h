@@ -93,7 +93,6 @@ signals:
 
 public:
     Ui::IIPviewerUi ui;
-    QColor penColor;
     QString workPath;
     std::array<QSize, 2> originSize;
     std::array<QString, 2> openedFile;
