@@ -26,8 +26,8 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0),
       yuvDataPtr(nullptr), yuvDataBit(0), 
       rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW),
-      openedImgType(UNKNOW_IMG),
-      rightMouseContextMenu(this)
+      rightMouseContextMenu(this),
+      openedImgType(UNKNOW_IMG)
 {
     QAction* exportPython = rightMouseContextMenu.addAction(tr("export roi data"));
     connect(exportPython, &QAction::triggered, this, &ImageWidget::exportRoiData);

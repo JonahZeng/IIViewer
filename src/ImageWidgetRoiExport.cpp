@@ -1,6 +1,7 @@
 #include "ImageWidget.h"
 #include "RoiDataExportDlg.h"
 #include <QMessageBox>
+#include <cmath>
 
 static void computeStats(const std::vector<unsigned int>& data, unsigned int& mean, unsigned long long int& variance, unsigned int& stddev)
 {
