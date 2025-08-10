@@ -131,7 +131,6 @@ private:
 
 IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     : QMainWindow(parent), ui(), 
-    penColor(0, 0, 0), 
     originSize{QSize{0, 0}, QSize{0, 0}}, 
     openedFile{QString(), QString()},
     openedFileLastModifiedTime{QDateTime(), QDateTime()},
@@ -195,7 +194,11 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
             geometry = geometry.intersected(screenRect);
         }
         
-        setGeometry(geometry);
+        if (settings.windowMaximized) {
+            showMaximized();
+        } else {
+            setGeometry(geometry);
+        }
     }
     setTitle();
 
@@ -260,6 +263,8 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
         {
             this->masterScrollarea = this->ui.scrollArea[RIGHT_IMG_WIDGET];
         });
+    connect(ui.imageLabel[LEFT_IMG_WIDGET], &ImageWidget::inform_open_file_selector, this, &IIPviewer::onOpenFileAction);
+    connect(ui.imageLabel[RIGHT_IMG_WIDGET], &ImageWidget::inform_open_file_selector, this, &IIPviewer::onOpenFileAction);
 
     connect(ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar(), &QScrollBar::valueChanged, this, &IIPviewer::syncScrollArea1_horScBarVal);
     connect(ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar(), &QScrollBar::valueChanged, this, &IIPviewer::syncScrollArea1_verScBarVal);
@@ -339,6 +344,10 @@ void IIPviewer::onUseRoiAction(bool check)
         ui.imageLabel[LEFT_IMG_WIDGET]->setMouseActionPaintRoi();
         ui.imageLabel[RIGHT_IMG_WIDGET]->setMouseActionPaintRoi();
 
+        QPixmap penColorBtnIcon(32, 32);
+        penColorBtnIcon.fill(settings.penColor);
+        ui.penColorSetBtn->setIcon(penColorBtnIcon);
+
         ui.penColorSetAction->setVisible(true);
         ui.penWidthAction->setVisible(true);
         // ui.toolBar->update();
@@ -415,6 +424,20 @@ void IIPviewer::onDoubleImgModeAction(bool check)
         ui.closeRightAction->setEnabled(false);
     }
     ui.mainWidget->adjustSize();
+
+    if(check && ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap && ui.imageLabel[LEFT_IMG_WIDGET]->pixMap)
+    {
+        if(ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar())
+        {
+            int hval = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->value();
+            syncScrollArea0_horScBarVal(hval);
+        }
+        if(ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()) 
+        {
+            int vval = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->value();
+            syncScrollArea0_verScBarVal(vval);
+        }
+    }
 }
 
 void IIPviewer::onSysOptionAction(bool check)
@@ -642,6 +665,9 @@ void IIPviewer::closeEvent(QCloseEvent *event)
             settings.windowScreenName = QApplication::primaryScreen()->name();
         }
 
+        // Save window maximized state
+        settings.windowMaximized = isMaximized();
+
         onCloseLeftFileAction();
         onCloseRightFileAction();
         QMainWindow::closeEvent(event);
@@ -692,7 +718,7 @@ void IIPviewer::onOpenFileAction()
 
     QFileInfo info(fileName);
     settings.workPath = info.absolutePath();
-    if (sender() == static_cast<QObject *>(ui.openFileLeftAction))
+    if (sender() == static_cast<QObject *>(ui.openFileLeftAction) || sender() == static_cast<QObject*>(ui.imageLabel[LEFT_IMG_WIDGET]))
     {
         onCloseLeftFileAction(); // 这里删除关闭文件监控
         loadFile(fileName, LEFT_IMG_WIDGET);
@@ -700,7 +726,7 @@ void IIPviewer::onOpenFileAction()
         openedFileWatcher.addPath(fileName); // 添加新文件监控
         openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(fileName).lastModified(); // 记录新文件的修改时间
     }
-    else if (sender() == static_cast<QObject *>(ui.openFileRightAction))
+    else if (sender() == static_cast<QObject *>(ui.openFileRightAction) || sender() == static_cast<QObject*>(ui.imageLabel[RIGHT_IMG_WIDGET]))
     {
         onCloseRightFileAction();
         loadFile(fileName, RIGHT_IMG_WIDGET);
@@ -1744,16 +1770,16 @@ void IIPviewer::plotRgbHist()
 
 void IIPviewer::selectPenPaintColor()
 {
-    QColorDialog dlg(penColor, this);
+    QColorDialog dlg(settings.penColor, this);
     int reply = dlg.exec();
     if (reply == QColorDialog::DialogCode::Accepted)
     {
-        penColor = dlg.selectedColor();
-        ui.imageLabel[LEFT_IMG_WIDGET]->setPaintPenColor(penColor);
-        ui.imageLabel[RIGHT_IMG_WIDGET]->setPaintPenColor(penColor);
+        settings.penColor = dlg.selectedColor();
+        ui.imageLabel[LEFT_IMG_WIDGET]->setPaintPenColor(settings.penColor);
+        ui.imageLabel[RIGHT_IMG_WIDGET]->setPaintPenColor(settings.penColor);
     }
     QPixmap penColorBtnIcon(32, 32);
-    penColorBtnIcon.fill(penColor);
+    penColorBtnIcon.fill(settings.penColor);
     ui.penColorSetBtn->setIcon(penColorBtnIcon);
 }
 

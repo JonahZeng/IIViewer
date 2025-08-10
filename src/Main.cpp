@@ -16,7 +16,9 @@ int main(int argc, char* argv[])
     // QCoreApplication::setOrganizationName("IIViewer.org");
     // QCoreApplication::setOrganizationDomain("IIViewer.com");
     QCoreApplication::setApplicationName("IIViewer");
+#ifdef Q_OS_WINDOWS
     app.setFont(QFont("Microsoft YaHei UI", 10));
+#endif
 
     QTranslator qt_translator; 
     QString qt_locale = QLocale::system().name();

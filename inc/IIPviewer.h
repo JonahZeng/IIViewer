@@ -12,7 +12,7 @@ class IIPviewer final: public QMainWindow
     Q_OBJECT
 
 public:
-    IIPviewer(QString needOpenFilePath, QWidget *parent = nullptr);
+    explicit IIPviewer(QString needOpenFilePath, QWidget *parent = nullptr);
     virtual ~IIPviewer();
     void setTitle();
     void closeEvent(QCloseEvent *event) override;
@@ -93,7 +93,6 @@ signals:
 
 public:
     Ui::IIPviewerUi ui;
-    QColor penColor;
     QString workPath;
     std::array<QSize, 2> originSize;
     std::array<QString, 2> openedFile;

@@ -9,6 +9,7 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QWidget>
+#include <QMenu>
 #include <array>
 
 enum OpenedImageType
@@ -29,14 +30,14 @@ enum MouseActionType
 };
 
 struct PaintCoordinateInfo {
-    std::array<QPoint, 2> paintCoordinates;
-    std::array<QPoint, 2> originPaintCoordinates;
-    float originScaleRatio;
+    std::array<QPoint, 2> paintCoordinates;       // 记录鼠标绘制矩后的坐标，跟随倍率变换
+    std::array<QPoint, 2> originPaintCoordinates; // 记录鼠标绘制矩形时的原始坐标
+    float originScaleRatio;                       // 记录鼠标绘制矩形时的原始倍率
 };
 
 #define ZOOM_LIST_LENGTH 13
 
-class ImageWidget : public QWidget
+class ImageWidget final : public QWidget
 {
     Q_OBJECT
 public:
@@ -47,6 +48,7 @@ public:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void setPixmap(QString &img);
     void setPixmap(QString &img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height);
@@ -99,10 +101,13 @@ private:
     void paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     RawFileInfoDlg::BayerPixelType getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by);
+    void exportRoiData();
+    void exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi_bottom, int roi_left, int roi_right);
 
 public:
+    QMenu rightMouseContextMenu;
     QScrollArea *parentScroll;
-    MouseActionType mouseAction;
+    MouseActionType mouseAction; // 标记鼠标作用
     QColor penColor;
     int penWidth;
     PaintCoordinateInfo ptCodInfo;
@@ -150,4 +155,5 @@ signals:
     void inform_zoom_in(int);
     void inform_zoom_out(int);
     void inform_change_master();
+    void inform_open_file_selector();
 };

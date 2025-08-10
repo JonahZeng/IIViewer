@@ -113,14 +113,22 @@ chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
 ```
 
 ### macos(arm64)
-I have no any mac device, but fortunately, copilot help me write a MacOS workflow yml file and it works, if you want build it on mac, see the [yml file](./.github/workflows/cmake-macos-platform.yml)
+I use homebrew to install Qt5
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install qt@5
+git clone https://github.com/JonahZeng/IIViewer.git
+cd IIViewer
+cmake -B ./build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./build/install -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@5 -DLRELEASE_EXECUTABLE=/opt/homebrew/opt/qt@5/bin/lrelease -DEXTRA_QT_INCLUDE_DIRS=/opt/homebrew/opt/qt@5/include
+cmake --build . -j 4
+```
 
 ## Translation
 - use `lupdate` to scan all the source codes and generate a .ts file
 - use `linguist` to translate the .ts file, and public it to a .qm file
 - load specific .qm file when the software startup, based on the user's region and language
 ```bash
-lupdate.exe ./src/Main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h ./src/IIPviewer.rc ./src/IIPviewer.qrc ./src/ImageWidget.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.h ./inc/IIPOptionDialog.ui ./src/IIPOptionDialog.cpp ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./inc/YuvFileInfoDlg.ui ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp -ts ./translations/IIViewer_zh.ts
+lupdate.exe ./src/Main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h ./src/IIPviewer.rc ./src/IIPviewer.qrc ./src/ImageWidget.cpp ./src/ImageWidgetRoiExport.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.h ./inc/IIPOptionDialog.ui ./src/IIPOptionDialog.cpp ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./inc/YuvFileInfoDlg.ui ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp ./inc/RoiDataExportDlg.h ./src/RoiDataExportDlg.cpp -ts ./translations/IIViewer_zh.ts
 ```
 
 ## HiDPI font render on windows

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.5.0 LANGUAGES CXX)
+project(IIViewer VERSION 0.5.1 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -10,7 +10,7 @@ if ((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     set(CXX_COMPILER_TYPE "MinGW64")
 elseif ((UNIX) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     set(CXX_COMPILER_TYPE "GCC")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     set(CXX_COMPILER_TYPE "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CXX_COMPILER_TYPE "MSVC")
@@ -109,6 +109,7 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/IIPviewer.rc
         ${CMAKE_SOURCE_DIR}/src/IIPviewer.qrc
         ${CMAKE_SOURCE_DIR}/src/ImageWidget.cpp
+        ${CMAKE_SOURCE_DIR}/src/ImageWidgetRoiExport.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
         ${CMAKE_SOURCE_DIR}/src/RawFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.h
@@ -127,6 +128,8 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/inc/config.h
         ${CMAKE_SOURCE_DIR}/inc/AppSetting.h
         ${CMAKE_SOURCE_DIR}/src/AppSetting.cpp
+        ${CMAKE_SOURCE_DIR}/inc/RoiDataExportDlg.h
+        ${CMAKE_SOURCE_DIR}/src/RoiDataExportDlg.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -161,6 +164,9 @@ endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network)
+if(APPLE)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${EXTRA_QT_INCLUDE_DIRS})
+endif()
 # if(WIN32)
 #     target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 # elseif(UNIX)
@@ -219,9 +225,9 @@ elseif(UNIX AND NOT APPLE)
 elseif(APPLE)
     set(_qm_translation_path "")
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/translations)
+        set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app/Contents/MacOS/translations")
     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/translations)
+        set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/${PROJECT_NAME}.app/Contents/MacOS/translations")
     endif()
     if(NOT EXISTS ${_qm_translation_path})
         file(MAKE_DIRECTORY ${_qm_translation_path})
@@ -262,7 +268,7 @@ if(WIN32)
         file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/bearer FILES \${bearer_dlls})
     "
     )
-elseif(UNIX)
+elseif(UNIX AND NOT APPLE)
     install(CODE
     "
         file(GLOB qm_files ${BIN_OUTPUT_DIRECTORY}/translations/*.qm)

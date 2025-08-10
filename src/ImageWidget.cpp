@@ -4,20 +4,33 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QAction>
 #include <stdexcept>
 
 #define CLIP3(a, mi, ma) (a < mi ? mi : (a > ma ? ma : a))
 
 ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, QWidget *parent)
-    : QWidget(parent), parentScroll(parentScroll), mouseAction(NONE_ACTION), penColor(color), penWidth(penWidth), 
-    ptCodInfo {{QPoint(0, 0), QPoint(0, 0)}, {QPoint(0, 0), QPoint(0, 0)}, 1.0},
-    paintBegin(false), paintEnd(false), doDragImg(false), imgDragStartPos(0, 0), imgDragEndPos(0, 0), pixMap(nullptr), 
-    zoomIdx(2), zoomList{0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 12.0, 16.0, 24.0, 32.0, 48.0, 64.0, 96.0}, 
-    zoomTextRect(), pixValPaintRect(), rawDataPtr(nullptr), rawDataBit(0), 
-    pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0), 
-    yuvDataPtr(nullptr), yuvDataBit(0), rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW), 
-    openedImgType(UNKNOW_IMG)
+    : QWidget(parent),
+      parentScroll(parentScroll),
+      mouseAction(NONE_ACTION),
+      penColor(color),
+      penWidth(penWidth),
+      ptCodInfo{{QPoint(0, 0), QPoint(0, 0)}, {QPoint(0, 0), QPoint(0, 0)}, 1.0},
+      paintBegin(false), paintEnd(false),
+      doDragImg(false), imgDragStartPos(0, 0), imgDragEndPos(0, 0),
+      pixMap(nullptr),
+      zoomIdx(2), zoomList{0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 12.0, 16.0, 24.0, 32.0, 48.0, 64.0, 96.0},
+      zoomTextRect(), 
+      pixValPaintRect(), 
+      rawDataPtr(nullptr), rawDataBit(0),
+      pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0),
+      yuvDataPtr(nullptr), yuvDataBit(0), 
+      rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW),
+      rightMouseContextMenu(this),
+      openedImgType(UNKNOW_IMG)
 {
+    QAction* exportPython = rightMouseContextMenu.addAction(tr("export roi data"));
+    connect(exportPython, &QAction::triggered, this, &ImageWidget::exportRoiData);
 }
 
 ImageWidget::~ImageWidget()
@@ -82,7 +95,6 @@ static const RawFileInfoDlg::BayerPixelType type_IR_GGB[16] = {
 static const RawFileInfoDlg::BayerPixelType* type_rgbir[8] = {
     type_RGG_IR, type_BGG_IR, type_GR_IR_G, type_GB_IR_G, type_G_IR_RG, type_G_IR_BG, type_IR_GGR, type_IR_GGB
 };
-
 
 RawFileInfoDlg::BayerPixelType ImageWidget::getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by)
 {
@@ -404,7 +416,7 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
     int pnmWidth = pixMap->width();
     int pnmHeight = pixMap->height();
 
-    bool isGray = pixMap->isGrayscale();
+    bool isGray = (pixMap->format() == QImage::Format_Grayscale8);
 
     if (isGray)
     {
@@ -1888,8 +1900,20 @@ void ImageWidget::paintEvent(QPaintEvent *event)
         painter.setPen(cusPen);
         painter.setRenderHint(QPainter::Antialiasing);
 
-        QRect appearRect = painter.boundingRect(QRect(0, 0, curSize.width(), curSize.height()), Qt::AlignmentFlag::AlignHCenter | Qt::AlignmentFlag::AlignVCenter, tr("drag image file here"));
-        painter.drawText(appearRect, tr("drag image file here"));
+        QFontMetrics fm(painter.font());
+        int textHeight = fm.height();
+        int spacing = textHeight / 2;
+        int totalHeight = textHeight * 3 + spacing * 2;
+        int startY = (curSize.height() - totalHeight) / 2;
+
+        QRect appearRect0 = painter.boundingRect(QRect(0, startY, curSize.width(), textHeight), Qt::AlignmentFlag::AlignHCenter, tr("drag image file here"));
+        painter.drawText(appearRect0, tr("drag image file here"));
+        
+        QRect appearRect1 = painter.boundingRect(QRect(0, startY + textHeight + spacing, curSize.width(), textHeight), Qt::AlignmentFlag::AlignHCenter, tr("or"));
+        painter.drawText(appearRect1, tr("or"));
+        
+        QRect appearRect2 = painter.boundingRect(QRect(0, startY + (textHeight + spacing) * 2, curSize.width(), textHeight), Qt::AlignmentFlag::AlignHCenter, tr("double click here"));
+        painter.drawText(appearRect2, tr("double click here"));
 
         painter.drawRoundedRect(QRect(10, 10, curSize.width() - 14, curSize.height() - 14), radius, radius);
         return;
@@ -1899,6 +1923,7 @@ void ImageWidget::paintEvent(QPaintEvent *event)
     QRect widgetRect(0, 0, imgRect.width() * scaleRatio, imgRect.height() * scaleRatio);
     painter.drawImage(widgetRect, *pixMap, imgRect);
 
+    // 鼠标已有绘制或者正在绘制过程中
     if (paintBegin || paintEnd)
     {
         QPen pen(penColor);
@@ -1989,6 +2014,18 @@ void ImageWidget::paintEvent(QPaintEvent *event)
     }
 }
 
+static bool pointInRectangle(const QPoint& in_pt, const QPoint& p0, const QPoint& p1)
+{
+    if(in_pt.x() >= qMin(p0.x(), p1.x()) && in_pt.x() < qMax(p0.x(), p1.x()))
+    {
+        if(in_pt.y() >= qMin(p0.y(), p1.y()) && in_pt.y() < qMax(p0.y(), p1.y()))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ImageWidget::mousePressEvent(QMouseEvent *event)
 {
     if (pixMap == nullptr)
@@ -2024,6 +2061,19 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
         imgDragStartPos = event->pos();
         doDragImg = true;
         setCursor(Qt::ClosedHandCursor);
+    }
+    else if(event->button() == Qt::RightButton && paintEnd)
+    {
+        // 检查roi坐标是否构成一个rectangel
+        if(ptCodInfo.paintCoordinates[0] != ptCodInfo.paintCoordinates[1])
+        {
+            // 如果鼠标点在roi范围内，弹出右键菜单
+            QPoint cur_pos = event->pos();
+            if(pointInRectangle(cur_pos, ptCodInfo.paintCoordinates[0], ptCodInfo.paintCoordinates[1]))
+            {                
+                rightMouseContextMenu.exec(event->globalPos());
+            }
+        }
     }
 }
 
@@ -2105,6 +2155,16 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
         imgDragEndPos = event->pos();
         emit inform_drag_img(imgDragStartPos, imgDragEndPos);
     }
+}
+
+void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event);
+    if (pixMap != nullptr)
+    {
+        return;
+    }
+    emit inform_open_file_selector();
 }
 
 void ImageWidget::wheelEvent(QWheelEvent *event)

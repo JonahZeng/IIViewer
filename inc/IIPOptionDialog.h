@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QColor>
 
-class IIPOptionDialog : public QDialog
+class IIPOptionDialog final : public QDialog
 {
 public:
     enum PaintPixValBgColor {
