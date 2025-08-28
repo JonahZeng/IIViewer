@@ -3,13 +3,13 @@
 #include <QPushButton>
 #include <QTextEdit>
 
-class RoiDataExportDlg final : public QDialog
+class RoiDataShowDlg final : public QDialog
 {
     Q_OBJECT
 public:
-    RoiDataExportDlg() = delete;
-    explicit RoiDataExportDlg(QWidget *parent);
-    ~RoiDataExportDlg();
+    RoiDataShowDlg() = delete;
+    explicit RoiDataShowDlg(QWidget *parent);
+    ~RoiDataShowDlg();
     void setRoiExportText(const QString&);
 
 public slots:
@@ -20,3 +20,4 @@ private:
     QTextEdit* roiInfoEdit;
     QPushButton* closeBtn;
 };
+

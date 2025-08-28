@@ -177,127 +177,127 @@
 <context>
     <name>IIPviewer</name>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="515"/>
+        <location filename="../src/IIPviewer.cpp" line="413"/>
         <source>find new version</source>
         <translation>发现新版本</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="519"/>
+        <location filename="../src/IIPviewer.cpp" line="417"/>
         <source>no new version</source>
         <translation>没有更新的版本</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="519"/>
+        <location filename="../src/IIPviewer.cpp" line="417"/>
         <source>You are using the latest version</source>
         <translation>已经是最新版本</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="522"/>
+        <location filename="../src/IIPviewer.cpp" line="420"/>
         <source>network error</source>
         <translation>网络错误</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="550"/>
-        <location filename="../src/IIPviewer.cpp" line="576"/>
+        <location filename="../src/IIPviewer.cpp" line="448"/>
+        <location filename="../src/IIPviewer.cpp" line="474"/>
         <source>file changed</source>
         <translation>文件被外部修改</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="550"/>
-        <location filename="../src/IIPviewer.cpp" line="576"/>
+        <location filename="../src/IIPviewer.cpp" line="448"/>
+        <location filename="../src/IIPviewer.cpp" line="474"/>
         <source> has been changed, reload it?</source>
         <translation> 被外部修改，是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="631"/>
+        <location filename="../src/IIPviewer.cpp" line="529"/>
         <source>Confirm</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="631"/>
+        <location filename="../src/IIPviewer.cpp" line="529"/>
         <source>Are you sure to quit?</source>
         <translation>确定退出？</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="711"/>
+        <location filename="../src/IIPviewer.cpp" line="609"/>
         <source>open images</source>
         <translation>打开图像文件</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="836"/>
-        <location filename="../src/IIPviewer.cpp" line="911"/>
-        <location filename="../src/IIPviewer.cpp" line="1037"/>
-        <location filename="../src/IIPviewer.cpp" line="1101"/>
-        <location filename="../src/IIPviewer.cpp" line="1313"/>
-        <location filename="../src/IIPviewer.cpp" line="1319"/>
-        <location filename="../src/IIPviewer.cpp" line="1368"/>
-        <location filename="../src/IIPviewer.cpp" line="1417"/>
-        <location filename="../src/IIPviewer.cpp" line="2029"/>
+        <location filename="../src/IIPviewer.cpp" line="734"/>
+        <location filename="../src/IIPviewer.cpp" line="809"/>
+        <location filename="../src/IIPviewer.cpp" line="935"/>
+        <location filename="../src/IIPviewer.cpp" line="999"/>
+        <location filename="../src/IIPviewer.cpp" line="1211"/>
+        <location filename="../src/IIPviewer.cpp" line="1217"/>
+        <location filename="../src/IIPviewer.cpp" line="1266"/>
+        <location filename="../src/IIPviewer.cpp" line="1315"/>
+        <location filename="../src/IIPviewer.cpp" line="1930"/>
         <source>error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="846"/>
-        <location filename="../src/IIPviewer.cpp" line="862"/>
-        <location filename="../src/IIPviewer.cpp" line="922"/>
-        <location filename="../src/IIPviewer.cpp" line="939"/>
-        <location filename="../src/IIPviewer.cpp" line="1114"/>
-        <location filename="../src/IIPviewer.cpp" line="1133"/>
-        <location filename="../src/IIPviewer.cpp" line="1332"/>
-        <location filename="../src/IIPviewer.cpp" line="1351"/>
-        <location filename="../src/IIPviewer.cpp" line="1381"/>
-        <location filename="../src/IIPviewer.cpp" line="1400"/>
-        <location filename="../src/IIPviewer.cpp" line="1430"/>
-        <location filename="../src/IIPviewer.cpp" line="1449"/>
+        <location filename="../src/IIPviewer.cpp" line="744"/>
+        <location filename="../src/IIPviewer.cpp" line="760"/>
+        <location filename="../src/IIPviewer.cpp" line="820"/>
+        <location filename="../src/IIPviewer.cpp" line="837"/>
+        <location filename="../src/IIPviewer.cpp" line="1012"/>
+        <location filename="../src/IIPviewer.cpp" line="1031"/>
+        <location filename="../src/IIPviewer.cpp" line="1230"/>
+        <location filename="../src/IIPviewer.cpp" line="1249"/>
+        <location filename="../src/IIPviewer.cpp" line="1279"/>
+        <location filename="../src/IIPviewer.cpp" line="1298"/>
+        <location filename="../src/IIPviewer.cpp" line="1328"/>
+        <location filename="../src/IIPviewer.cpp" line="1347"/>
         <source>warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="846"/>
-        <location filename="../src/IIPviewer.cpp" line="862"/>
-        <location filename="../src/IIPviewer.cpp" line="922"/>
-        <location filename="../src/IIPviewer.cpp" line="939"/>
-        <location filename="../src/IIPviewer.cpp" line="1114"/>
-        <location filename="../src/IIPviewer.cpp" line="1133"/>
-        <location filename="../src/IIPviewer.cpp" line="1332"/>
-        <location filename="../src/IIPviewer.cpp" line="1351"/>
-        <location filename="../src/IIPviewer.cpp" line="1381"/>
-        <location filename="../src/IIPviewer.cpp" line="1400"/>
-        <location filename="../src/IIPviewer.cpp" line="1430"/>
-        <location filename="../src/IIPviewer.cpp" line="1449"/>
+        <location filename="../src/IIPviewer.cpp" line="744"/>
+        <location filename="../src/IIPviewer.cpp" line="760"/>
+        <location filename="../src/IIPviewer.cpp" line="820"/>
+        <location filename="../src/IIPviewer.cpp" line="837"/>
+        <location filename="../src/IIPviewer.cpp" line="1012"/>
+        <location filename="../src/IIPviewer.cpp" line="1031"/>
+        <location filename="../src/IIPviewer.cpp" line="1230"/>
+        <location filename="../src/IIPviewer.cpp" line="1249"/>
+        <location filename="../src/IIPviewer.cpp" line="1279"/>
+        <location filename="../src/IIPviewer.cpp" line="1298"/>
+        <location filename="../src/IIPviewer.cpp" line="1328"/>
+        <location filename="../src/IIPviewer.cpp" line="1347"/>
         <source>image0 size != image1 size</source>
         <translation>图像0的尺寸！=图像1的尺寸</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="892"/>
-        <location filename="../src/IIPviewer.cpp" line="969"/>
+        <location filename="../src/IIPviewer.cpp" line="790"/>
+        <location filename="../src/IIPviewer.cpp" line="867"/>
         <source>not support</source>
         <translation>不支持</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="892"/>
-        <location filename="../src/IIPviewer.cpp" line="969"/>
+        <location filename="../src/IIPviewer.cpp" line="790"/>
+        <location filename="../src/IIPviewer.cpp" line="867"/>
         <source>this format file not support yet!</source>
         <translation>该格式文件尚未支持！</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="1037"/>
+        <location filename="../src/IIPviewer.cpp" line="935"/>
         <source>yuv bits &gt; 16</source>
         <translation>yuv位深 &gt; 16</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="1101"/>
+        <location filename="../src/IIPviewer.cpp" line="999"/>
         <source>yuv file size &lt; your require</source>
         <translation>yuv文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="1313"/>
-        <location filename="../src/IIPviewer.cpp" line="1319"/>
+        <location filename="../src/IIPviewer.cpp" line="1211"/>
+        <location filename="../src/IIPviewer.cpp" line="1217"/>
         <source>raw file size &lt; your input</source>
         <translation>raw文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="2029"/>
+        <location filename="../src/IIPviewer.cpp" line="1930"/>
         <source>At most 1 image!</source>
         <translation>最多打开一个图像！</translation>
     </message>
@@ -305,35 +305,63 @@
 <context>
     <name>ImageWidget</name>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="32"/>
+        <location filename="../src/ImageWidget.cpp" line="34"/>
         <source>export roi data</source>
         <translation>导出roi数据</translation>
     </message>
     <message>
-        <location filename="../src/ImageWidgetRoiExport.cpp" line="35"/>
+        <location filename="../src/ImageWidgetRoiShowText.cpp" line="36"/>
         <source>warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../src/ImageWidgetRoiExport.cpp" line="35"/>
+        <location filename="../src/ImageWidgetRoiShowText.cpp" line="36"/>
         <source>pixel in roi count &gt; 4096, are you sure to export?</source>
         <translation>像素数量&gt;4096，确定要导出？</translation>
     </message>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="1909"/>
-        <location filename="../src/ImageWidget.cpp" line="1910"/>
-        <source>drag image file here</source>
-        <translation>拖动图像文件到这里</translation>
+        <location filename="../src/ImageWidgetRoiShowText.cpp" line="1178"/>
+        <source> not exist!</source>
+        <translation>不存在！</translation>
+    </message>
+    <message>
+        <location filename="../src/ImageWidgetRoiShowText.cpp" line="1179"/>
+        <source>error</source>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <location filename="../src/ImageWidgetRoiShowText.cpp" line="1184"/>
+        <source>save roi data to text file</source>
+        <translation>保存roi数据到txt文件</translation>
+    </message>
+    <message>
+        <source>%1 not exist!</source>
+        <translation type="vanished">%1 不存在</translation>
+    </message>
+    <message>
+        <source>save roi data to text</source>
+        <translation type="vanished">保存roi数据到txt文件</translation>
+    </message>
+    <message>
+        <location filename="../src/ImageWidget.cpp" line="33"/>
+        <source>show roi data</source>
+        <translation>显示ROI数据</translation>
     </message>
     <message>
         <location filename="../src/ImageWidget.cpp" line="1912"/>
         <location filename="../src/ImageWidget.cpp" line="1913"/>
-        <source>or</source>
-        <translation>或</translation>
+        <source>drag image file here</source>
+        <translation>拖动图像文件到这里</translation>
     </message>
     <message>
         <location filename="../src/ImageWidget.cpp" line="1915"/>
         <location filename="../src/ImageWidget.cpp" line="1916"/>
+        <source>or</source>
+        <translation>或</translation>
+    </message>
+    <message>
+        <location filename="../src/ImageWidget.cpp" line="1918"/>
+        <location filename="../src/ImageWidget.cpp" line="1919"/>
         <source>double click here</source>
         <translation>双击这里打开图像</translation>
     </message>
@@ -341,7 +369,7 @@
 <context>
     <name>ImgInfoDlg</name>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="48"/>
+        <location filename="../src/ImgInfoDlg.cpp" line="17"/>
         <source>image info</source>
         <translation>图像信息</translation>
     </message>
@@ -524,12 +552,23 @@
 <context>
     <name>RoiDataExportDlg</name>
     <message>
-        <location filename="../src/RoiDataExportDlg.cpp" line="19"/>
+        <source>close</source>
+        <translation type="vanished">关闭</translation>
+    </message>
+    <message>
+        <source>Roi data</source>
+        <translation type="vanished">Roi数据</translation>
+    </message>
+</context>
+<context>
+    <name>RoiDataShowDlg</name>
+    <message>
+        <location filename="../src/RoiDataShowDlg.cpp" line="19"/>
         <source>close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../src/RoiDataExportDlg.cpp" line="26"/>
+        <location filename="../src/RoiDataShowDlg.cpp" line="26"/>
         <source>Roi data</source>
         <translation>Roi数据</translation>
     </message>
@@ -593,7 +632,7 @@
     </message>
     <message>
         <location filename="../src/IIPviewer_ui.cpp" line="75"/>
-        <location filename="../src/IIPviewer_ui.cpp" line="408"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="407"/>
         <source>play list</source>
         <translation>播放列表</translation>
     </message>
@@ -658,58 +697,58 @@
         <translation>检查升级</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="246"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="245"/>
         <source>data analysis</source>
         <translation>数据分析</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="280"/>
-        <location filename="../src/IIPviewer_ui.cpp" line="322"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="279"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="321"/>
         <source>ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="286"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="285"/>
         <source>sync coordinate to right</source>
         <translation>同步坐标到右侧</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="288"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="287"/>
         <source>sync coordinate to left</source>
         <translation>同步坐标到左侧</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="289"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="288"/>
         <source>clear</source>
         <translation>清除选区</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="339"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="338"/>
         <source>rgb contour/line</source>
         <translation>rgb数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="340"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="339"/>
         <source>rgb hist</source>
         <translation>rgb直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="341"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="340"/>
         <source>yuv contour/line</source>
         <translation>yuv数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="342"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="341"/>
         <source>yuv hist</source>
         <translation>yuv直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="343"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="342"/>
         <source>hsv contour/line</source>
         <translation>hsv数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="344"/>
+        <location filename="../src/IIPviewer_ui.cpp" line="343"/>
         <source>hsv hist</source>
         <translation>hsv直方图</translation>
     </message>

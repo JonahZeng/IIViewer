@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.5.1 LANGUAGES CXX)
+project(IIViewer VERSION 0.5.3 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -109,7 +109,7 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/IIPviewer.rc
         ${CMAKE_SOURCE_DIR}/src/IIPviewer.qrc
         ${CMAKE_SOURCE_DIR}/src/ImageWidget.cpp
-        ${CMAKE_SOURCE_DIR}/src/ImageWidgetRoiExport.cpp
+        ${CMAKE_SOURCE_DIR}/src/ImageWidgetRoiShowText.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
         ${CMAKE_SOURCE_DIR}/src/RawFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.h
@@ -128,8 +128,10 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/inc/config.h
         ${CMAKE_SOURCE_DIR}/inc/AppSetting.h
         ${CMAKE_SOURCE_DIR}/src/AppSetting.cpp
-        ${CMAKE_SOURCE_DIR}/inc/RoiDataExportDlg.h
-        ${CMAKE_SOURCE_DIR}/src/RoiDataExportDlg.cpp
+        ${CMAKE_SOURCE_DIR}/inc/RoiDataShowDlg.h
+        ${CMAKE_SOURCE_DIR}/src/RoiDataShowDlg.cpp
+        ${CMAKE_SOURCE_DIR}/inc/ImgInfoDlg.h
+        ${CMAKE_SOURCE_DIR}/src/ImgInfoDlg.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

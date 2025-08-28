@@ -174,9 +174,9 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     penWidthSbox->setValue(2);
     penWidthSbox->setVisible(false);
     penWidthAction = toolBar->addWidget(penWidthSbox);
-    
 
     mainWidget = new QFrame();
+    mainWindow->setCentralWidget(mainWidget);
     // mainWidget->setFrameStyle(QFrame::Box | QFrame::Sunken);
     // mainWidget->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
     // mainWidget->setFrameStyle(QFrame::NoFrame);
@@ -185,16 +185,17 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     mainWidget->setLayout(scrollAreaLayout);
 
     scrollArea[0] = new QScrollArea();
-    imageLabel[0] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[0]);
     imageLabelContianer[0] = new QWidget();
-    QVBoxLayout *imgLabelContianerLayout0 = new QVBoxLayout(imageLabelContianer[0]);
-    imgLabelContianerLayout0->addWidget(imageLabel[0]);
     scrollArea[0]->setWidget(imageLabelContianer[0]);
     scrollArea[0]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     scrollArea[0]->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scrollArea[0]->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scrollArea[0]->setFrameShape(QFrame::NoFrame);
 
+    QVBoxLayout *imgLabelContianerLayout0 = new QVBoxLayout(imageLabelContianer[0]);
+    imageLabel[0] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[0]);
+    imgLabelContianerLayout0->addWidget(imageLabel[0]);
+    
     zoomRatioLabel = new QLabel("1.00x");
     zoomRatioLabel->setAlignment(Qt::AlignmentFlag::AlignHCenter);
 
@@ -211,29 +212,27 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
 
     scrollAreaCenterFrame = new QFrame(mainWidget);
     QVBoxLayout *centerLayout = new QVBoxLayout();
+    scrollAreaCenterFrame->setLayout(centerLayout);
     centerLayout->addStretch(1);
     centerLayout->addWidget(zoomRatioLabel);
     centerLayout->addWidget(exchangeAreaPreviewBtn);
     centerLayout->addWidget(imageInfoBtn);
     centerLayout->addStretch(1);
-    scrollAreaCenterFrame->setLayout(centerLayout);
 
     scrollArea[1] = new QScrollArea();
-    imageLabel[1] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[1]);
     imageLabelContianer[1] = new QWidget();
-    QVBoxLayout *imgLabelContianerLayout1 = new QVBoxLayout(imageLabelContianer[1]);
-    imgLabelContianerLayout1->addWidget(imageLabel[1]);
     scrollArea[1]->setWidget(imageLabelContianer[1]);
     scrollArea[1]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     scrollArea[1]->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scrollArea[1]->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scrollArea[1]->setFrameShape(QFrame::NoFrame);
-
+    QVBoxLayout *imgLabelContianerLayout1 = new QVBoxLayout(imageLabelContianer[1]);
+    imageLabel[1] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[1]);
+    imgLabelContianerLayout1->addWidget(imageLabel[1]);
+    
     scrollAreaLayout->addWidget(scrollArea[0], 1);
     scrollAreaLayout->addWidget(scrollAreaCenterFrame, 0);
     scrollAreaLayout->addWidget(scrollArea[1], 1);
-
-    mainWindow->setCentralWidget(mainWidget);
 
     createDockWidget0(mainWindow);
 

@@ -1,9 +1,12 @@
 #include "ImageWidget.h"
-#include "RoiDataExportDlg.h"
+#include "RoiDataShowDlg.h"
 #include <QMessageBox>
+#include <QFileInfo>
+#include <QDir>
+#include <QFileDialog>
 #include <cmath>
 
-static void computeStats(const std::vector<unsigned int>& data, unsigned int& mean, unsigned long long int& variance, unsigned int& stddev)
+static void computeRoiDataStats(const std::vector<unsigned int>& data, unsigned int& mean, unsigned long long int& variance, unsigned int& stddev)
 {
     size_t n = data.size();
     if (n == 0) return;
@@ -20,15 +23,12 @@ static void computeStats(const std::vector<unsigned int>& data, unsigned int& me
     stddev = std::sqrt(variance);
 }
 
-void ImageWidget::exportRoiData()
+QString ImageWidget::generateRoiDataStr()
 {
     int roi_left = qMin(ptCodInfo.originPaintCoordinates[0].x(), ptCodInfo.originPaintCoordinates[1].x()) / ptCodInfo.originScaleRatio;
     int roi_right = qMax(ptCodInfo.originPaintCoordinates[0].x(), ptCodInfo.originPaintCoordinates[1].x()) / ptCodInfo.originScaleRatio;
     int roi_top = qMin(ptCodInfo.originPaintCoordinates[0].y(), ptCodInfo.originPaintCoordinates[1].y()) / ptCodInfo.originScaleRatio;
     int roi_bottom = qMax(ptCodInfo.originPaintCoordinates[0].y(), ptCodInfo.originPaintCoordinates[1].y()) / ptCodInfo.originScaleRatio;
-
-    // auto msg_text = QString("%1, %2, %3, %4").arg(roi_left).arg(roi_right).arg(roi_top).arg(roi_bottom);
-    // QMessageBox::information(this, "roi coordinate", msg_text, QMessageBox::StandardButton::Ok);
 
     int pixCnt = (roi_right - roi_left) * (roi_bottom - roi_top);
     if(pixCnt > 4096)
@@ -36,11 +36,11 @@ void ImageWidget::exportRoiData()
         auto ans = QMessageBox::question(this, tr("warning"), tr("pixel in roi count > 4096, are you sure to export?"), QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No);
         if(ans != QMessageBox::StandardButton::Yes)
         {
-            return;
+            return QString("");
         }
     }
 
-    QString roiPixelValStr("");
+    QString roiPixelValStr = QString("IMAGE:%1\nL:%2, R:%3, T:%4, B:%5\n").arg(*imgName).arg(roi_left).arg(roi_right).arg(roi_top).arg(roi_bottom);
     if(openedImgType == OpenedImageType::NORMAL_IMG)
     {
         roiPixelValStr.append("[");
@@ -226,15 +226,15 @@ void ImageWidget::exportRoiData()
         {
             unsigned int roi_r_mean = 0, roi_r_stddev = 0;
             unsigned long long int roi_r_var = 0;
-            computeStats(std::vector(roi_r.begin(), roi_r.begin() + r_cnt), roi_r_mean, roi_r_var, roi_r_stddev);
+            computeRoiDataStats(std::vector(roi_r.begin(), roi_r.begin() + r_cnt), roi_r_mean, roi_r_var, roi_r_stddev);
 
             unsigned int roi_g_mean = 0, roi_g_stddev = 0;
             unsigned long long int roi_g_var = 0;
-            computeStats(std::vector(roi_g.begin(), roi_g.begin() + g_cnt), roi_g_mean, roi_g_var, roi_g_stddev);
+            computeRoiDataStats(std::vector(roi_g.begin(), roi_g.begin() + g_cnt), roi_g_mean, roi_g_var, roi_g_stddev);
 
             unsigned int roi_b_mean = 0, roi_b_stddev = 0;
             unsigned long long int roi_b_var = 0;
-            computeStats(std::vector(roi_b.begin(), roi_b.begin() + b_cnt), roi_b_mean, roi_b_var, roi_b_stddev);
+            computeRoiDataStats(std::vector(roi_b.begin(), roi_b.begin() + b_cnt), roi_b_mean, roi_b_var, roi_b_stddev);
 
             roiPixelValStr.append(QString("R mean=%1, var=%2, std_dev=%3\n").arg(roi_r_mean).arg(roi_r_var).arg(roi_r_stddev));
             roiPixelValStr.append(QString("G mean=%1, var=%2, std_dev=%3\n").arg(roi_g_mean).arg(roi_g_var).arg(roi_g_stddev));
@@ -244,19 +244,19 @@ void ImageWidget::exportRoiData()
         {
             unsigned int roi_r_mean = 0, roi_r_stddev = 0;
             unsigned long long int roi_r_var = 0;
-            computeStats(std::vector(roi_r.begin(), roi_r.begin() + r_cnt), roi_r_mean, roi_r_var, roi_r_stddev);
+            computeRoiDataStats(std::vector(roi_r.begin(), roi_r.begin() + r_cnt), roi_r_mean, roi_r_var, roi_r_stddev);
 
             unsigned int roi_g_mean = 0, roi_g_stddev = 0;
             unsigned long long int roi_g_var = 0;
-            computeStats(std::vector(roi_g.begin(), roi_g.begin() + g_cnt), roi_g_mean, roi_g_var, roi_g_stddev);
+            computeRoiDataStats(std::vector(roi_g.begin(), roi_g.begin() + g_cnt), roi_g_mean, roi_g_var, roi_g_stddev);
 
             unsigned int roi_b_mean = 0, roi_b_stddev = 0;
             unsigned long long int roi_b_var = 0;
-            computeStats(std::vector(roi_b.begin(), roi_b.begin() + b_cnt), roi_b_mean, roi_b_var, roi_b_stddev);
+            computeRoiDataStats(std::vector(roi_b.begin(), roi_b.begin() + b_cnt), roi_b_mean, roi_b_var, roi_b_stddev);
 
             unsigned int roi_ir_mean = 0, roi_ir_stddev = 0;
             unsigned long long int roi_ir_var = 0;
-            computeStats(std::vector(roi_ir.begin(), roi_ir.begin() + ir_cnt), roi_ir_mean, roi_ir_var, roi_ir_stddev);
+            computeRoiDataStats(std::vector(roi_ir.begin(), roi_ir.begin() + ir_cnt), roi_ir_mean, roi_ir_var, roi_ir_stddev);
 
             roiPixelValStr.append(QString("R mean=%1, var=%2, std_dev=%3\n").arg(roi_r_mean).arg(roi_r_var).arg(roi_r_stddev));
             roiPixelValStr.append(QString("G mean=%1, var=%2, std_dev=%3\n").arg(roi_g_mean).arg(roi_g_var).arg(roi_g_stddev));
@@ -267,7 +267,7 @@ void ImageWidget::exportRoiData()
         {
             unsigned int roi_y_mean = 0, roi_y_stddev = 0;
             unsigned long long int roi_y_var = 0;
-            computeStats(std::vector(roi_y.begin(), roi_y.begin() + y_cnt), roi_y_mean, roi_y_var, roi_y_stddev);
+            computeRoiDataStats(std::vector(roi_y.begin(), roi_y.begin() + y_cnt), roi_y_mean, roi_y_var, roi_y_stddev);
             roiPixelValStr.append(QString("Y mean=%1, var=%2, std_dev=%3\n").arg(roi_y_mean).arg(roi_y_var).arg(roi_y_stddev));
         }
 
@@ -276,10 +276,7 @@ void ImageWidget::exportRoiData()
     {
         exportRoiYuvData(roiPixelValStr, roi_top, roi_bottom, roi_left, roi_right);
     }
-
-    RoiDataExportDlg detailDlg(this);
-    detailDlg.setRoiExportText(roiPixelValStr);
-    detailDlg.exec();
+    return roiPixelValStr;
 }
 
 void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi_bottom, int roi_left, int roi_right)
@@ -1147,5 +1144,52 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
             }
         }
         roiPixelValStr.append("]");
+    }
+}
+
+void ImageWidget::showRoiDataToText()
+{
+    QString roiPixelValStr = generateRoiDataStr();
+    if(roiPixelValStr.length() == 0)
+    {
+        return;
+    }
+
+    RoiDataShowDlg detailDlg(this);
+    detailDlg.setRoiExportText(roiPixelValStr);
+    detailDlg.exec();
+}
+
+void ImageWidget::exportRoiDataToDisk()
+{
+    QString roiPixelValStr = generateRoiDataStr();
+    if(roiPixelValStr.length() == 0)
+    {
+        return;
+    }
+
+    QFileInfo curImgInfo(*imgName);
+    // auto mesg = QString("%1, %2, %3").arg(curImgInfo.absolutePath()).arg(curImgInfo.baseName()).arg(curImgInfo.completeSuffix());
+    // QMessageBox::information(this, "file info", mesg);
+    auto targetDir = curImgInfo.absoluteDir();
+    auto targetDirName = curImgInfo.absolutePath();
+    if(!targetDir.exists())
+    {
+        QString errMsg = QString("%1").arg(targetDirName) + QString(tr(" not exist!"));
+        QMessageBox::warning(this, tr("error"), errMsg);
+        return;
+    }
+
+    auto targetTxtPathName = QString("%1/%2_.txt").arg(targetDirName).arg(curImgInfo.baseName());
+    auto userSelFn = QFileDialog::getSaveFileName(this, tr("save roi data to text file"), targetTxtPathName, "Text files(*.txt *.TXT );;All files(*.*)");
+
+    if (!userSelFn.isEmpty())
+    {
+        QFile file(userSelFn);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream out(&file);
+            out << roiPixelValStr;
+        }
     }
 }
