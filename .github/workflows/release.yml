@@ -2,15 +2,20 @@ name: Release Build
 
 on:
   push:
-    branches: [ "main" ]
     tags:
       - 'v*'  # 匹配v开头的tag
+permissions:
+  contents: write   # 关键：允许创建/更新 Release
 
 jobs:
   build:
     runs-on: windows-2022
 
     steps:
+    - run: gh auth status
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - uses: actions/checkout@v4
       with:
         submodules: recursive

@@ -11,6 +11,7 @@
 
 ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, QWidget *parent)
     : QWidget(parent),
+      rightMouseContextMenu(this),
       parentScroll(parentScroll),
       mouseAction(NONE_ACTION),
       penColor(color),
@@ -26,7 +27,6 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0),
       yuvDataPtr(nullptr), yuvDataBit(0), 
       rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW),
-      rightMouseContextMenu(this),
       openedImgType(UNKNOW_IMG),
       imgName(nullptr)
 {

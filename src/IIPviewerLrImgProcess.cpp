@@ -121,7 +121,7 @@ static QString compareNormalImage(const QImage* left, const QImage* right)
     }
     int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
-    return std::move(tmp);
+    return tmp;
 }
 
 static QString comparePgmImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
@@ -155,7 +155,7 @@ static QString comparePgmImage(const unsigned char* left, const unsigned char* r
     }
     int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
-    return std::move(tmp);
+    return tmp;
 }
 
 static QString comparePnmImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
@@ -195,7 +195,7 @@ static QString comparePnmImage(const unsigned char* left, const unsigned char* r
     }
     int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
-    return std::move(tmp);
+    return tmp;
 }
 
 static QString compareRawImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
@@ -229,7 +229,7 @@ static QString compareRawImage(const unsigned char* left, const unsigned char* r
     }
     int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
-    return std::move(tmp);
+    return tmp;
 }
 
 static QString compareYuvImage(const unsigned char* left, const unsigned char* right, const int bits, YuvFileInfoDlg::YuvType yuvTp, const QSize imgSize)
@@ -279,7 +279,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
         }
         int pixCnt = height * width;
         QString tmp = QString("Y max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixYmaxDiff).arg(pixYminDiff).arg(pixYdiffSum / (qreal)pixCnt).arg(maxYdiffPos.y()).arg(maxYdiffPos.x());
-        return std::move(tmp);
+        return tmp;
     }
     else if(yuvTp == YuvFileInfoDlg::YuvType::YUV420_NV12 || yuvTp == YuvFileInfoDlg::YuvType::YUV420_NV21) // YYY...UVUV and YYY...VUVU
     {
@@ -359,7 +359,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
             tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         else
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
-        return std::move(tmp);
+        return tmp;
     }
     else if(yuvTp == YuvFileInfoDlg::YuvType::YUV420P_YU12 || YuvFileInfoDlg::YuvType::YUV420P_YV12) // YYY...UU..VV and YYY...VV..UU
     {
@@ -442,7 +442,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
             tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         else
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
-        return std::move(tmp);
+        return tmp;
     }
     else if(yuvTp == YuvFileInfoDlg::YuvType::YUV422_UYVY || yuvTp == YuvFileInfoDlg::YuvType::YUV422_YUYV) // UYVY and YUYV
     {
@@ -519,7 +519,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
         }
         tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 2)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
 
-        return std::move(tmp);
+        return tmp;
     }
     else if(yuvTp == YuvFileInfoDlg::YuvType::YUV444_INTERLEAVE) // YUVYUV
     {
@@ -590,7 +590,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
             }
         }
         tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixUmaxDiff).arg(pixUminDiff).arg(pixUdiffSum / (qreal)pixCnt).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
-        return std::move(tmp);
+        return tmp;
     }
     else if(yuvTp == YuvFileInfoDlg::YuvType::YUV444_PLANAR) // YYY..UUU..VVV
     {
@@ -667,12 +667,12 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
             }
         }
         tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)pixCnt).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
-        return std::move(tmp);
+        return tmp;
     }
     else
     {
         QString tmp("error yuv format\n");
-        return std::move(tmp);
+        return tmp;
     }
 }
 
