@@ -26,109 +26,6 @@
 constexpr int LEFT_IMG_WIDGET = 0;
 constexpr int RIGHT_IMG_WIDGET = 1;
 
-class ImgInfoDlg : public QDialog
-{
-    // Q_OBJECT
-public:
-    ImgInfoDlg(QWidget *parent)
-        : QDialog(parent)
-    {
-        leftLabel = new QLabel(this);
-        rightLabel = new QLabel(this);
-        QFrame *centerLine = new QFrame();
-        centerLine->setFrameShape(QFrame::Shape::VLine);
-        centerLine->setFrameShadow(QFrame::Shadow::Sunken);
-
-        QHBoxLayout *layout = new QHBoxLayout();
-        layout->addWidget(leftLabel);
-        layout->addWidget(centerLine);
-        layout->addWidget(rightLabel);
-        setLayout(layout);
-        resize(400, 200);
-        setWindowTitle(tr("image info"));
-    }
-    ~ImgInfoDlg()
-    {
-    }
-
-    void setImgInfo(QString &filePath, QSize &imgSize, RawFileInfoDlg::BayerPatternType by, YuvFileInfoDlg::YuvType yt, int bits, bool left)
-    {
-        // if (filePath.length() == 0) {
-        //     if (left) {
-        //         leftLabel->setText("no input");
-        //     } else {
-        //         rightLabel->setText("no input");
-        //     }
-        //     return;
-        // }
-        QString tmp = QString::asprintf("\nw: %d, h: %d, %d bit\n", imgSize.width(), imgSize.height(), bits);
-        if (by == RawFileInfoDlg::BayerPatternType::RGGB)
-        {
-            tmp += QString(" RGGB");
-        }
-        else if (by == RawFileInfoDlg::BayerPatternType::GRBG)
-        {
-            tmp += QString(" GRBG");
-        }
-        else if (by == RawFileInfoDlg::BayerPatternType::GBRG)
-        {
-            tmp += QString(" GBRG");
-        }
-        else if (by == RawFileInfoDlg::BGGR)
-        {
-            tmp += QString(" BGGR");
-        }
-        if (yt == YuvFileInfoDlg::YuvType::YUV444_INTERLEAVE)
-        {
-            tmp += QString(" YUV444_INTERLEAVE");
-        }
-        else if (yt == YuvFileInfoDlg::YuvType::YUV444_PLANAR)
-        {
-            tmp += QString(" YUV444_PLANAR");
-        }
-        else if (yt == YuvFileInfoDlg::YuvType::YUV422_UYVY)
-        {
-            tmp += QString(" YUV422_UYVY");
-        }
-        else if (yt == YuvFileInfoDlg::YuvType::YUV422_YUYV)
-        {
-            tmp += QString(" YUV422_YUYV");
-        }
-        else if (yt == YuvFileInfoDlg::YuvType::YUV420_NV12)
-        {
-            tmp += QString(" YUV420_NV12");
-        }
-        else if (yt == YuvFileInfoDlg::YuvType::YUV420_NV21)
-        {
-            tmp += QString(" YUV420_NV21");
-        }
-        else if (yt == YuvFileInfoDlg::YuvType::YUV420P_YU12)
-        {
-            tmp += QString(" YUV420P_YU12");
-        }
-        else if (yt == YuvFileInfoDlg::YuvType::YUV420P_YV12)
-        {
-            tmp += QString(" YUV420P_YV12");
-        }
-        else if (yt == YuvFileInfoDlg::YuvType::YUV400)
-        {
-            tmp += QString(" YUV400");
-        }
-        if (left)
-        {
-            leftLabel->setText(filePath + tmp);
-        }
-        else
-        {
-            rightLabel->setText(filePath + tmp);
-        }
-    }
-
-private:
-    QLabel *leftLabel;
-    QLabel *rightLabel;
-};
-
 IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     : QMainWindow(parent), ui(), 
     originSize{QSize{0, 0}, QSize{0, 0}}, 
@@ -216,6 +113,7 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     connect(ui.exchangeAreaPreviewBtn, &QPushButton::pressed, this, &IIPviewer::exchangeRight2LeftImg);
     connect(ui.exchangeAreaPreviewBtn, &QPushButton::released, this, &IIPviewer::restoreLeftImg);
     connect(ui.imageInfoBtn, &QPushButton::clicked, this, &IIPviewer::showImageInfo);
+    connect(ui.imageDiffInfoBtn, &QPushButton::clicked, this, &IIPviewer::showImageDiffReport);
     connect(ui.closeLeftAction, &QAction::triggered, this, &IIPviewer::onCloseLeftFileAction);
     connect(ui.closeRightAction, &QAction::triggered, this, &IIPviewer::onCloseRightFileAction);
     connect(ui.exitAction, &QAction::triggered, this, [this]()
@@ -456,45 +354,6 @@ void IIPviewer::onSysOptionAction(bool check)
     }
 }
 
-void IIPviewer::showImageInfo()
-{
-    ImgInfoDlg dlg(this);
-    if (openedFile[0].endsWith("raw", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[0], originSize[0], ui.imageLabel[0]->rawBayerType, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[0]->rawDataBit, true);
-    }
-    else if (openedFile[0].endsWith("pnm", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[0]->pnmDataBit, true);
-    }
-    else if (openedFile[0].endsWith("yuv", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, ui.imageLabel[0]->yuvType, ui.imageLabel[0]->yuvDataBit, true);
-    }
-    else if (openedFile[0].endsWith("jpg", Qt::CaseInsensitive) || openedFile[0].endsWith("jpeg", Qt::CaseInsensitive) || openedFile[0].endsWith("bmp", Qt::CaseInsensitive) || openedFile[0].endsWith("png", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, 8, true);
-    }
-
-    if (openedFile[1].endsWith("raw", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[1], originSize[1], ui.imageLabel[1]->rawBayerType, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[1]->rawDataBit, false);
-    }
-    else if (openedFile[1].endsWith("pnm", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[1]->pnmDataBit, false);
-    }
-    else if (openedFile[1].endsWith("yuv", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, ui.imageLabel[1]->yuvType, ui.imageLabel[1]->yuvDataBit, false);
-    }
-    else if (openedFile[1].endsWith("jpg", Qt::CaseInsensitive) || openedFile[1].endsWith("jpeg", Qt::CaseInsensitive) || openedFile[1].endsWith("bmp", Qt::CaseInsensitive) || openedFile[1].endsWith("png", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, 8, false);
-    }
-    dlg.exec();
-}
-
 void IIPviewer::checkUpdate()
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -587,43 +446,6 @@ void IIPviewer::openedFileChanged(const QString &filePath)
     {
         openedFileWatcher.removePath(filePath);
     }
-}
-
-void IIPviewer::updateExchangeBtn()
-{
-    if (ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType != UNKNOW_IMG && ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType != UNKNOW_IMG)
-    {
-        ui.exchangeAreaPreviewBtn->setEnabled(true);
-    }
-    else
-    {
-        ui.exchangeAreaPreviewBtn->setEnabled(false);
-    }
-}
-
-void IIPviewer::updateZoomLabelText()
-{
-    if (ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType == UNKNOW_IMG && ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType == UNKNOW_IMG)
-    {
-        ui.zoomRatioLabel->setEnabled(false);
-        ui.zoomRatioLabel->setText("1.00x");
-    }
-    else
-    {
-        ui.zoomRatioLabel->setEnabled(true);
-    }
-}
-
-void IIPviewer::exchangeRight2LeftImg()
-{
-    ui.imageLabel[LEFT_IMG_WIDGET]->acceptImgFromOther(ui.imageLabel[RIGHT_IMG_WIDGET]);
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":image/resource/right2left-pressed.png"));
-}
-
-void IIPviewer::restoreLeftImg()
-{
-    ui.imageLabel[LEFT_IMG_WIDGET]->restoreImg();
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":image/resource/right2left.png"));
 }
 
 void IIPviewer::closeEvent(QCloseEvent *event)
@@ -849,7 +671,7 @@ void IIPviewer::reLoadFile(int scrollArea)
             }
             // openedFile[0] = dstFn;
             originSize[0] = reader.size();
-            setImage(dstFn, LEFT_IMG_WIDGET);
+            setImage(dstFn, LEFT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
 
             // loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
         }
@@ -866,7 +688,7 @@ void IIPviewer::reLoadFile(int scrollArea)
             // openedFile[1] = dstFn;
             originSize[1] = reader.size();
             // ui.imageLabelContianer[1]->resize(originSize[1]);
-            setImage(dstFn, RIGHT_IMG_WIDGET);
+            setImage(dstFn, RIGHT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
 
             // loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
         }
@@ -925,7 +747,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
             }
             openedFile[0] = fileName;
             originSize[0] = reader.size();
-            setImage(fileName, LEFT_IMG_WIDGET);
+            setImage(openedFile[0], LEFT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
 
             loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
         }
@@ -943,7 +765,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
             openedFile[1] = fileName;
             originSize[1] = reader.size();
             // ui.imageLabelContianer[1]->resize(originSize[1]);
-            setImage(fileName, RIGHT_IMG_WIDGET);
+            setImage(openedFile[1], RIGHT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
 
             loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
         }
@@ -1117,7 +939,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
-        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
+        setYuvImage(openedFile[0], tp, bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
@@ -1136,7 +958,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
-        setYuvImage(fileName, tp, bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
+        setYuvImage(openedFile[1], tp, bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
@@ -1335,7 +1157,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
-        setRawImage(fileName, by, order, bitDepth, raw_compact, width, height, LEFT_IMG_WIDGET);
+        setRawImage(openedFile[0], by, order, bitDepth, raw_compact, width, height, LEFT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET); }
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
@@ -1354,7 +1176,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
-        setRawImage(fileName, by, order, bitDepth, raw_compact, width, height, RIGHT_IMG_WIDGET);
+        setRawImage(openedFile[1], by, order, bitDepth, raw_compact, width, height, RIGHT_IMG_WIDGET);
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
@@ -1384,7 +1206,7 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = reader.size();
-        setImage(fileName, LEFT_IMG_WIDGET);
+        setImage(openedFile[0], LEFT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
@@ -1403,7 +1225,7 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = reader.size();
-        setImage(fileName, RIGHT_IMG_WIDGET);
+        setImage(openedFile[1], RIGHT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
@@ -1433,7 +1255,7 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = reader.size();
-        setImage(fileName, LEFT_IMG_WIDGET);
+        setImage(openedFile[0], LEFT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
@@ -1452,7 +1274,7 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = reader.size();
-        setImage(fileName, RIGHT_IMG_WIDGET);
+        setImage(openedFile[1], RIGHT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
         if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
     }
 }
@@ -1461,21 +1283,24 @@ void IIPviewer::setImage(QString &imageName, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
-    ui.imageLabel[leftOrRight]->setPixmap(imageName);
+    ui.imageLabel[leftOrRight]->imgName = &imageName;
+    ui.imageLabel[leftOrRight]->setPixmap();
 }
 
 void IIPviewer::setRawImage(QString &imageName, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
-    ui.imageLabel[leftOrRight]->setPixmap(imageName, by, order, bitDepth, compact, width, height);
+    ui.imageLabel[leftOrRight]->imgName = &imageName;
+    ui.imageLabel[leftOrRight]->setPixmap(by, order, bitDepth, compact, width, height);
 }
 
 void IIPviewer::setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
-    ui.imageLabel[leftOrRight]->setPixmap(imageName, tp, bitDepth, width, height, pixSize);
+    ui.imageLabel[leftOrRight]->imgName = &imageName;
+    ui.imageLabel[leftOrRight]->setPixmap(tp, bitDepth, width, height, pixSize);
 }
 
 void IIPviewer::onCloseLeftFileAction()

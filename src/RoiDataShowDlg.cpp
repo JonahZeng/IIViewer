@@ -1,18 +1,18 @@
-#include "RoiDataExportDlg.h"
+#include "RoiDataShowDlg.h"
 #include <QVBoxLayout>
 
-RoiDataExportDlg::RoiDataExportDlg(QWidget *parent): QDialog(parent), roiInfoEdit(nullptr), closeBtn(nullptr)
+RoiDataShowDlg::RoiDataShowDlg(QWidget *parent): QDialog(parent), roiInfoEdit(nullptr), closeBtn(nullptr)
 {
     initUI();
-    connect(closeBtn, &QPushButton::clicked, this, &RoiDataExportDlg::onCloseBtn);
+    connect(closeBtn, &QPushButton::clicked, this, &RoiDataShowDlg::onCloseBtn);
 }
 
-RoiDataExportDlg::~RoiDataExportDlg()
+RoiDataShowDlg::~RoiDataShowDlg()
 {
 
 }
 
-void RoiDataExportDlg::initUI()
+void RoiDataShowDlg::initUI()
 {
     QVBoxLayout* vlayout = new QVBoxLayout();
     roiInfoEdit = new QTextEdit(this);
@@ -26,12 +26,12 @@ void RoiDataExportDlg::initUI()
     setWindowTitle(tr("Roi data"));
 }
 
-void RoiDataExportDlg::onCloseBtn()
+void RoiDataShowDlg::onCloseBtn()
 {
     close();
 }
 
-void RoiDataExportDlg::setRoiExportText(const QString& info)
+void RoiDataShowDlg::setRoiExportText(const QString& info)
 {
     roiInfoEdit->setText(info);
 }

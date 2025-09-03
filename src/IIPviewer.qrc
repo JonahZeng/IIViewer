@@ -20,5 +20,6 @@
         <file>resource/skin.svg</file>
         <file>resource/single_rect.svg</file>
         <file>resource/double_rect.svg</file>
+        <file>resource/compare_diff.svg</file>
     </qresource>
 </RCC>

@@ -83,6 +83,7 @@ public slots:
     void exchangeRight2LeftImg();
     void restoreLeftImg();
     void showImageInfo();
+    void showImageDiffReport();
     void checkUpdate();
     void openedFileChanged(const QString& filePath);
 

@@ -50,9 +50,9 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
-    void setPixmap(QString &img);
-    void setPixmap(QString &img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height);
-    void setPixmap(QString &img, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize);
+    void setPixmap();
+    void setPixmap(RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height);
+    void setPixmap(YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize);
     void zoomIn(int zoomIdx);
     void zoomOut(int zoomIdx);
     void setMouseActionPaintRoi()
@@ -101,7 +101,9 @@ private:
     void paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     RawFileInfoDlg::BayerPixelType getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by);
-    void exportRoiData();
+    QString generateRoiDataStr();
+    void showRoiDataToText();
+    void exportRoiDataToDisk();
     void exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi_bottom, int roi_left, int roi_right);
 
 public:
@@ -133,7 +135,8 @@ public:
     RawFileInfoDlg::ByteOrderType rawByteOrderType;
     YuvFileInfoDlg::YuvType yuvType;
     OpenedImageType openedImgType;
-    AppSettings* appSettings;
+    AppSettings* appSettings; // app设置信息，会通过顶层IIPviewer(QMainWindow)传递过来，只使用不持有
+    QString* imgName; // 保存IIPviewer::openedFile
 
 private:
     QImage *pixMapBak;

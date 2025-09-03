@@ -54,6 +54,7 @@ namespace Ui
         QLabel *zoomRatioLabel;
         QPushButton *exchangeAreaPreviewBtn;
         QPushButton *imageInfoBtn;
+        QPushButton *imageDiffInfoBtn;
         QDockWidget *dataAnalyseDockWgt;
         QDockWidget *playListDockWgt;
         QPushButton *paintOk0;

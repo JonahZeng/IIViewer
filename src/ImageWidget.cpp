@@ -27,10 +27,13 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       yuvDataPtr(nullptr), yuvDataBit(0), 
       rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW),
       rightMouseContextMenu(this),
-      openedImgType(UNKNOW_IMG)
+      openedImgType(UNKNOW_IMG),
+      imgName(nullptr)
 {
-    QAction* exportPython = rightMouseContextMenu.addAction(tr("export roi data"));
-    connect(exportPython, &QAction::triggered, this, &ImageWidget::exportRoiData);
+    QAction* showRoiData = rightMouseContextMenu.addAction(tr("show roi data"));
+    QAction* exportRoiData = rightMouseContextMenu.addAction(tr("export roi data"));
+    connect(showRoiData, &QAction::triggered, this, &ImageWidget::showRoiDataToText);
+    connect(exportRoiData, &QAction::triggered, this, &ImageWidget::exportRoiDataToDisk);
 }
 
 ImageWidget::~ImageWidget()
@@ -45,50 +48,50 @@ static const RawFileInfoDlg::BayerPixelType type_BGGR[4] = {RawFileInfoDlg::PIX_
 
 static const RawFileInfoDlg::BayerPixelType type_RGG_IR[16] = {
     RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR,
     RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR
 };
 static const RawFileInfoDlg::BayerPixelType type_BGG_IR[16] = {
     RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR,
     RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR
 };
 static const RawFileInfoDlg::BayerPixelType type_GR_IR_G[16] = {
     RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
-    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR,
     RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
-    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB
+    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB
 };
 static const RawFileInfoDlg::BayerPixelType type_GB_IR_G[16] = {
     RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
-    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB,
     RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
-    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR
+    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR
 };
 static const RawFileInfoDlg::BayerPixelType type_G_IR_RG[16] = {
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR,
     RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR,
     RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR
 };
 static const RawFileInfoDlg::BayerPixelType type_G_IR_BG[16] = {
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR,
     RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y,
+    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR,
     RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB
 };
 static const RawFileInfoDlg::BayerPixelType type_IR_GGR[16] = {
-    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR,
     RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
-    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB,
     RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R
 };
 static const RawFileInfoDlg::BayerPixelType type_IR_GGB[16] = {
-    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB,
+    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB,
     RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
-    RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_Y, RawFileInfoDlg::PIX_GR,
+    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR,
     RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B
 };
 
@@ -124,7 +127,7 @@ RawFileInfoDlg::BayerPixelType ImageWidget::getPixType(int y, int x, RawFileInfo
     }
     else if(by >= RawFileInfoDlg::BayerPatternType::RGGIR && by <= RawFileInfoDlg::BayerPatternType::IRGGB)
     {
-        uint32_t pos = ((y & 0x11) << 2) + (x & 0x11);
+        uint32_t pos = ((y & 0x3) << 2) + (x & 0x3);
         const RawFileInfoDlg::BayerPixelType *type = type_rgbir[by - RawFileInfoDlg::BayerPatternType::RGGIR];
         return type[pos];
     }
@@ -316,7 +319,7 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                 }
                 else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_IR)
                 {
-                    painter.setPen(QColor(128, 128, 128));
+                    painter.setPen(QColor(100, 100, 100));
                 }
                 unsigned int gray = 0;
                 if (rawDataBit <= 8)
@@ -1872,7 +1875,7 @@ void ImageWidget::paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, i
                     y = ((unsigned short *)yuvDataPtr)[(yStart + h) * yuvWidth + (xStart + w)];
                 }
 
-                QRectF pixValRect(paintPixValTopLeft.x() + w * 96, paintPixValTopLeft.y() + h * 96, 96, 32);
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 32, 64, 32);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("Y:%d", y));
             }
@@ -2032,7 +2035,7 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
     {
         return;
     }
-    if (event->button() == Qt::LeftButton && !paintBegin && mouseAction == MouseActionType::PAINT_ROI_ACTION)
+    if (event->button() == Qt::MouseButton::LeftButton && !paintBegin && mouseAction == MouseActionType::PAINT_ROI_ACTION)
     {
         paintBegin = true;
         paintEnd = false;
@@ -2056,13 +2059,13 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
         ptCodInfo.originScaleRatio = scale_ratio;
         emit inform_real_Pos(ptCodInfo.paintCoordinates[0] / scale_ratio, ptCodInfo.paintCoordinates[1] / scale_ratio);
     }
-    else if (event->button() == Qt::LeftButton && mouseAction == MouseActionType::DRAG_IMG_ACTION)
+    else if (event->button() == Qt::MouseButton::LeftButton && mouseAction == MouseActionType::DRAG_IMG_ACTION)
     {
         imgDragStartPos = event->pos();
         doDragImg = true;
-        setCursor(Qt::ClosedHandCursor);
+        setCursor(Qt::CursorShape::ClosedHandCursor);
     }
-    else if(event->button() == Qt::RightButton && paintEnd)
+    else if(event->button() == Qt::MouseButton::RightButton && paintEnd)
     {
         // 检查roi坐标是否构成一个rectangel
         if(ptCodInfo.paintCoordinates[0] != ptCodInfo.paintCoordinates[1])
@@ -2184,11 +2187,15 @@ void ImageWidget::wheelEvent(QWheelEvent *event)
     event->accept();
 }
 
-void ImageWidget::setPixmap(QString &img) // jpg, jpeg, bmp, png, pnm, pgm, tiff
+void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
 {
-    if (img.endsWith(".pgm", Qt::CaseInsensitive))
+    if(imgName == nullptr)
     {
-        QFile input_f(img);
+        return;
+    }
+    if (imgName->endsWith(".pgm", Qt::CaseInsensitive))
+    {
+        QFile input_f(*imgName);
         input_f.open(QIODevice::ReadOnly);
         QByteArray p5 = input_f.readLine();
         QByteArray w_h = input_f.readLine();
@@ -2289,10 +2296,10 @@ void ImageWidget::setPixmap(QString &img) // jpg, jpeg, bmp, png, pnm, pgm, tiff
         resize(pixMap->size() * zoomList[zoomIdx]);
         repaint();
     }
-    else if (img.endsWith(".pnm", Qt::CaseInsensitive))
+    else if (imgName->endsWith(".pnm", Qt::CaseInsensitive))
     {
         bool isGray = false;
-        QFile input_f(img);
+        QFile input_f(*imgName);
         input_f.open(QIODevice::ReadOnly);
         QByteArray p6 = input_f.readLine();
         QByteArray w_h = input_f.readLine();
@@ -2440,7 +2447,7 @@ void ImageWidget::setPixmap(QString &img) // jpg, jpeg, bmp, png, pnm, pgm, tiff
     else
     {
         releaseBuffer();
-        pixMap = new QImage(img);
+        pixMap = new QImage(*imgName);
         openedImgType = NORMAL_IMG;
         rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
         rawByteOrderType = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
@@ -2499,8 +2506,13 @@ static void decompress14BitData(uint8_t *inputData, int width, int height, uint1
     }
 }
 
-void ImageWidget::setPixmap(QString &img, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height) // raw
+void ImageWidget::setPixmap(RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height) // raw
 {
+    if(imgName == nullptr)
+    {
+        return;
+    }
+
     int pixSize = 2;
     if (bitDepth <= 8)
     {
@@ -2523,7 +2535,7 @@ void ImageWidget::setPixmap(QString &img, RawFileInfoDlg::BayerPatternType by, R
     pixMap = new QImage(width, height, QImage::Format_Grayscale8);
     unsigned char *bufferShow = pixMap->bits();
 
-    QFile rawFile(img);
+    QFile rawFile(*imgName);
     rawFile.open(QIODevice::ReadOnly);
     if (compact)
         rawFile.read((char *)compact_buffer, (bitDepth * width * height + 7) / 8);
@@ -2962,8 +2974,13 @@ static void convertYUV2RGB888(unsigned char *yuvBuf, unsigned char *rgb888Buf, i
     }
 }
 
-void ImageWidget::setPixmap(QString &img, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize) // yuv
+void ImageWidget::setPixmap(YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize) // yuv
 {
+    if(imgName == nullptr)
+    {
+        return;
+    }
+
     qint64 total_size = 0;
 
     if (tp == YuvFileInfoDlg::YUV444_INTERLEAVE || tp == YuvFileInfoDlg::YUV444_PLANAR)
@@ -2990,7 +3007,7 @@ void ImageWidget::setPixmap(QString &img, YuvFileInfoDlg::YuvType tp, int bitDep
     int entirpixperline = pixMap->bytesPerLine() / 3;
     unsigned char *bufferShow = pixMap->bits();
 
-    QFile yuvFile(img);
+    QFile yuvFile(*imgName);
     yuvFile.open(QIODevice::ReadOnly);
     yuvFile.read((char *)buffer, total_size);
     yuvFile.close();
