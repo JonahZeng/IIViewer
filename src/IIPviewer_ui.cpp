@@ -208,7 +208,14 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     imageInfoBtn = new QPushButton();
     imageInfoBtn->setIcon(QIcon(":/image/resource/info.svg"));
     imageInfoBtn->setMaximumWidth(40);
-    imageInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#41a7e0} QPushButton:pressed{background-color:#a7a7a7}");
+    imageInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
+    imageInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show image infomation", nullptr));
+
+    imageDiffInfoBtn = new QPushButton();
+    imageDiffInfoBtn->setIcon(QIcon(":/image/resource/compare_diff.svg"));
+    imageDiffInfoBtn->setMaximumWidth(40);
+    imageDiffInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
+    imageDiffInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show left and right image difference report", nullptr));
 
     scrollAreaCenterFrame = new QFrame(mainWidget);
     QVBoxLayout *centerLayout = new QVBoxLayout();
@@ -217,6 +224,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     centerLayout->addWidget(zoomRatioLabel);
     centerLayout->addWidget(exchangeAreaPreviewBtn);
     centerLayout->addWidget(imageInfoBtn);
+    centerLayout->addWidget(imageDiffInfoBtn);
     centerLayout->addStretch(1);
 
     scrollArea[1] = new QScrollArea();

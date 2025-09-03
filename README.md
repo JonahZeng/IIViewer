@@ -83,9 +83,13 @@ cmake --build . --config Release
 
 ### linux(amd64 & arm64)
 #### prepare
-install gcc, openssl and Qt5 
+install gcc, openssl and Qt5 on ubuntu 20.04
 ```bash
-sudo apt install cmake build-essential libssl-dev qt5-default libqt5datavisualization5-dev qttools5-dev-tools
+sudo apt install build-essential libssl-dev qt5-default libqt5datavisualization5-dev qttools5-dev-tools
+```
+ubuntu 22.04
+```bash
+sudo apt install build-essential libssl-dev qtbase5-dev libqt5datavisualization5-dev qtbase5-dev-tools
 ```
 install cmake by download from [newest release ](https://github.com/Kitware/CMake/releases) or build from source.
 #### build
@@ -113,7 +117,7 @@ chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage
 ```
 
 ### macos(arm64)
-I use homebrew to install Qt5
+Use homebrew to install Qt5 on mac
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install qt@5
@@ -128,7 +132,7 @@ cmake --build . -j 4
 - use `linguist` to translate the .ts file, and public it to a .qm file
 - load specific .qm file when the software startup, based on the user's region and language
 ```bash
-lupdate.exe ./src/Main.cpp ./src/IIPviewer.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h ./src/IIPviewer.rc ./src/IIPviewer.qrc ./src/ImageWidget.cpp ./src/ImageWidgetRoiShowText.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.h ./inc/IIPOptionDialog.ui ./src/IIPOptionDialog.cpp ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./inc/YuvFileInfoDlg.ui ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/resource.h ./inc/config.h ./inc/AppSetting.h ./src/AppSetting.cpp ./inc/RoiDataShowDlg.h ./src/RoiDataShowDlg.cpp ./inc/ImgInfoDlg.h ./src/ImgInfoDlg.cpp -ts ./translations/IIViewer_zh.ts
+lupdate.exe ./src/Main.cpp ./src/IIPviewer.cpp ./src/IIPviewerLrImgProcess.cpp ./inc/IIPviewer.h ./src/AboutDlg.cpp ./inc/AboutDlg.h ./src/ImageWidget.cpp ./src/ImageWidgetRoiShowText.cpp ./inc/ImageWidget.h ./src/RawFileInfoDlg.cpp ./inc/RawFileInfoDlg.h ./inc/RawFileInfoDlg.ui ./inc/IIPOptionDialog.h ./inc/IIPOptionDialog.ui ./src/IIPOptionDialog.cpp ./src/IIPviewer_ui.cpp ./inc/IIPviewer_ui.h ./src/YuvFileInfoDlg.cpp ./inc/YuvFileInfoDlg.h ./inc/YuvFileInfoDlg.ui ./src/DataVisualDlg.cpp ./inc/DataVisualDlg.h ./inc/AppSetting.h ./src/AppSetting.cpp ./inc/RoiDataShowDlg.h ./src/RoiDataShowDlg.cpp ./inc/ImgInfoDlg.h ./src/ImgInfoDlg.cpp ./inc/ImgDiffReportDlg.h ./src/ImgDiffReportDlg.cpp -ts ./translations/IIViewer_zh.ts
 ```
 
 ## HiDPI font render on windows

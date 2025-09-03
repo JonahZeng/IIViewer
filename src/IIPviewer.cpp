@@ -3,7 +3,6 @@
 #include "AboutDlg.h"
 #include "DataVisualDlg.h"
 #include "IIPOptionDialog.h"
-#include "ImgInfoDlg.h"
 #include <QApplication>
 #include <QColorDialog>
 #include <QDir>
@@ -114,6 +113,7 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     connect(ui.exchangeAreaPreviewBtn, &QPushButton::pressed, this, &IIPviewer::exchangeRight2LeftImg);
     connect(ui.exchangeAreaPreviewBtn, &QPushButton::released, this, &IIPviewer::restoreLeftImg);
     connect(ui.imageInfoBtn, &QPushButton::clicked, this, &IIPviewer::showImageInfo);
+    connect(ui.imageDiffInfoBtn, &QPushButton::clicked, this, &IIPviewer::showImageDiffReport);
     connect(ui.closeLeftAction, &QAction::triggered, this, &IIPviewer::onCloseLeftFileAction);
     connect(ui.closeRightAction, &QAction::triggered, this, &IIPviewer::onCloseRightFileAction);
     connect(ui.exitAction, &QAction::triggered, this, [this]()
@@ -354,45 +354,6 @@ void IIPviewer::onSysOptionAction(bool check)
     }
 }
 
-void IIPviewer::showImageInfo()
-{
-    ImgInfoDlg dlg(this);
-    if (openedFile[0].endsWith("raw", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[0], originSize[0], ui.imageLabel[0]->rawBayerType, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[0]->rawDataBit, true);
-    }
-    else if (openedFile[0].endsWith("pnm", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[0]->pnmDataBit, true);
-    }
-    else if (openedFile[0].endsWith("yuv", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, ui.imageLabel[0]->yuvType, ui.imageLabel[0]->yuvDataBit, true);
-    }
-    else if (openedFile[0].endsWith("jpg", Qt::CaseInsensitive) || openedFile[0].endsWith("jpeg", Qt::CaseInsensitive) || openedFile[0].endsWith("bmp", Qt::CaseInsensitive) || openedFile[0].endsWith("png", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, 8, true);
-    }
-
-    if (openedFile[1].endsWith("raw", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[1], originSize[1], ui.imageLabel[1]->rawBayerType, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[1]->rawDataBit, false);
-    }
-    else if (openedFile[1].endsWith("pnm", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[1]->pnmDataBit, false);
-    }
-    else if (openedFile[1].endsWith("yuv", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, ui.imageLabel[1]->yuvType, ui.imageLabel[1]->yuvDataBit, false);
-    }
-    else if (openedFile[1].endsWith("jpg", Qt::CaseInsensitive) || openedFile[1].endsWith("jpeg", Qt::CaseInsensitive) || openedFile[1].endsWith("bmp", Qt::CaseInsensitive) || openedFile[1].endsWith("png", Qt::CaseInsensitive))
-    {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, 8, false);
-    }
-    dlg.exec();
-}
-
 void IIPviewer::checkUpdate()
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -485,43 +446,6 @@ void IIPviewer::openedFileChanged(const QString &filePath)
     {
         openedFileWatcher.removePath(filePath);
     }
-}
-
-void IIPviewer::updateExchangeBtn()
-{
-    if (ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType != UNKNOW_IMG && ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType != UNKNOW_IMG)
-    {
-        ui.exchangeAreaPreviewBtn->setEnabled(true);
-    }
-    else
-    {
-        ui.exchangeAreaPreviewBtn->setEnabled(false);
-    }
-}
-
-void IIPviewer::updateZoomLabelText()
-{
-    if (ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType == UNKNOW_IMG && ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType == UNKNOW_IMG)
-    {
-        ui.zoomRatioLabel->setEnabled(false);
-        ui.zoomRatioLabel->setText("1.00x");
-    }
-    else
-    {
-        ui.zoomRatioLabel->setEnabled(true);
-    }
-}
-
-void IIPviewer::exchangeRight2LeftImg()
-{
-    ui.imageLabel[LEFT_IMG_WIDGET]->acceptImgFromOther(ui.imageLabel[RIGHT_IMG_WIDGET]);
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":image/resource/right2left-pressed.png"));
-}
-
-void IIPviewer::restoreLeftImg()
-{
-    ui.imageLabel[LEFT_IMG_WIDGET]->restoreImg();
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":image/resource/right2left.png"));
 }
 
 void IIPviewer::closeEvent(QCloseEvent *event)

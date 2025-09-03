@@ -103,6 +103,7 @@ configure_file (config.h.in ${CMAKE_SOURCE_DIR}/inc/config.h)
 set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/Main.cpp
         ${CMAKE_SOURCE_DIR}/src/IIPviewer.cpp
+        ${CMAKE_SOURCE_DIR}/src/IIPviewerLrImgProcess.cpp
         ${CMAKE_SOURCE_DIR}/inc/IIPviewer.h
         ${CMAKE_SOURCE_DIR}/src/AboutDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/AboutDlg.h
@@ -132,6 +133,8 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/RoiDataShowDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImgInfoDlg.h
         ${CMAKE_SOURCE_DIR}/src/ImgInfoDlg.cpp
+        ${CMAKE_SOURCE_DIR}/inc/ImgDiffReportDlg.h
+        ${CMAKE_SOURCE_DIR}/src/ImgDiffReportDlg.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
