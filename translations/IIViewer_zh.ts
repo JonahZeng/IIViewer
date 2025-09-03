@@ -203,8 +203,8 @@
         <translation>文件被外部修改</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="448"/>
-        <location filename="../src/IIPviewer.cpp" line="474"/>
+        <location filename="../src/IIPviewer.cpp" line="409"/>
+        <location filename="../src/IIPviewer.cpp" line="435"/>
         <source> has been changed, reload it?</source>
         <translation> 被外部修改，是否重新加载？</translation>
     </message>
