@@ -361,7 +361,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         return tmp;
     }
-    else if(yuvTp == YuvFileInfoDlg::YuvType::YUV420P_YU12 || YuvFileInfoDlg::YuvType::YUV420P_YV12) // YYY...UU..VV and YYY...VV..UU
+    else if(yuvTp == YuvFileInfoDlg::YuvType::YUV420P_YU12 || yuvTp == YuvFileInfoDlg::YuvType::YUV420P_YV12) // YYY...UU..VV and YYY...VV..UU
     {
         for (int y = 0; y < height; y++)
         {
