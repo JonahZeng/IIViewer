@@ -74,8 +74,8 @@ jobs:
     - name: Show QT_ROOT_DIR
       run: echo "QT_ROOT_DIR is ${env:QT_ROOT_DIR}"
     - name: Download OpenSSL DLLs for Qt 5.15.2 (Win64)
-        shell: pwsh
-        run: |
+      shell: pwsh
+      run: |
           $opensslUrl = "https://slproweb.com/download/Win64OpenSSL_Light-1_1_1w.exe"
           $opensslInstaller = "openssl-installer.exe"
           Invoke-WebRequest -Uri $opensslUrl -OutFile $opensslInstaller
