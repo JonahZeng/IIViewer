@@ -23,6 +23,7 @@ on:
       - '**/*.rc'
       - '**/*.qrc'
       - 'CMakeLists.txt'
+      - '**/**/*.yml'
 
 env:
   BUILD_TYPE: Release

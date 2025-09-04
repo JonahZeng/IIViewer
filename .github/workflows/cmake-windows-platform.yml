@@ -14,6 +14,7 @@ on:
       - '**/*.rc'
       - '**/*.qrc'
       - 'CMakeLists.txt'
+      - '**/**/*.yml'
   pull_request:
     branches: [ "main" ]
     paths:
@@ -25,6 +26,7 @@ on:
       - '**/*.rc'
       - '**/*.qrc'
       - 'CMakeLists.txt'
+      - '**/**/*.yml'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
