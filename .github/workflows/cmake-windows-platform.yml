@@ -3,18 +3,17 @@
 name: CMake on windows
 
 on:
-  push:
-    branches: [ "dev" ]
-    paths:
-      - '**/*.h'
-      - '**/*.hpp'
-      - '**/*.ui'
-      - '**/*.cmake'
-      - '**/*.cpp'
-      - '**/*.rc'
-      - '**/*.qrc'
-      - 'CMakeLists.txt'
-      - '**/**/*.yml'
+  # push:
+  #   branches: [ "main" ]
+  #   paths:
+  #     - '**/*.h'
+  #     - '**/*.hpp'
+  #     - '**/*.ui'
+  #     - '**/*.cmake'
+  #     - '**/*.cpp'
+  #     - '**/*.rc'
+  #     - '**/*.qrc'
+  #     - 'CMakeLists.txt'
   pull_request:
     branches: [ "main" ]
     paths:
@@ -26,7 +25,6 @@ on:
       - '**/*.rc'
       - '**/*.qrc'
       - 'CMakeLists.txt'
-      - '**/**/*.yml'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -73,42 +71,6 @@ jobs:
       # run: cmake --version
     - name: Show QT_ROOT_DIR
       run: echo "QT_ROOT_DIR is ${env:QT_ROOT_DIR}"
-    - name: Download OpenSSL DLLs for Qt 5.15.2 (Win64)
-      shell: pwsh
-      run: |
-          $opensslUrl = "https://slproweb.com/download/Win64OpenSSL_Light-1_1_1w.exe"
-          $opensslInstaller = "openssl-installer.exe"
-          Invoke-WebRequest -Uri $opensslUrl -OutFile $opensslInstaller
-          7z x $opensslInstaller -oopenssl_tmp
-          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\thirdparty\msvc" | Out-Null
-          Copy-Item -Path "openssl_tmp`$R0/libssl-1_1-x64.dll" -Destination "${{ github.workspace }}\thirdparty\msvc" -Force
-          Copy-Item -Path "openssl_tmp`$R0/libcrypto-1_1-x64.dll" -Destination "${{ github.workspace }}\thirdparty\msvc" -Force
-          Write-Host "✅ OpenSSL DLLs downloaded to thirdparty/msvc"
-
-    - name: Check OpenSSL support in Qt
-      shell: pwsh
-      run: |
-        $qtBin = "${env:QT_ROOT_DIR}\bin"
-        Write-Host "Checking for OpenSSL DLLs in $qtBin ..."
-        if ( (Test-Path "$qtBin\libssl*.dll") -or (Test-Path "$qtBin\libcrypto*.dll") ) {
-          Write-Host "✅ OpenSSL runtime found."
-        } else {
-          Write-Error "❌ OpenSSL runtime not found."
-          # exit 1
-        }
-
-        # 生成 sslcheck.cpp
-        @"
-        #include <QSslSocket>
-        #include <QDebug>
-        int main() {
-          qDebug() << "SSL supported:" << QSslSocket::supportsSsl();
-          qDebug() << "SSL library version:" << QSslSocket::sslLibraryVersionString();
-          return QSslSocket::supportsSsl() ? 0 : 1;
-        }
-        "@ | Set-Content sslcheck.cpp
-        & "$qtBin\qmake.exe" sslcheck.cpp -o sslcheck.exe
-        .\sslcheck.exe
 
     - uses: actions/checkout@v4
 
