@@ -69,20 +69,21 @@ jobs:
     # - name: list cmake version
       # shell: bash
       # run: cmake --version
-    - name: Show Qt5_DIR
-      run: echo "Qt5_DIR is $Qt5_DIR, Qt5_Dir is ${env:Qt5_Dir}"
+    - name: Show QT_ROOT_DIR
+      run: echo "QT_ROOT_DIR is ${env:QT_ROOT_DIR}"
 
     - name: Check OpenSSL runtime in Qt
       shell: pwsh
       run: |
-        $qtBin = "${env:Qt5_Dir}\bin"
+        $qtBin = "${env:QT_ROOT_DIR}\bin"
         Write-Host "Checking for OpenSSL DLLs in $qtBin ..."
-        if (Test-Path "$qtBin\libssl*.dll" -or Test-Path "$qtBin\libcrypto*.dll") {
+        if ( (Test-Path "$qtBin\libssl*.dll") -or (Test-Path "$qtBin\libcrypto*.dll") ) {
           Write-Host "✅ OpenSSL runtime found."
         } else {
           Write-Error "❌ OpenSSL runtime not found."
           exit 1
         }
+
         # 生成 sslcheck.cpp
         @"
         #include <QSslSocket>
