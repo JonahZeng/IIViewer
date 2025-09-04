@@ -4,7 +4,7 @@ name: CMake on windows
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
     paths:
       - '**/*.h'
       - '**/*.hpp'
@@ -35,7 +35,7 @@ jobs:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: windows-2022
+    runs-on: windows-latest
 
     steps:
     # - name: Remove old Qt
@@ -69,6 +69,33 @@ jobs:
     # - name: list cmake version
       # shell: bash
       # run: cmake --version
+    - name: Show Qt5_DIR
+      run: echo "Qt5_DIR is $Qt5_DIR, Qt5_Dir is ${env:Qt5_Dir}"
+
+    - name: Check OpenSSL runtime in Qt
+      shell: pwsh
+      run: |
+        $qtBin = "${env:Qt5_Dir}\bin"
+        Write-Host "Checking for OpenSSL DLLs in $qtBin ..."
+        if (Test-Path "$qtBin\libssl*.dll" -or Test-Path "$qtBin\libcrypto*.dll") {
+          Write-Host "✅ OpenSSL runtime found."
+        } else {
+          Write-Error "❌ OpenSSL runtime not found."
+          exit 1
+        }
+        # 生成 sslcheck.cpp
+        @"
+        #include <QSslSocket>
+        #include <QDebug>
+        int main() {
+          qDebug() << "SSL supported:" << QSslSocket::supportsSsl();
+          qDebug() << "SSL library version:" << QSslSocket::sslLibraryVersionString();
+          return QSslSocket::supportsSsl() ? 0 : 1;
+        }
+        "@ | Set-Content sslcheck.cpp
+        & "$qtBin\qmake.exe" sslcheck.cpp -o sslcheck.exe
+        .\sslcheck.exe
+
     - uses: actions/checkout@v4
 
     - name: Configure CMake
