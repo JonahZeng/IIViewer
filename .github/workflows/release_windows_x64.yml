@@ -36,7 +36,9 @@ jobs:
 
     - name: Install NASM
       shell: pwsh
-      run: choco install nasm -y
+      run: |
+        choco install nasm -y
+        echo "C:\ProgramData\chocolatey\bin" >> $env:GITHUB_PATH
 
     - name: Setup MSVC environment
       uses: ilammy/msvc-dev-cmd@v1
