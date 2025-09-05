@@ -34,6 +34,29 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}\build --config Release
 
+    - name: Build OpenSSL 1.1.1w (Win64)
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $OPENSSL_URL = "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz"
+        Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
+        tar -xzf openssl.tar.gz
+        cd openssl-1.1.1w
+        perl Configure VC-WIN64A --prefix="$PWD/install"
+
+        # 编译 & 安装
+        nmake
+        nmake install
+
+        # 查找 DLL 并复制到 bin/Release
+        $dlls = Get-ChildItem -Recurse -Include "libssl-1_1-x64.dll","libcrypto-1_1-x64.dll"
+        if ($dlls.Count -eq 0) { throw "❌ OpenSSL DLL not found" }
+        New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\bin\Release" | Out-Null
+        foreach ($dll in $dlls) {
+          Copy-Item $dll.FullName "${{ github.workspace }}\bin\Release" -Force
+        }
+        Write-Host "✅ OpenSSL DLLs copied to bin/Release"
+
     - name: install
       run: cmake --install ${{github.workspace}}\build --config Release
     - name: generate installer package

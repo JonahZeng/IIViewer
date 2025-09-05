@@ -38,9 +38,7 @@ if(MSVC)
 elseif ((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/mingw64/lib/cmake/OpenSSL")
     find_package(OpenSSL CONFIG REQUIRED)
-elseif((UNIX) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
-    # set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/gcc/lib/cmake/OpenSSL")
-    # apt install openssl libssl-devel
+else()
     find_package(OpenSSL REQUIRED)
 endif()
 
