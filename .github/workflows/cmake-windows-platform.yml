@@ -111,8 +111,9 @@ jobs:
         set PATH=%PATH%;${{ github.workspace }}\nasm\nasm-2.16.03
         dir ${{ github.workspace }}
         cd ${{ github.workspace }}\openssl-1.1.1w
-        rmdir /S /Q install
-        perl Configure VC-WIN64A --prefix=%CD%\install --prefix=%CD%\install
+        if exist install rmdir /S /Q install
+        if exist install (echo "❌ install dir still exists" & dir install & exit /b 1)
+        perl Configure VC-WIN64A --prefix=%CD%\install
         nmake
         nmake install
         copy install\bin\libssl-1_1-x64.dll ${{ github.workspace }}\bin\Release
