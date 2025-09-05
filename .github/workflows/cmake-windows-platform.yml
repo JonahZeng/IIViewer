@@ -47,6 +47,15 @@ jobs:
         echo $nasmDir >> $env:GITHUB_PATH
         & "$nasmDir\nasm.exe" -v
 
+    - name: Download openssl-1.1
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $OPENSSL_URL = "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz"
+        Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
+        tar -xzf openssl.tar.gz
+
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -93,45 +102,18 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
 
-    - name: Setup MSVC environment
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x64
-
-    # - name: Install NASM
-    #   shell: pwsh
-    #   run: |
-    #     choco install nasm -y
-    #     $nasmPath = "C:\ProgramData\chocolatey\bin"
-    #     echo "Adding $nasmPath to PATH"
-    #     echo $nasmPath >> $env:GITHUB_PATH
-    #     nasm -v
-
     - name: Build OpenSSL 1.1.1w (Win64)
-      shell: pwsh
+      shell: cmd
       run: |
-        $ErrorActionPreference = "Stop"
-        $OPENSSL_URL = "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz"
-        Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
-        tar -xzf openssl.tar.gz
-        cd openssl-1.1.1w
-        $nasmDir = "${{ github.workspace }}\nasm\nasm-2.16.03"
-        $env:PATH = "$env:PATH;$nasmDir"
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        set PATH=%PATH%;%GITHUB_WORKSPACE%\nasm\nasm-2.16.03
         nasm -v
-        perl Configure VC-WIN64A --prefix="$PWD/install"
-
-        # 编译 & 安装
+        cd openssl-1.1.1w
+        perl Configure VC-WIN64A --prefix=%CD%\install
         nmake
         nmake install
-
-        # 查找 DLL 并复制到 bin/Release
-        $dlls = Get-ChildItem -Recurse -Include "libssl-1_1-x64.dll","libcrypto-1_1-x64.dll"
-        if ($dlls.Count -eq 0) { throw "❌ OpenSSL DLL not found" }
-        New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\bin\Release" | Out-Null
-        foreach ($dll in $dlls) {
-          Copy-Item $dll.FullName "${{ github.workspace }}\bin\Release" -Force
-        }
-        Write-Host "✅ OpenSSL DLLs copied to bin/Release"
+        copy install\bin\libssl-1_1-x64.dll %GITHUB_WORKSPACE%\bin\Release
+        copy install\bin\libcrypto-1_1-x64.dll %GITHUB_WORKSPACE%\bin\Release
 
     - name: install
       run: cmake --install ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
