@@ -4,7 +4,7 @@ name: CMake on windows
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
   #   paths:
   #     - '**/*.h'
   #     - '**/*.hpp'
