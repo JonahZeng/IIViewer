@@ -38,26 +38,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Download NASM
-      working-directory: ${{github.workspace}}
-      shell: pwsh
-      run: |
-        Invoke-WebRequest -Uri https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/win64/nasm-2.16.03-win64.zip -OutFile nasm.zip
-        Expand-Archive nasm.zip -DestinationPath nasm
-        $nasmDir = (Get-ChildItem nasm -Directory | Select-Object -First 1).FullName
-        echo $nasmDir >> $env:GITHUB_PATH
-        & "$nasmDir\nasm.exe" -v
-
-    - name: Download openssl-1.1
-      working-directory: ${{github.workspace}}
-      shell: pwsh
-      run: |
-        $ErrorActionPreference = "Stop"
-        $OPENSSL_URL = "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz"
-        Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
-        tar -xzf openssl.tar.gz
-        dir
-
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -91,6 +71,26 @@ jobs:
       run: echo "QT_ROOT_DIR is ${env:QT_ROOT_DIR}"
 
     - uses: actions/checkout@v4
+
+    - name: Download NASM
+      working-directory: ${{github.workspace}}
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/win64/nasm-2.16.03-win64.zip -OutFile nasm.zip
+        Expand-Archive nasm.zip -DestinationPath nasm
+        $nasmDir = (Get-ChildItem nasm -Directory | Select-Object -First 1).FullName
+        echo $nasmDir >> $env:GITHUB_PATH
+        & "$nasmDir\nasm.exe" -v
+
+    - name: Download openssl-1.1
+      working-directory: ${{github.workspace}}
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $OPENSSL_URL = "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz"
+        Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
+        tar -xzf openssl.tar.gz
+        dir
 
     - name: Configure CMake
       # shell: bash
