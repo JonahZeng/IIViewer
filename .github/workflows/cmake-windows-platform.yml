@@ -3,8 +3,8 @@
 name: CMake on windows
 
 on:
-  push:
-    # branches: [ "dev" ]
+  # push:
+  #   branches: [ "dev" ]
   #   paths:
   #     - '**/*.h'
   #     - '**/*.hpp'
