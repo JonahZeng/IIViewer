@@ -106,14 +106,12 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        set PATH=%PATH%;${{ github.workspace }}\nasm\nasm-2.16.03
-        nasm -v
         cd openssl-1.1.1w
-        perl Configure VC-WIN64A --prefix=%CD%\install
+        perl Configure VC-WIN64A --prefix=%CD%\install --prefix=%CD%\install --nasm="${{ github.workspace }}\nasm\nasm-2.16.03\nasm.exe"
         nmake
         nmake install
-        copy install\bin\libssl-1_1-x64.dll %GITHUB_WORKSPACE%\bin\Release
-        copy install\bin\libcrypto-1_1-x64.dll %GITHUB_WORKSPACE%\bin\Release
+        copy install\bin\libssl-1_1-x64.dll ${{ github.workspace }}\bin\Release
+        copy install\bin\libcrypto-1_1-x64.dll ${{ github.workspace }}\bin\Release
 
     - name: install
       run: cmake --install ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
