@@ -1,17 +1,17 @@
 name: CMake on macOS
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - '**/*.h'
-      - '**/*.hpp'
-      - '**/*.ui'
-      - '**/*.cmake'
-      - '**/*.cpp'
-      - '**/*.rc'
-      - '**/*.qrc'
-      - 'CMakeLists.txt'
+  # push:
+  #   branches: [ "main" ]
+  #   paths:
+  #     - '**/*.h'
+  #     - '**/*.hpp'
+  #     - '**/*.ui'
+  #     - '**/*.cmake'
+  #     - '**/*.cpp'
+  #     - '**/*.rc'
+  #     - '**/*.qrc'
+  #     - 'CMakeLists.txt'
   pull_request:
     branches: [ "main" ]
     paths:
@@ -23,6 +23,7 @@ on:
       - '**/*.rc'
       - '**/*.qrc'
       - 'CMakeLists.txt'
+      - '**/**/*.yml'
 
 env:
   BUILD_TYPE: Release
@@ -68,6 +69,8 @@ jobs:
         ls $(brew --prefix create-dmg)/bin
 
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5) -DLRELEASE_EXECUTABLE=$(brew --prefix qt@5)/bin/lrelease -DEXTRA_QT_INCLUDE_DIRS=$(brew --prefix qt@5)/include

@@ -1,0 +1,88 @@
+name: Release Ubuntu x64
+
+on:
+  push:
+    tags:
+      - 'v*'  # 匹配v开头的tag
+permissions:
+  contents: write   # 关键：允许创建/更新 Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - run: gh auth status
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Update system packages 
+      run: sudo apt update
+    - name: Install dependencies
+      run: sudo apt install -y openssl libssl-dev libfuse2
+    - name: Verify OpenSSL installation 
+      run: openssl version
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '5.15.2'
+        host: 'linux'
+        target: 'desktop'
+        cache: true
+        # arch: 'win64_msvc2019_64'
+        # dir: '${{ github.workspace }}/example/'
+        install-deps: 'true'
+        modules: 'qtcharts qtdatavis3d'
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install
+
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build
+
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/build
+      # Execute tests defined by the CMake configuration.
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+    #   run: ctest -C ${{env.BUILD_TYPE}}
+    - name: install
+      working-directory: ${{github.workspace}}/build
+      run: cmake --install ${{github.workspace}}/build
+    - name: generate deb package
+      working-directory: ${{github.workspace}}/build
+      run: cpack -G DEB
+    - name: generate tgz package
+      working-directory: ${{github.workspace}}/build
+      run: cpack -G TGZ
+    - name: generate appimage package
+      working-directory: ${{github.workspace}}
+      run: |
+        cp ./icon/default.png ./bin/${{env.BUILD_TYPE}}/ &&
+        cp ./icon/default.desktop ./bin/${{env.BUILD_TYPE}}/ &&
+        wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage && 
+        chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage && 
+        ./linuxdeployqt-continuous-x86_64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
+
+    - name: Package artifacts
+      run: |
+        mkdir -p release
+        cp ${{github.workspace}}/build/*.deb release/
+        cp ${{github.workspace}}/build/*.tar.gz release/
+        cp ${{github.workspace}}/*.AppImage release/
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          release/*.deb
+          release/*.tar.gz
+          release/*.AppImage
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}

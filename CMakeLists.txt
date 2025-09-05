@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.5.3 LANGUAGES CXX)
+project(IIViewer VERSION 0.5.5 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -38,9 +38,7 @@ if(MSVC)
 elseif ((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/mingw64/lib/cmake/OpenSSL")
     find_package(OpenSSL CONFIG REQUIRED)
-elseif((UNIX) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
-    # set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/gcc/lib/cmake/OpenSSL")
-    # apt install openssl libssl-devel
+else()
     find_package(OpenSSL REQUIRED)
 endif()
 
