@@ -34,6 +34,15 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}\build --config Release
 
+    - name: Install NASM
+      shell: pwsh
+      run: choco install nasm -y
+
+    - name: Setup MSVC environment
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
     - name: Build OpenSSL 1.1.1w (Win64)
       shell: pwsh
       run: |
