@@ -55,7 +55,6 @@ jobs:
         Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
         tar -xzf openssl.tar.gz
 
-
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -106,6 +105,7 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        dir ${{ github.workspace }}
         cd ${{ github.workspace }}\openssl-1.1.1w
         perl Configure VC-WIN64A --prefix=%CD%\install --prefix=%CD%\install --nasm="${{ github.workspace }}\nasm\nasm-2.16.03\nasm.exe"
         nmake
@@ -114,6 +114,7 @@ jobs:
         copy install\bin\libcrypto-1_1-x64.dll ${{ github.workspace }}\bin\Release
 
     - name: install
+      working-directory: ${{github.workspace}}\build
       run: cmake --install ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
     - name: generate installer package
       working-directory: ${{github.workspace}}\build
