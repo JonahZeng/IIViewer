@@ -43,8 +43,9 @@ jobs:
       run: |
         Invoke-WebRequest -Uri https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/win64/nasm-2.16.03-win64.zip -OutFile nasm.zip
         Expand-Archive nasm.zip -DestinationPath nasm
-        echo "${{ github.workspace }}\nasm" >> $env:GITHUB_PATH
-        nasm -v
+        $nasmDir = (Get-ChildItem nasm -Directory | Select-Object -First 1).FullName
+        echo $nasmDir >> $env:GITHUB_PATH
+        & "$nasmDir\nasm.exe" -v
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
