@@ -38,8 +38,14 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # - name: Remove old Qt
-    #   run: rm ${{github.workspace}}\thirdparty\Qt -r -force
+    - name: Download NASM
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/win64/nasm-2.16.03-win64.zip -OutFile nasm.zip
+        Expand-Archive nasm.zip -DestinationPath nasm
+        echo "${{ github.workspace }}\nasm" >> $env:GITHUB_PATH
+        nasm -v
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -91,11 +97,14 @@ jobs:
       with:
         arch: x64
 
-    - name: Install NASM
-      shell: pwsh
-      run: |
-        choco install nasm -y
-        nasm -v
+    # - name: Install NASM
+    #   shell: pwsh
+    #   run: |
+    #     choco install nasm -y
+    #     $nasmPath = "C:\ProgramData\chocolatey\bin"
+    #     echo "Adding $nasmPath to PATH"
+    #     echo $nasmPath >> $env:GITHUB_PATH
+    #     nasm -v
 
     - name: Build OpenSSL 1.1.1w (Win64)
       shell: pwsh
