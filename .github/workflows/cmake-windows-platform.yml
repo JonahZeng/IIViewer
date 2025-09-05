@@ -115,7 +115,8 @@ jobs:
         Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
         tar -xzf openssl.tar.gz
         cd openssl-1.1.1w
-        set PATH=%PATH%;%GITHUB_WORKSPACE%\nasm\nasm-2.16.03
+        $nasmDir = "${{ github.workspace }}\nasm\nasm-2.16.03"
+        $env:PATH = "$env:PATH;$nasmDir"
         nasm -v
         perl Configure VC-WIN64A --prefix="$PWD/install"
 
