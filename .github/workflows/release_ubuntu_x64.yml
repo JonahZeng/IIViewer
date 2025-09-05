@@ -72,6 +72,7 @@ jobs:
         wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage && 
         chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage && 
         ./linuxdeployqt-continuous-x86_64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
+        rm ./linuxdeployqt-continuous-x86_64.AppImage
 
     - name: Package artifacts
       run: |
@@ -90,5 +91,6 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
+
 
 
