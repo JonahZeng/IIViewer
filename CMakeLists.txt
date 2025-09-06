@@ -29,8 +29,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization Network)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization Network LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization Network LinguistTools)
 
 if(MSVC)
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/msvc/lib/cmake/OpenSSL")
@@ -44,7 +44,13 @@ endif()
 
 get_target_property(_qmake_executable Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+if(WIN32)
+    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+elseif(APPLE)
+    find_program(LRELEASE_EXECUTABLE lrelease HINTS "${_qt_bin_dir}")
+    find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
+    set(EXTRA_QT_INCLUDE_DIRS "${_qt_bin_dir}/../include")
+endif()
 
 include(InstallRequiredSystemLibraries)
 
@@ -106,7 +112,6 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/AboutDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/AboutDlg.h
         ${CMAKE_SOURCE_DIR}/src/IIPviewer.rc
-        ${CMAKE_SOURCE_DIR}/src/IIPviewer.qrc
         ${CMAKE_SOURCE_DIR}/src/ImageWidget.cpp
         ${CMAKE_SOURCE_DIR}/src/ImageWidgetRoiShowText.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
@@ -135,6 +140,17 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/ImgDiffReportDlg.cpp
 )
 
+set(TRANSLATIONS
+    translations/IIViewer_zh.ts
+)
+qt5_add_translation(QM_FILES ${TRANSLATIONS})
+
+set(RESOURCES
+    IIPviewer.qrc
+)
+
+qt5_add_resources(RESOURCE_FILES ${RESOURCES})
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
@@ -150,7 +166,7 @@ else()
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     elseif(WIN32)
-        add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES})
+        add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${RESOURCE_FILES} ${QM_FILES})
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             if(MSVC)
                 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
@@ -160,7 +176,7 @@ else()
         endif()
         target_compile_options(${PROJECT_NAME} PRIVATE /W4)
     elseif(UNIX)
-        add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${PROJECT_SOURCES} ${RESOURCE_FILES} ${QM_FILES})
         target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
     endif()
 endif()
@@ -181,6 +197,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_BUNDLE_NAME "IIViewer"
+    MACOSX_BUNDLE_EXECUTABLE_NAME "IIViewer"
+    MACOSX_BUNDLE_ICON_FILE "IIViewer.icns"
+    MACOSX_BUNDLE_INFO_PLIST "${INFO_PLIST}"
+    BUNDLE_EXTENSION "app"
     WIN32_EXECUTABLE TRUE
 )
 
@@ -228,9 +249,9 @@ elseif(UNIX AND NOT APPLE)
 elseif(APPLE)
     set(_qm_translation_path "")
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app/Contents/MacOS/translations")
+        set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app/Contents/Resources/translations")
     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/${PROJECT_NAME}.app/Contents/MacOS/translations")
+        set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/${PROJECT_NAME}.app/Contents/Resources/translations")
     endif()
     if(NOT EXISTS ${_qm_translation_path})
         file(MAKE_DIRECTORY ${_qm_translation_path})
@@ -240,6 +261,31 @@ elseif(APPLE)
         ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
         -qm 
         ${_qm_translation_path}/IIViewer_zh.qm
+    )
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_app_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(_app_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/${PROJECT_NAME}.app")
+    endif()
+    
+    # Copy IIViewer.icns to app bundle Resources directory
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_resources_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app/Contents/Resources")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(_resources_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/${PROJECT_NAME}.app/Contents/Resources")
+    endif()
+    
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_SOURCE_DIR}/icon/IIViewer.icns
+            ${_resources_path}/IIViewer.icns
+        COMMENT "Copying IIViewer.icns to app bundle Resources directory"
+    )
+
+    add_custom_target(mac_deploy
+        COMMAND ${MACDEPLOYQT_EXECUTABLE} ${_app_path} -always-overwrite
+        COMMENT "Deploying application with macdeployqt"
+        DEPENDS IIViewer
     )
 endif()
 

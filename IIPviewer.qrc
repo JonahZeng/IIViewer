@@ -1,0 +1,28 @@
+<RCC>
+    <qresource prefix="/image">
+        <file>src/resource/aboutlog.png</file>
+        <file>src/resource/right2left.png</file>
+        <file>src/resource/right2left-pressed.png</file>
+        <file>src/resource/close_button.png</file>
+        <file>src/resource/file-x.svg</file>
+        <file>src/resource/file-x-fill.svg</file>
+        <file>src/resource/file-earmark-left.png</file>
+        <file>src/resource/file-earmark-right.png</file>
+        <file>src/resource/info-circle.svg</file>
+        <file>src/resource/info.svg</file>
+        <file>src/resource/arrows-move.svg</file>
+        <file>src/resource/bounding-box-circles.svg</file>
+        <file>src/resource/reload-left.png</file>
+        <file>src/resource/reload-right.png</file>
+        <file>src/resource/update_version.svg</file>
+        <file>src/resource/mouse.svg</file>
+        <file>src/resource/options.svg</file>
+        <file>src/resource/skin.svg</file>
+        <file>src/resource/single_rect.svg</file>
+        <file>src/resource/double_rect.svg</file>
+        <file>src/resource/compare_diff.svg</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>icon/IIViewer.icns</file>
+    </qresource>
+</RCC>

@@ -38,24 +38,24 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     // QMenu{background:rgb(128,128,128)}
     // QMenu::item:selected{background-color:#654321;}");
     openFileLeftAction = new QAction(QApplication::translate("mainWindow", "Open file in left", nullptr), mainWindow);
-    openFileLeftAction->setIcon(QIcon(":/image/resource/file-earmark-left.png"));
+    openFileLeftAction->setIcon(QIcon(":/image/src/resource/file-earmark-left.png"));
     openFileLeftAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
     openFileRightAction = new QAction(QApplication::translate("mainWindow", "Open file in right", nullptr), mainWindow);
-    openFileRightAction->setIcon(QIcon(":/image/resource/file-earmark-right.png"));
+    openFileRightAction->setIcon(QIcon(":/image/src/resource/file-earmark-right.png"));
     openFileRightAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
     reloadFileLeftAction = new QAction(QApplication::translate("mainWindow", "Reload left image", nullptr), mainWindow);
-    reloadFileLeftAction->setIcon(QIcon(":/image/resource/reload-left.png"));
+    reloadFileLeftAction->setIcon(QIcon(":/image/src/resource/reload-left.png"));
     reloadFileRightAction = new QAction(QApplication::translate("mainWindow", "Reload right image", nullptr), mainWindow);
-    reloadFileRightAction->setIcon(QIcon(":/image/resource/reload-right.png"));
+    reloadFileRightAction->setIcon(QIcon(":/image/src/resource/reload-right.png"));
 
     exitAction = new QAction(QApplication::translate("mainWindow", "Exit", nullptr), mainWindow);
     exitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q));
     closeLeftAction = new QAction(QApplication::translate("mainWindow", "Close left image", nullptr), mainWindow);
     closeLeftAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L));
-    closeLeftAction->setIcon(QIcon(":/image/resource/file-x.svg"));
+    closeLeftAction->setIcon(QIcon(":/image/src/resource/file-x.svg"));
     closeRightAction = new QAction(QApplication::translate("mainWindow", "Close right image", nullptr), mainWindow);
     closeRightAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R));
-    closeRightAction->setIcon(QIcon(":/image/resource/file-x.svg"));
+    closeRightAction->setIcon(QIcon(":/image/src/resource/file-x.svg"));
     fileMenu->addAction(openFileLeftAction);
     fileMenu->addAction(openFileRightAction);
     fileMenu->addAction(reloadFileLeftAction);
@@ -81,18 +81,18 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     playListAction->setChecked(false);
 
     workAreaSingleModeAction = new QAction(QApplication::translate("mainWindow", "normal mode", nullptr), mainWindow);
-    workAreaSingleModeAction->setIcon(QIcon(":/image/resource/single_rect.svg"));
+    workAreaSingleModeAction->setIcon(QIcon(":/image/src/resource/single_rect.svg"));
     workAreaSingleModeAction->setCheckable(true);
     workAreaSingleModeAction->setChecked(false);
     workAreaDoubleModeAction = new QAction(QApplication::translate("mainWindow", "compare mode", nullptr), mainWindow);
-    workAreaDoubleModeAction->setIcon(QIcon(":/image/resource/double_rect.svg"));
+    workAreaDoubleModeAction->setIcon(QIcon(":/image/src/resource/double_rect.svg"));
     workAreaDoubleModeAction->setCheckable(true);
     workAreaDoubleModeAction->setChecked(true);
     workAreaModeMenu->addAction(workAreaSingleModeAction);
     workAreaModeMenu->addAction(workAreaDoubleModeAction);
 
     QMenu *themeMenu = new QMenu(QApplication::translate("mainWindow", "theme", nullptr), mainWindow);
-    themeMenu->setIcon(QIcon(":image/resource/skin.svg"));
+    themeMenu->setIcon(QIcon(":/image/src/resource/skin.svg"));
     auto themeStrings = QStyleFactory::keys();
     for (auto &theme : themeStrings)
     {
@@ -116,27 +116,27 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     useRoiToolAction = new QAction(QApplication::translate("mainWindow", "pen", nullptr), mainWindow);
     useRoiToolAction->setCheckable(true);
     useRoiToolAction->setChecked(false);
-    useRoiToolAction->setIcon(QIcon(":/image/resource/bounding-box-circles.svg"));
+    useRoiToolAction->setIcon(QIcon(":/image/src/resource/bounding-box-circles.svg"));
     useMoveToolAction = new QAction(QApplication::translate("mainWindow", "move", nullptr), mainWindow);
     useMoveToolAction->setCheckable(true);
     useMoveToolAction->setChecked(false);
-    useMoveToolAction->setIcon(QIcon(":image/resource/arrows-move.svg"));
+    useMoveToolAction->setIcon(QIcon(":/image/src/resource/arrows-move.svg"));
     mouseForMenu->addAction(useMoveToolAction);
     mouseForMenu->addAction(useRoiToolAction);
-    mouseForMenu->setIcon(QIcon(":/image/resource/mouse.svg"));
+    mouseForMenu->setIcon(QIcon(":/image/src/resource/mouse.svg"));
 
     sysOptionAction = new QAction(QApplication::translate("mainWindow", "options", nullptr), mainWindow);
-    sysOptionAction->setIcon(QIcon(":/image/resource/options.svg"));
+    sysOptionAction->setIcon(QIcon(":/image/src/resource/options.svg"));
     settingMenu->addMenu(mouseForMenu);
     settingMenu->addMenu(themeMenu);
     settingMenu->addAction(sysOptionAction);
 
     QMenu *helpMenu = mbar->addMenu(QApplication::translate("mainWindow", "&Help", nullptr));
     aboutThisAction = new QAction(QApplication::translate("mainWindow", "About | Feedback", nullptr), mainWindow);
-    aboutThisAction->setIcon(QIcon(":/image/resource/info-circle.svg"));
+    aboutThisAction->setIcon(QIcon(":/image/src/resource/info-circle.svg"));
     helpMenu->addAction(aboutThisAction);
     checkUpdateAction = new QAction(QApplication::translate("mainWindow", "Check update", nullptr), mainWindow);
-    checkUpdateAction->setIcon(QIcon(":/image/resource/update_version.svg"));
+    checkUpdateAction->setIcon(QIcon(":/image/src/resource/update_version.svg"));
     helpMenu->addAction(checkUpdateAction);
 
     toolBar->addAction(openFileLeftAction);
@@ -201,18 +201,18 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
 
     exchangeAreaPreviewBtn = new QPushButton();
     exchangeAreaPreviewBtn->setMaximumWidth(40);
-    exchangeAreaPreviewBtn->setIcon(QIcon(":/image/resource/right2left.png"));
+    exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left.png"));
     exchangeAreaPreviewBtn->setStyleSheet("QPushButton{border: none}");
     exchangeAreaPreviewBtn->setIconSize(QSize(30, 16));
 
     imageInfoBtn = new QPushButton();
-    imageInfoBtn->setIcon(QIcon(":/image/resource/info.svg"));
+    imageInfoBtn->setIcon(QIcon(":/image/src/resource/info.svg"));
     imageInfoBtn->setMaximumWidth(40);
     imageInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
     imageInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show image infomation", nullptr));
 
     imageDiffInfoBtn = new QPushButton();
-    imageDiffInfoBtn->setIcon(QIcon(":/image/resource/compare_diff.svg"));
+    imageDiffInfoBtn->setIcon(QIcon(":/image/src/resource/compare_diff.svg"));
     imageDiffInfoBtn->setMaximumWidth(40);
     imageDiffInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
     imageDiffInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show left and right image difference report", nullptr));
