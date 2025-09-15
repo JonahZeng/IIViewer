@@ -192,7 +192,7 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     ui.dataAnalyseAction->setChecked(false);
     ui.playListAction->setChecked(false);
     ui.exchangeAreaPreviewBtn->setEnabled(false);
-    setWindowIcon(QIcon(":image/resource/aboutlog.png"));
+    setWindowIcon(QIcon(":/image/src/resource/aboutlog.png"));
 
     if(settings.workAreaDoubleImgMode)
     {
@@ -798,39 +798,39 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     YuvFileInfoDlg dlg(this);
 
     auto yuvtp = settings.yuvType;
-    if (yuvtp == YuvFileInfoDlg::YUV444_INTERLEAVE)
+    if (yuvtp == YuvType::YUV444_INTERLEAVE)
     {
         dlg.ui.formatComboBox->setCurrentIndex(0);
     }
-    else if (yuvtp == YuvFileInfoDlg::YUV444_PLANAR)
+    else if (yuvtp == YuvType::YUV444_PLANAR)
     {
         dlg.ui.formatComboBox->setCurrentIndex(1);
     }
-    else if (yuvtp == YuvFileInfoDlg::YUV422_UYVY)
+    else if (yuvtp == YuvType::YUV422_UYVY)
     {
         dlg.ui.formatComboBox->setCurrentIndex(2);
     }
-    else if (yuvtp == YuvFileInfoDlg::YUV422_YUYV)
+    else if (yuvtp == YuvType::YUV422_YUYV)
     {
         dlg.ui.formatComboBox->setCurrentIndex(3);
     }
-    else if (yuvtp == YuvFileInfoDlg::YUV420_NV12)
+    else if (yuvtp == YuvType::YUV420_NV12)
     {
         dlg.ui.formatComboBox->setCurrentIndex(4);
     }
-    else if (yuvtp == YuvFileInfoDlg::YUV420_NV21)
+    else if (yuvtp == YuvType::YUV420_NV21)
     {
         dlg.ui.formatComboBox->setCurrentIndex(5);
     }
-    else if (yuvtp == YuvFileInfoDlg::YUV420P_YU12)
+    else if (yuvtp == YuvType::YUV420P_YU12)
     {
         dlg.ui.formatComboBox->setCurrentIndex(6);
     }
-    else if (yuvtp == YuvFileInfoDlg::YUV420P_YV12)
+    else if (yuvtp == YuvType::YUV420P_YV12)
     {
         dlg.ui.formatComboBox->setCurrentIndex(7);
     }
-    else if (yuvtp == YuvFileInfoDlg::YUV400)
+    else if (yuvtp == YuvType::YUV400)
     {
         dlg.ui.formatComboBox->setCurrentIndex(8);
     }
@@ -863,51 +863,51 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     int width = dlg.ui.widthLineEdit->text().toInt();
     int height = dlg.ui.heightLineEdit->text().toInt();
     qint64 totalSize = 0;
-    YuvFileInfoDlg::YuvType tp = YuvFileInfoDlg::YUV444_INTERLEAVE;
+    YuvType tp = YuvType::YUV444_INTERLEAVE;
     int curIdx = dlg.ui.formatComboBox->currentIndex();
     if (curIdx == 0)
     {
-        tp = YuvFileInfoDlg::YUV444_INTERLEAVE;
+        tp = YuvType::YUV444_INTERLEAVE;
         totalSize = width * height * pixSize * 3;
     }
     else if (curIdx == 1)
     {
-        tp = YuvFileInfoDlg::YUV444_PLANAR;
+        tp = YuvType::YUV444_PLANAR;
         totalSize = width * height * pixSize * 3;
     }
     else if (curIdx == 2)
     {
-        tp = YuvFileInfoDlg::YUV422_UYVY;
+        tp = YuvType::YUV422_UYVY;
         totalSize = width * height * pixSize * 2;
     }
     else if (curIdx == 3)
     {
-        tp = YuvFileInfoDlg::YUV422_YUYV;
+        tp = YuvType::YUV422_YUYV;
         totalSize = width * height * pixSize * 2;
     }
     else if (curIdx == 4)
     {
-        tp = YuvFileInfoDlg::YUV420_NV12;
+        tp = YuvType::YUV420_NV12;
         totalSize = width * height * pixSize * 3 / 2;
     }
     else if (curIdx == 5)
     {
-        tp = YuvFileInfoDlg::YUV420_NV21;
+        tp = YuvType::YUV420_NV21;
         totalSize = width * height * pixSize * 3 / 2;
     }
     else if (curIdx == 6)
     {
-        tp = YuvFileInfoDlg::YUV420P_YU12;
+        tp = YuvType::YUV420P_YU12;
         totalSize = width * height * pixSize * 3 / 2;
     }
     else if (curIdx == 7)
     {
-        tp = YuvFileInfoDlg::YUV420P_YV12;
+        tp = YuvType::YUV420P_YV12;
         totalSize = width * height * pixSize * 3 / 2;
     }
     else if (curIdx == 8)
     {
-        tp = YuvFileInfoDlg::YUV400;
+        tp = YuvType::YUV400;
         totalSize = width * height * pixSize;
     }
 
@@ -968,43 +968,43 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     RawFileInfoDlg dlg(this);
     switch (settings.rawByType)
     {
-    case RawFileInfoDlg::BayerPatternType::RGGB:
+    case BayerPatternType::RGGB:
         dlg.ui.RGGBRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::GRBG:
+    case BayerPatternType::GRBG:
         dlg.ui.GRBGRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::GBRG:
+    case BayerPatternType::GBRG:
         dlg.ui.GBRGRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::BGGR:
+    case BayerPatternType::BGGR:
         dlg.ui.BGGRRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::RGGIR:
+    case BayerPatternType::RGGIR:
         dlg.ui.RGGIRRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::BGGIR:
+    case BayerPatternType::BGGIR:
         dlg.ui.BGGIRRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::GRIRG:
+    case BayerPatternType::GRIRG:
         dlg.ui.GRIRGRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::GBIRG:
+    case BayerPatternType::GBIRG:
         dlg.ui.GBIRGRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::GIRRG:
+    case BayerPatternType::GIRRG:
         dlg.ui.GIRRGRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::GIRBG:
+    case BayerPatternType::GIRBG:
         dlg.ui.GIRBGRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::IRGGR:
+    case BayerPatternType::IRGGR:
         dlg.ui.IRGGRRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::IRGGB:
+    case BayerPatternType::IRGGB:
         dlg.ui.IRGGBRadioButton->setChecked(true);
         break;
-    case RawFileInfoDlg::BayerPatternType::MONO:
+    case BayerPatternType::MONO:
         dlg.ui.MONORadioButton->setChecked(true);
         break;
     
@@ -1013,11 +1013,11 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     }
     
     auto byteOrder = settings.rawByteOrder;
-    if (byteOrder == RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN)
+    if (byteOrder == ByteOrderType::RAW_LITTLE_ENDIAN)
     {
         dlg.ui.little_endian->setChecked(true);
     }
-    else if (byteOrder == RawFileInfoDlg::ByteOrderType::RAW_BIG_ENDIAN)
+    else if (byteOrder == ByteOrderType::RAW_BIG_ENDIAN)
     {
         dlg.ui.big_endian->setChecked(true);
     }
@@ -1033,64 +1033,64 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     {
         return;
     }
-    RawFileInfoDlg::BayerPatternType by = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
+    BayerPatternType by = BayerPatternType::BAYER_UNKNOW;
     if (dlg.ui.RGGBRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::RGGB;
+        by = BayerPatternType::RGGB;
     }
     else if (dlg.ui.GRBGRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::GRBG;
+        by = BayerPatternType::GRBG;
     }
     else if (dlg.ui.GBRGRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::GBRG;
+        by = BayerPatternType::GBRG;
     }
     else if (dlg.ui.BGGRRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::BGGR;
+        by = BayerPatternType::BGGR;
     }
     else if (dlg.ui.RGGIRRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::RGGIR;
+        by = BayerPatternType::RGGIR;
     }
     else if (dlg.ui.BGGIRRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::BGGIR;
+        by = BayerPatternType::BGGIR;
     }
     else if (dlg.ui.GRIRGRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::GRIRG;
+        by = BayerPatternType::GRIRG;
     }
     else if (dlg.ui.GBIRGRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::GBIRG;
+        by = BayerPatternType::GBIRG;
     }
     else if (dlg.ui.GIRRGRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::GIRRG;
+        by = BayerPatternType::GIRRG;
     }
     else if (dlg.ui.GIRBGRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::GIRBG;
+        by = BayerPatternType::GIRBG;
     }
     else if (dlg.ui.IRGGRRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::IRGGR;
+        by = BayerPatternType::IRGGR;
     }
     else if (dlg.ui.IRGGBRadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::IRGGB;
+        by = BayerPatternType::IRGGB;
     }
     else if (dlg.ui.MONORadioButton->isChecked())
     {
-        by = RawFileInfoDlg::BayerPatternType::MONO;
+        by = BayerPatternType::MONO;
     }
 
-    auto order = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+    auto order = ByteOrderType::RAW_LITTLE_ENDIAN;
     if (dlg.ui.big_endian->isChecked())
     {
-        order = RawFileInfoDlg::ByteOrderType::RAW_BIG_ENDIAN;
+        order = ByteOrderType::RAW_BIG_ENDIAN;
     }
     bool isInt = false;
     QString bit_option_str = dlg.ui.BitDepthComboBox->currentText();
@@ -1287,7 +1287,7 @@ void IIPviewer::setImage(QString &imageName, int leftOrRight)
     ui.imageLabel[leftOrRight]->setPixmap();
 }
 
-void IIPviewer::setRawImage(QString &imageName, RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight)
+void IIPviewer::setRawImage(QString &imageName, BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
@@ -1295,7 +1295,7 @@ void IIPviewer::setRawImage(QString &imageName, RawFileInfoDlg::BayerPatternType
     ui.imageLabel[leftOrRight]->setPixmap(by, order, bitDepth, compact, width, height);
 }
 
-void IIPviewer::setYuvImage(QString &imageName, YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)
+void IIPviewer::setYuvImage(QString &imageName, YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
@@ -1319,7 +1319,7 @@ void IIPviewer::onCloseLeftFileAction()
     ui.imageLabel[LEFT_IMG_WIDGET]->paintEnd = false;
     ui.imageLabel[LEFT_IMG_WIDGET]->zoomIdx = 2; // 关闭之后恢复到1.0x倍率
     ui.imageLabel[LEFT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
-    ui.imageLabel[LEFT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
+    ui.imageLabel[LEFT_IMG_WIDGET]->rawBayerType = BayerPatternType::BAYER_UNKNOW;
     ui.imageLabel[LEFT_IMG_WIDGET]->rawDataBit = 0;
     openedFileWatcher.removePath(openedFile[0]);
     openedFile[0].clear();
@@ -1356,7 +1356,7 @@ void IIPviewer::onCloseRightFileAction()
     ui.imageLabel[RIGHT_IMG_WIDGET]->paintEnd = false;
     ui.imageLabel[RIGHT_IMG_WIDGET]->zoomIdx = 2; // 关闭之后恢复到1.0x倍率
     ui.imageLabel[RIGHT_IMG_WIDGET]->openedImgType = UNKNOW_IMG;
-    ui.imageLabel[RIGHT_IMG_WIDGET]->rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->rawBayerType = BayerPatternType::BAYER_UNKNOW;
     ui.imageLabel[RIGHT_IMG_WIDGET]->rawDataBit = 0;
     openedFileWatcher.removePath(openedFile[1]);
     openedFile[1].clear();

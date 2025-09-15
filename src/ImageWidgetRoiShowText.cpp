@@ -185,27 +185,27 @@ QString ImageWidget::generateRoiDataStr()
                     roiPixelValStr.append(QString("%1").arg(gray));
                 
                 auto pix_by = getPixType(row, col, rawBayerType);
-                if(pix_by == RawFileInfoDlg::BayerPixelType::PIX_R)
+                if(pix_by == BayerPixelType::PIX_R)
                 {
                     roi_r[r_cnt] = gray;
                     r_cnt += 1;
                 }
-                else if(pix_by == RawFileInfoDlg::BayerPixelType::PIX_GR || pix_by == RawFileInfoDlg::BayerPixelType::PIX_GB)
+                else if(pix_by == BayerPixelType::PIX_GR || pix_by == BayerPixelType::PIX_GB)
                 {
                     roi_g[g_cnt] = gray;
                     g_cnt += 1;
                 }
-                else if(pix_by == RawFileInfoDlg::BayerPixelType::PIX_B)
+                else if(pix_by == BayerPixelType::PIX_B)
                 {
                     roi_b[b_cnt] = gray;
                     b_cnt += 1;
                 }
-                else if(pix_by == RawFileInfoDlg::BayerPixelType::PIX_IR)
+                else if(pix_by == BayerPixelType::PIX_IR)
                 {
                     roi_ir[ir_cnt] = gray;
                     ir_cnt += 1;
                 }
-                else if(pix_by == RawFileInfoDlg::BayerPixelType::PIX_Y)
+                else if(pix_by == BayerPixelType::PIX_Y)
                 {
                     roi_y[y_cnt] = gray;
                     y_cnt += 1;
@@ -222,7 +222,7 @@ QString ImageWidget::generateRoiDataStr()
             }
         }
         roiPixelValStr.append("]\n");
-        if(rawBayerType >= RawFileInfoDlg::BayerPatternType::RGGB && rawBayerType <= RawFileInfoDlg::BayerPatternType::BGGR) // 2x2 bayer
+        if(rawBayerType >= BayerPatternType::RGGB && rawBayerType <= BayerPatternType::BGGR) // 2x2 bayer
         {
             unsigned int roi_r_mean = 0, roi_r_stddev = 0;
             unsigned long long int roi_r_var = 0;
@@ -240,7 +240,7 @@ QString ImageWidget::generateRoiDataStr()
             roiPixelValStr.append(QString("G mean=%1, var=%2, std_dev=%3\n").arg(roi_g_mean).arg(roi_g_var).arg(roi_g_stddev));
             roiPixelValStr.append(QString("B mean=%1, var=%2, std_dev=%3\n").arg(roi_b_mean).arg(roi_b_var).arg(roi_b_stddev));
         }
-        else if(rawBayerType >= RawFileInfoDlg::BayerPatternType::RGGIR && rawBayerType <= RawFileInfoDlg::BayerPatternType::IRGGB) // rgbir 4x4
+        else if(rawBayerType >= BayerPatternType::RGGIR && rawBayerType <= BayerPatternType::IRGGB) // rgbir 4x4
         {
             unsigned int roi_r_mean = 0, roi_r_stddev = 0;
             unsigned long long int roi_r_var = 0;
@@ -284,7 +284,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
     int yWidth = pixMap->width();
     int yHeight = pixMap->height();
 
-    if (yuvType == YuvFileInfoDlg::YuvType::YUV444_INTERLEAVE)
+    if (yuvType == YuvType::YUV444_INTERLEAVE)
     {
         roiPixelValStr.append("Y: [");
         for (int row = roi_top; row < roi_bottom; row++)
@@ -382,7 +382,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]");
     }
-    else if (yuvType == YuvFileInfoDlg::YuvType::YUV444_PLANAR)
+    else if (yuvType == YuvType::YUV444_PLANAR)
     {
         roiPixelValStr.append("Y: [");
         for (int row = roi_top; row < roi_bottom; row++)
@@ -482,7 +482,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]");
     }
-    else if (yuvType == YuvFileInfoDlg::YuvType::YUV422_UYVY)
+    else if (yuvType == YuvType::YUV422_UYVY)
     {
         roiPixelValStr.append("Y: [");
         for (int row = roi_top; row < roi_bottom; row++)
@@ -582,7 +582,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]");
     }
-    else if (yuvType == YuvFileInfoDlg::YuvType::YUV422_YUYV)
+    else if (yuvType == YuvType::YUV422_YUYV)
     {
         roiPixelValStr.append("Y: [");
         // YUYV....YUYV....
@@ -683,7 +683,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]");
     }
-    else if (yuvType == YuvFileInfoDlg::YuvType::YUV420_NV12)
+    else if (yuvType == YuvType::YUV420_NV12)
     {
         roiPixelValStr.append("Y: [");
         // YYYYYY
@@ -788,7 +788,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]");
     }
-    else if (yuvType == YuvFileInfoDlg::YuvType::YUV420_NV21)
+    else if (yuvType == YuvType::YUV420_NV21)
     {
         roiPixelValStr.append("Y: [");
         // YYYYYY
@@ -893,7 +893,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]");
     }
-    else if (yuvType == YuvFileInfoDlg::YuvType::YUV420P_YU12)
+    else if (yuvType == YuvType::YUV420P_YU12)
     {
         roiPixelValStr.append("Y: [");
         // YYYYYY
@@ -1002,7 +1002,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]");
     }
-    else if (yuvType == YuvFileInfoDlg::YuvType::YUV420P_YV12)
+    else if (yuvType == YuvType::YUV420P_YV12)
     {
         roiPixelValStr.append("Y: [");
         // YYYYYY
@@ -1111,7 +1111,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]");
     }
-    else if (yuvType == YuvFileInfoDlg::YuvType::YUV400)
+    else if (yuvType == YuvType::YUV400)
     {
         roiPixelValStr.append("[");
         for (int row = roi_top; row < roi_bottom; row++)

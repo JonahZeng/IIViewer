@@ -46,14 +46,20 @@ function(windeployqt target directory)
                 --no-compiler-runtime
                 --no-angle
                 --no-opengl-sw
-                \"$<TARGET_FILE:${target}>\"
+                "$<TARGET_FILE:${target}>"
     )
     # Run lrelease after build
+    # add_custom_command(TARGET ${target} POST_BUILD
+    #     COMMAND "${_qt_bin_dir}/lrelease.exe"
+    #             ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
+    #             -qm 
+    #             $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
+    # )
     add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND "${_qt_bin_dir}/lrelease.exe"
-                ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
-                -qm 
-                $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_BINARY_DIR}/IIViewer_zh.qm
+        $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
+        COMMENT "Copy translation qm file to target directory"
     )
 
     # install(CODE ...) doesn't support generator expressions, but

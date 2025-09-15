@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.5.5 LANGUAGES CXX)
+project(IIViewer VERSION 0.5.6 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -29,8 +29,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization Network LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization Network LinguistTools)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization Network LinguistTools Charts)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization Network LinguistTools Charts)
 
 if(MSVC)
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/msvc/lib/cmake/OpenSSL")
@@ -138,6 +138,11 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/ImgInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImgDiffReportDlg.h
         ${CMAKE_SOURCE_DIR}/src/ImgDiffReportDlg.cpp
+        ${CMAKE_SOURCE_DIR}/inc/CurveAdjustDialog.h
+        ${CMAKE_SOURCE_DIR}/src/CurveAdjustDialog.cpp
+        ${CMAKE_SOURCE_DIR}/inc/ColorSpaceCvt.h
+        ${CMAKE_SOURCE_DIR}/src/ColorSpaceCvt.cpp
+        ${CMAKE_SOURCE_DIR}/inc/common_type.h
 )
 
 set(TRANSLATIONS
@@ -167,6 +172,7 @@ else()
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     elseif(WIN32)
         add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${RESOURCE_FILES} ${QM_FILES})
+        # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             if(MSVC)
                 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:CONSOLE")
@@ -182,7 +188,7 @@ else()
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Charts)
 if(APPLE)
     target_include_directories(${PROJECT_NAME} PRIVATE ${EXTRA_QT_INCLUDE_DIRS})
 endif()
@@ -225,9 +231,9 @@ if(WIN32)
     endif()
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 if(WIN32)
-    # Ensure the Qt runtime libraries are installed
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
     include(windeployqt)
     windeployqt(${PROJECT_NAME} "bin")
 elseif(UNIX AND NOT APPLE)
@@ -240,11 +246,11 @@ elseif(UNIX AND NOT APPLE)
     if(NOT EXISTS ${_qm_translation_path})
         file(MAKE_DIRECTORY ${_qm_translation_path})
     endif()
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND "lrelease"
-        ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
-        -qm 
-        ${_qm_translation_path}/IIViewer_zh.qm
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_BINARY_DIR}/IIViewer_zh.qm
+        $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
+        COMMENT "Copy translation qm file to target directory"
     )
 elseif(APPLE)
     set(_qm_translation_path "")

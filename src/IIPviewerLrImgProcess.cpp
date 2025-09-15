@@ -31,13 +31,13 @@ void IIPviewer::updateZoomLabelText()
 void IIPviewer::exchangeRight2LeftImg()
 {
     ui.imageLabel[0]->acceptImgFromOther(ui.imageLabel[1]);
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":image/resource/right2left-pressed.png"));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left-pressed.png"));
 }
 
 void IIPviewer::restoreLeftImg()
 {
     ui.imageLabel[0]->restoreImg();
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":image/resource/right2left.png"));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left.png"));
 }
 
 void IIPviewer::showImageInfo()
@@ -45,38 +45,38 @@ void IIPviewer::showImageInfo()
     ImgInfoDlg dlg(this);
     if (openedFile[0].endsWith("raw", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], ui.imageLabel[0]->rawBayerType, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[0]->rawDataBit, true);
+        dlg.setImgInfo(openedFile[0], originSize[0], ui.imageLabel[0]->rawBayerType, YUV_UNKNOW, ui.imageLabel[0]->rawDataBit, true);
     }
     else if (openedFile[0].endsWith("pnm", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[0]->pnmDataBit, true);
+        dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[0]->pnmDataBit, true);
     }
     else if (openedFile[0].endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, ui.imageLabel[0]->yuvType, ui.imageLabel[0]->yuvDataBit, true);
+        dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, ui.imageLabel[0]->yuvType, ui.imageLabel[0]->yuvDataBit, true);
     }
     else if (openedFile[0].endsWith("jpg", Qt::CaseSensitivity::CaseInsensitive) || openedFile[0].endsWith("jpeg", Qt::CaseSensitivity::CaseInsensitive) || 
         openedFile[0].endsWith("bmp", Qt::CaseSensitivity::CaseInsensitive) || openedFile[0].endsWith("png", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, 8, true);
+        dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, YUV_UNKNOW, 8, true);
     }
 
     if (openedFile[1].endsWith("raw", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], ui.imageLabel[1]->rawBayerType, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[1]->rawDataBit, false);
+        dlg.setImgInfo(openedFile[1], originSize[1], ui.imageLabel[1]->rawBayerType, YUV_UNKNOW, ui.imageLabel[1]->rawDataBit, false);
     }
     else if (openedFile[1].endsWith("pnm", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, ui.imageLabel[1]->pnmDataBit, false);
+        dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[1]->pnmDataBit, false);
     }
     else if (openedFile[1].endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, ui.imageLabel[1]->yuvType, ui.imageLabel[1]->yuvDataBit, false);
+        dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, ui.imageLabel[1]->yuvType, ui.imageLabel[1]->yuvDataBit, false);
     }
     else if (openedFile[1].endsWith("jpg", Qt::CaseSensitivity::CaseInsensitive) || openedFile[1].endsWith("jpeg", Qt::CaseSensitivity::CaseInsensitive) || 
         openedFile[1].endsWith("bmp", Qt::CaseSensitivity::CaseInsensitive) || openedFile[1].endsWith("png", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], RawFileInfoDlg::BAYER_UNKNOW, YuvFileInfoDlg::YUV_UNKNOW, 8, false);
+        dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, YUV_UNKNOW, 8, false);
     }
     dlg.exec();
 }
@@ -232,7 +232,7 @@ static QString compareRawImage(const unsigned char* left, const unsigned char* r
     return tmp;
 }
 
-static QString compareYuvImage(const unsigned char* left, const unsigned char* right, const int bits, YuvFileInfoDlg::YuvType yuvTp, const QSize imgSize)
+static QString compareYuvImage(const unsigned char* left, const unsigned char* right, const int bits, YuvType yuvTp, const QSize imgSize)
 {
     const int width = imgSize.width();
     const int height = imgSize.height();
@@ -254,7 +254,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
     quint32 pixVminDiff = (1u << bits) - 1;
     QPoint maxVdiffPos(-1, -1);
 
-    if (yuvTp == YuvFileInfoDlg::YuvType::YUV400)
+    if (yuvTp == YuvType::YUV400)
     {
         for (int y = 0; y < height; y++)
         {
@@ -281,7 +281,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
         QString tmp = QString("Y max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixYmaxDiff).arg(pixYminDiff).arg(pixYdiffSum / (qreal)pixCnt).arg(maxYdiffPos.y()).arg(maxYdiffPos.x());
         return tmp;
     }
-    else if(yuvTp == YuvFileInfoDlg::YuvType::YUV420_NV12 || yuvTp == YuvFileInfoDlg::YuvType::YUV420_NV21) // YYY...UVUV and YYY...VUVU
+    else if(yuvTp == YuvType::YUV420_NV12 || yuvTp == YuvType::YUV420_NV21) // YYY...UVUV and YYY...VUVU
     {
         for (int y = 0; y < height; y++)
         {
@@ -329,7 +329,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
                 pixUdiffSum += pixUdiff;
             }
         }
-        if(yuvTp == YuvFileInfoDlg::YuvType::YUV420_NV12)
+        if(yuvTp == YuvType::YUV420_NV12)
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixUmaxDiff).arg(pixUminDiff).arg(pixUdiffSum / (qreal)(pixCnt / 4)).arg(maxUdiffPos.y()).arg(maxUdiffPos.x());
         else
             tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixUmaxDiff).arg(pixUminDiff).arg(pixUdiffSum / (qreal)(pixCnt / 4)).arg(maxUdiffPos.y()).arg(maxUdiffPos.x());
@@ -355,13 +355,13 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
                 pixVdiffSum += pixVdiff;
             }
         }
-        if(yuvTp == YuvFileInfoDlg::YuvType::YUV420_NV12)
+        if(yuvTp == YuvType::YUV420_NV12)
             tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         else
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         return tmp;
     }
-    else if(yuvTp == YuvFileInfoDlg::YuvType::YUV420P_YU12 || yuvTp == YuvFileInfoDlg::YuvType::YUV420P_YV12) // YYY...UU..VV and YYY...VV..UU
+    else if(yuvTp == YuvType::YUV420P_YU12 || yuvTp == YuvType::YUV420P_YV12) // YYY...UU..VV and YYY...VV..UU
     {
         for (int y = 0; y < height; y++)
         {
@@ -410,7 +410,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
                 pixUdiffSum += pixUdiff;
             }
         }
-        if(yuvTp == YuvFileInfoDlg::YuvType::YUV420P_YU12)
+        if(yuvTp == YuvType::YUV420P_YU12)
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixUmaxDiff).arg(pixUminDiff).arg(pixUdiffSum / (qreal)(pixCnt / 4)).arg(maxUdiffPos.y()).arg(maxUdiffPos.x());
         else
             tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixUmaxDiff).arg(pixUminDiff).arg(pixUdiffSum / (qreal)(pixCnt / 4)).arg(maxUdiffPos.y()).arg(maxUdiffPos.x());
@@ -438,17 +438,17 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
                 pixVdiffSum += pixVdiff;
             }
         }
-        if(yuvTp == YuvFileInfoDlg::YuvType::YUV420P_YU12)
+        if(yuvTp == YuvType::YUV420P_YU12)
             tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         else
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         return tmp;
     }
-    else if(yuvTp == YuvFileInfoDlg::YuvType::YUV422_UYVY || yuvTp == YuvFileInfoDlg::YuvType::YUV422_YUYV) // UYVY and YUYV
+    else if(yuvTp == YuvType::YUV422_UYVY || yuvTp == YuvType::YUV422_YUYV) // UYVY and YUYV
     {
-        int yx_start = yuvTp == YuvFileInfoDlg::YuvType::YUV422_UYVY ? 1 : 0;
-        int ux_start = yuvTp == YuvFileInfoDlg::YuvType::YUV422_UYVY ? 0 : 1;
-        int vx_start = yuvTp == YuvFileInfoDlg::YuvType::YUV422_UYVY ? 2 : 3;
+        int yx_start = yuvTp == YuvType::YUV422_UYVY ? 1 : 0;
+        int ux_start = yuvTp == YuvType::YUV422_UYVY ? 0 : 1;
+        int vx_start = yuvTp == YuvType::YUV422_UYVY ? 2 : 3;
         for (int y = 0; y < height; y++)
         {
             for (int x = yx_start; x < width * 2; x += 2)
@@ -521,7 +521,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
 
         return tmp;
     }
-    else if(yuvTp == YuvFileInfoDlg::YuvType::YUV444_INTERLEAVE) // YUVYUV
+    else if(yuvTp == YuvType::YUV444_INTERLEAVE) // YUVYUV
     {
         for (int y = 0; y < height; y++)
         {
@@ -592,7 +592,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
         tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixUmaxDiff).arg(pixUminDiff).arg(pixUdiffSum / (qreal)pixCnt).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         return tmp;
     }
-    else if(yuvTp == YuvFileInfoDlg::YuvType::YUV444_PLANAR) // YYY..UUU..VVV
+    else if(yuvTp == YuvType::YUV444_PLANAR) // YYY..UUU..VVV
     {
         for (int y = 0; y < height; y++)
         {

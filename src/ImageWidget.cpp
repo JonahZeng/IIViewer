@@ -1,4 +1,7 @@
+#include "common_type.h"
 #include "ImageWidget.h"
+#include "ColorSpaceCvt.h"
+#include "CurveAdjustDialog.h"
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
@@ -6,8 +9,6 @@
 #include <QPainter>
 #include <QAction>
 #include <stdexcept>
-
-#define CLIP3(a, mi, ma) (a < mi ? mi : (a > ma ? ma : a))
 
 ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, QWidget *parent)
     : QWidget(parent),
@@ -26,14 +27,17 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       rawDataPtr(nullptr), rawDataBit(0),
       pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0),
       yuvDataPtr(nullptr), yuvDataBit(0), 
-      rawBayerType(RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RawFileInfoDlg::RAW_LITTLE_ENDIAN), yuvType(YuvFileInfoDlg::YuvType::YUV_UNKNOW),
+      normalDataPixMap(nullptr),
+      rawBayerType(BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RAW_LITTLE_ENDIAN), yuvType(YuvType::YUV_UNKNOW),
       openedImgType(UNKNOW_IMG),
       imgName(nullptr)
 {
     QAction* showRoiData = rightMouseContextMenu.addAction(tr("show roi data"));
     QAction* exportRoiData = rightMouseContextMenu.addAction(tr("export roi data"));
+    QAction* adjPreviewCurve = rightMouseContextMenu.addAction(tr("adjust preview curve"));
     connect(showRoiData, &QAction::triggered, this, &ImageWidget::showRoiDataToText);
     connect(exportRoiData, &QAction::triggered, this, &ImageWidget::exportRoiDataToDisk);
+    connect(adjPreviewCurve, &QAction::triggered, this, &ImageWidget::adjustPreviewCurve);
 }
 
 ImageWidget::~ImageWidget()
@@ -41,101 +45,150 @@ ImageWidget::~ImageWidget()
     releaseBuffer();
 }
 
-static const RawFileInfoDlg::BayerPixelType type_RGGB[4] = {RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B};
-static const RawFileInfoDlg::BayerPixelType type_GRBG[4] = {RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB};
-static const RawFileInfoDlg::BayerPixelType type_GBRG[4] = {RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR};
-static const RawFileInfoDlg::BayerPixelType type_BGGR[4] = {RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R};
+static const BayerPixelType type_RGGB[4] = {PIX_R, PIX_GR, PIX_GB, PIX_B};
+static const BayerPixelType type_GRBG[4] = {PIX_GR, PIX_R, PIX_B, PIX_GB};
+static const BayerPixelType type_GBRG[4] = {PIX_GB, PIX_B, PIX_R, PIX_GR};
+static const BayerPixelType type_BGGR[4] = {PIX_B, PIX_GB, PIX_GR, PIX_R};
 
-static const RawFileInfoDlg::BayerPixelType type_RGG_IR[16] = {
-    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR,
-    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR
+static const BayerPixelType type_RGG_IR[16] = {
+    PIX_R,  PIX_GR, PIX_B,  PIX_GB,
+    PIX_GB, PIX_IR, PIX_GR, PIX_IR,
+    PIX_B,  PIX_GB, PIX_R,  PIX_GR,
+    PIX_GR, PIX_IR, PIX_GB, PIX_IR
 };
-static const RawFileInfoDlg::BayerPixelType type_BGG_IR[16] = {
-    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR,
-    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR
+static const BayerPixelType type_BGG_IR[16] = {
+    PIX_B,  PIX_GB, PIX_R,  PIX_GR,
+    PIX_GR, PIX_IR, PIX_GB, PIX_IR,
+    PIX_R,  PIX_GR, PIX_B,  PIX_GB,
+    PIX_GB, PIX_IR, PIX_GR, PIX_IR
 };
-static const RawFileInfoDlg::BayerPixelType type_GR_IR_G[16] = {
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
-    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
-    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB
+static const BayerPixelType type_GR_IR_G[16] = {
+    PIX_GR, PIX_R,  PIX_GB, PIX_B,
+    PIX_IR, PIX_GB, PIX_IR, PIX_GR,
+    PIX_GB, PIX_B,  PIX_GR, PIX_R,
+    PIX_IR, PIX_GR, PIX_IR, PIX_GB
 };
-static const RawFileInfoDlg::BayerPixelType type_GB_IR_G[16] = {
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
-    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
-    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR
+static const BayerPixelType type_GB_IR_G[16] = {
+    PIX_GB, PIX_B,  PIX_GR, PIX_R,
+    PIX_IR, PIX_GR, PIX_IR, PIX_GB,
+    PIX_GR, PIX_R,  PIX_GB, PIX_B,
+    PIX_IR, PIX_GB, PIX_IR, PIX_GR
 };
-static const RawFileInfoDlg::BayerPixelType type_G_IR_RG[16] = {
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR,
-    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR,
-    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR
+static const BayerPixelType type_G_IR_RG[16] = {
+    PIX_GB, PIX_IR, PIX_GR, PIX_IR,
+    PIX_R,  PIX_GR, PIX_B,  PIX_GB,
+    PIX_GR, PIX_IR, PIX_GB, PIX_IR,
+    PIX_B,  PIX_GB, PIX_R,  PIX_GR
 };
-static const RawFileInfoDlg::BayerPixelType type_G_IR_BG[16] = {
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR,
-    RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR,
-    RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GB
+static const BayerPixelType type_G_IR_BG[16] = {
+    PIX_GR, PIX_IR, PIX_GB, PIX_IR,
+    PIX_B,  PIX_GB, PIX_R,  PIX_GR,
+    PIX_GB, PIX_IR, PIX_GR, PIX_IR,
+    PIX_R,  PIX_GR, PIX_B,  PIX_GB
 };
-static const RawFileInfoDlg::BayerPixelType type_IR_GGR[16] = {
-    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B,
-    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R
+static const BayerPixelType type_IR_GGR[16] = {
+    PIX_IR, PIX_GB, PIX_IR, PIX_GR,
+    PIX_GR, PIX_R,  PIX_GB, PIX_B,
+    PIX_IR, PIX_GR, PIX_IR, PIX_GB,
+    PIX_GB, PIX_B,  PIX_GR, PIX_R
 };
-static const RawFileInfoDlg::BayerPixelType type_IR_GGB[16] = {
-    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB,
-    RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B, RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R,
-    RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_IR, RawFileInfoDlg::PIX_GR,
-    RawFileInfoDlg::PIX_GR, RawFileInfoDlg::PIX_R, RawFileInfoDlg::PIX_GB, RawFileInfoDlg::PIX_B
+static const BayerPixelType type_IR_GGB[16] = {
+    PIX_IR, PIX_GR, PIX_IR, PIX_GB,
+    PIX_GB, PIX_B,  PIX_GR, PIX_R,
+    PIX_IR, PIX_GB, PIX_IR, PIX_GR,
+    PIX_GR, PIX_R,  PIX_GB, PIX_B
 };
 
-static const RawFileInfoDlg::BayerPixelType* type_rgbir[8] = {
+static const BayerPixelType* type_rgbir[8] = {
     type_RGG_IR, type_BGG_IR, type_GR_IR_G, type_GB_IR_G, type_G_IR_RG, type_G_IR_BG, type_IR_GGR, type_IR_GGB
 };
 
-RawFileInfoDlg::BayerPixelType ImageWidget::getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by)
+BayerPixelType ImageWidget::getPixType(int y, int x, BayerPatternType by)
 {
-    if (by >= RawFileInfoDlg::BayerPatternType::RGGB && by <= RawFileInfoDlg::BayerPatternType::BGGR)
+    if (by >= BayerPatternType::RGGB && by <= BayerPatternType::BGGR)
     {
         uint32_t pos = ((y & 0x1) << 1) + (x & 0x1);
 
-        const RawFileInfoDlg::BayerPixelType *type = type_RGGB;
-        if (by == RawFileInfoDlg::BayerPatternType::RGGB)
+        const BayerPixelType *type = type_RGGB;
+        if (by == BayerPatternType::RGGB)
         {
             type = type_RGGB;
         }
-        else if (by == RawFileInfoDlg::BayerPatternType::GRBG)
+        else if (by == BayerPatternType::GRBG)
         {
             type = type_GRBG;
         }
-        else if (by == RawFileInfoDlg::BayerPatternType::GBRG)
+        else if (by == BayerPatternType::GBRG)
         {
             type = type_GBRG;
         }
-        else if (by == RawFileInfoDlg::BayerPatternType::BGGR)
+        else if (by == BayerPatternType::BGGR)
         {
             type = type_BGGR;
         }
 
         return type[pos];
     }
-    else if(by >= RawFileInfoDlg::BayerPatternType::RGGIR && by <= RawFileInfoDlg::BayerPatternType::IRGGB)
+    else if(by >= BayerPatternType::RGGIR && by <= BayerPatternType::IRGGB)
     {
         uint32_t pos = ((y & 0x3) << 2) + (x & 0x3);
-        const RawFileInfoDlg::BayerPixelType *type = type_rgbir[by - RawFileInfoDlg::BayerPatternType::RGGIR];
+        const BayerPixelType *type = type_rgbir[by - BayerPatternType::RGGIR];
         return type[pos];
     }
-    else if(by == RawFileInfoDlg::BayerPatternType::MONO)
+    else if(by == BayerPatternType::MONO)
     {
-        return RawFileInfoDlg::BayerPixelType::PIX_Y;
+        return BayerPixelType::PIX_Y;
     }
-    return RawFileInfoDlg::BayerPixelType::PIX_UNKNOW;
+    return BayerPixelType::PIX_UNKNOW;
+}
+
+void ImageWidget::setPainterColorShape(QPainter &painter)
+{
+    switch (appSettings->pix_val_bg_index)
+    {
+    case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+        painter.setPen(appSettings->pix_val_cus_bg_color);
+        painter.setBrush(appSettings->pix_val_cus_bg_color);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::WHITE:
+        painter.setPen(Qt::white);
+        painter.setBrush(Qt::white);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::GRAY:
+        painter.setPen(Qt::gray);
+        painter.setBrush(Qt::gray);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::BLACK:
+        painter.setPen(Qt::black);
+        painter.setBrush(Qt::black);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::RED:
+        painter.setPen(Qt::red);
+        painter.setBrush(Qt::red);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+        painter.setPen(Qt::yellow);
+        painter.setBrush(Qt::yellow);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::GREEN:
+        painter.setPen(Qt::green);
+        painter.setBrush(Qt::green);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::CYAN:
+        painter.setPen(Qt::cyan);
+        painter.setBrush(Qt::cyan);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::BLUE:
+        painter.setPen(Qt::blue);
+        painter.setBrush(Qt::blue);
+        break;
+    case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+        painter.setPen(Qt::magenta);
+        painter.setBrush(Qt::magenta);
+        break;
+    default:
+        break;
+    }
 }
 
 void ImageWidget::paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft)
@@ -145,51 +198,7 @@ void ImageWidget::paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, i
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -236,51 +245,7 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -300,24 +265,24 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
         {
             if (yStart + h < rawHeight && xStart + w < rawWidth)
             {
-                RawFileInfoDlg::BayerPixelType pixType = getPixType(yStart + h, xStart + w, rawBayerType);
-                if (pixType == RawFileInfoDlg::BayerPixelType::PIX_R)
+                BayerPixelType pixType = getPixType(yStart + h, xStart + w, rawBayerType);
+                if (pixType == BayerPixelType::PIX_R)
                 {
                     painter.setPen(QColor(255, 0, 0));
                 }
-                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_GR || pixType == RawFileInfoDlg::BayerPixelType::PIX_GB)
+                else if (pixType == BayerPixelType::PIX_GR || pixType == BayerPixelType::PIX_GB)
                 {
                     painter.setPen(QColor(0, 255, 0));
                 }
-                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_B)
+                else if (pixType == BayerPixelType::PIX_B)
                 {
                     painter.setPen(QColor(0, 0, 255));
                 }
-                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_Y)
+                else if (pixType == BayerPixelType::PIX_Y)
                 {
                     painter.setPen(QColor(200, 200, 200));
                 }
-                else if (pixType == RawFileInfoDlg::BayerPixelType::PIX_IR)
+                else if (pixType == BayerPixelType::PIX_IR)
                 {
                     painter.setPen(QColor(100, 100, 100));
                 }
@@ -329,7 +294,7 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                 else if (rawDataBit > 8 && rawDataBit <= 16)
                 {
                     gray = ((unsigned short *)rawDataPtr)[(yStart + h) * rawWidth + xStart + w];
-                    if (rawByteOrderType == RawFileInfoDlg::RAW_BIG_ENDIAN)
+                    if (rawByteOrderType == RAW_BIG_ENDIAN)
                     {
                         gray = ((gray & 0x00ff) << 8) | ((gray & 0xff00) >> 8);
                     }
@@ -337,7 +302,7 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                 else if (rawDataBit > 16 && rawDataBit <= 32)
                 {
                     gray = ((unsigned int *)rawDataPtr)[(yStart + h) * rawWidth + xStart + w];
-                    if (rawByteOrderType == RawFileInfoDlg::RAW_BIG_ENDIAN)
+                    if (rawByteOrderType == RAW_BIG_ENDIAN)
                     {
                         gray = ((gray & 0x000000ff) << 24) | ((gray & 0x0000ff00) << 8) | ((gray & 0x00ff0000) >> 8) | ((gray & 0xff000000) >> 24);
                     }
@@ -361,51 +326,7 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -528,51 +449,7 @@ void ImageWidget::paintPgmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -618,51 +495,7 @@ void ImageWidget::paintYuv444InterleavePixVal(QPoint &viewTopLeftPix, QPainter &
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -757,51 +590,7 @@ void ImageWidget::paintYuv444PlanarPixVal(QPoint &viewTopLeftPix, QPainter &pain
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -896,51 +685,7 @@ void ImageWidget::paintYuv422UYVYPixVal(QPoint &viewTopLeftPix, QPainter &painte
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -1063,51 +808,7 @@ void ImageWidget::paintYuv422YUYVPixVal(QPoint &viewTopLeftPix, QPainter &painte
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -1232,51 +933,7 @@ void ImageWidget::paintYuv420NV12PixVal(QPoint &viewTopLeftPix, QPainter &painte
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -1377,51 +1034,7 @@ void ImageWidget::paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painte
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -1522,51 +1135,7 @@ void ImageWidget::paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &paint
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -1661,51 +1230,7 @@ void ImageWidget::paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &paint
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -1800,51 +1325,7 @@ void ImageWidget::paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, i
 
     if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
     {
-        switch(appSettings->pix_val_bg_index)
-        {
-            case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
-                painter.setPen(appSettings->pix_val_cus_bg_color);
-                painter.setBrush(appSettings->pix_val_cus_bg_color);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::WHITE:
-                painter.setPen(Qt::white);
-                painter.setBrush(Qt::white);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GRAY:
-                painter.setPen(Qt::gray);
-                painter.setBrush(Qt::gray);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLACK:
-                painter.setPen(Qt::black);
-                painter.setBrush(Qt::black);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::RED:
-                painter.setPen(Qt::red);
-                painter.setBrush(Qt::red);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::YELLOW:
-                painter.setPen(Qt::yellow);
-                painter.setBrush(Qt::yellow);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::GREEN:
-                painter.setPen(Qt::green);
-                painter.setBrush(Qt::green);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::CYAN:
-                painter.setPen(Qt::cyan);
-                painter.setBrush(Qt::cyan);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::BLUE:
-                painter.setPen(Qt::blue);
-                painter.setBrush(Qt::blue);
-                break;
-            case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
-                painter.setPen(Qt::magenta);
-                painter.setBrush(Qt::magenta);
-                break;
-            default:
-                break;
-        }
+        setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
         {
             for (int w = 0; w < viewPixWidth; w++)
@@ -1977,39 +1458,39 @@ void ImageWidget::paintEvent(QPaintEvent *event)
         }
         else if (openedImgType == YUV_IMG)
         {
-            if (yuvType == YuvFileInfoDlg::YuvType::YUV444_INTERLEAVE)
+            if (yuvType == YuvType::YUV444_INTERLEAVE)
             {
                 paintYuv444InterleavePixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
-            else if (yuvType == YuvFileInfoDlg::YuvType::YUV444_PLANAR)
+            else if (yuvType == YuvType::YUV444_PLANAR)
             {
                 paintYuv444PlanarPixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
-            else if (yuvType == YuvFileInfoDlg::YuvType::YUV422_UYVY)
+            else if (yuvType == YuvType::YUV422_UYVY)
             {
                 paintYuv422UYVYPixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
-            else if (yuvType == YuvFileInfoDlg::YuvType::YUV422_YUYV)
+            else if (yuvType == YuvType::YUV422_YUYV)
             {
                 paintYuv422YUYVPixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
-            else if (yuvType == YuvFileInfoDlg::YuvType::YUV420_NV12)
+            else if (yuvType == YuvType::YUV420_NV12)
             {
                 paintYuv420NV12PixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
-            else if (yuvType == YuvFileInfoDlg::YuvType::YUV420_NV21)
+            else if (yuvType == YuvType::YUV420_NV21)
             {
                 paintYuv420NV21PixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
-            else if (yuvType == YuvFileInfoDlg::YuvType::YUV420P_YU12)
+            else if (yuvType == YuvType::YUV420P_YU12)
             {
                 paintYuv420PYU12PixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
-            else if (yuvType == YuvFileInfoDlg::YuvType::YUV420P_YV12)
+            else if (yuvType == YuvType::YUV420P_YV12)
             {
                 paintYuv420PYV12PixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
-            else if (yuvType == YuvFileInfoDlg::YuvType::YUV400)
+            else if (yuvType == YuvType::YUV400)
             {
                 paintYuv400PixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
@@ -2065,18 +1546,27 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
         doDragImg = true;
         setCursor(Qt::CursorShape::ClosedHandCursor);
     }
-    else if(event->button() == Qt::MouseButton::RightButton && paintEnd)
+    else if(event->button() == Qt::MouseButton::RightButton && pixMap != nullptr)
     {
-        // 检查roi坐标是否构成一个rectangel
-        if(ptCodInfo.paintCoordinates[0] != ptCodInfo.paintCoordinates[1])
+        if (paintEnd)
         {
-            // 如果鼠标点在roi范围内，弹出右键菜单
-            QPoint cur_pos = event->pos();
-            if(pointInRectangle(cur_pos, ptCodInfo.paintCoordinates[0], ptCodInfo.paintCoordinates[1]))
-            {                
-                rightMouseContextMenu.exec(event->globalPos());
+            // 检查roi坐标是否构成一个rectangel
+            if (ptCodInfo.paintCoordinates[0] != ptCodInfo.paintCoordinates[1])
+            {
+                // 如果鼠标点在roi范围内，弹出右键菜单
+                QPoint cur_pos = event->pos();
+                if (pointInRectangle(cur_pos, ptCodInfo.paintCoordinates[0], ptCodInfo.paintCoordinates[1]))
+                {
+                    rightMouseContextMenu.actions().at(0)->setEnabled(true);
+                    rightMouseContextMenu.actions().at(1)->setEnabled(true);
+                    rightMouseContextMenu.exec(event->globalPos());
+                    return;
+                }
             }
         }
+        rightMouseContextMenu.actions().at(0)->setEnabled(false);
+        rightMouseContextMenu.actions().at(1)->setEnabled(false);
+        rightMouseContextMenu.exec(event->globalPos());
     }
 }
 
@@ -2254,7 +1744,10 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
         input_f.read((char *)buffer, qint64(pixSize) * width * height);
         input_f.close();
 
+        normalDataPixMap = new QImage(width, height, QImage::Format_Grayscale8);
+
         unsigned char *bufferShow = pixMap->bits();
+        unsigned char *bufferShowBak = normalDataPixMap->bits();
         int bytesperline = pixMap->bytesPerLine();
 
         if (pixSize == 1)
@@ -2264,6 +1757,7 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
                 for (qint64 j = 0; j < width; j++)
                 {
                     bufferShow[i * bytesperline + j] = buffer[i * width + j];
+                    bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
                 }
             }
         }
@@ -2276,17 +1770,18 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
                 {
                     buffer_us[i * width + j] = ((buffer_us[i * width + j] & 0xff00) >> 8) | ((buffer_us[i * width + j] & 0x00ff) << 8);
                     bufferShow[i * bytesperline + j] = buffer_us[i * width + j] >> (bitDepth - 8);
+                    bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
                 }
             }
         }
 
         rawDataPtr = nullptr;
         rawDataBit = 0;
-        rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
-        rawByteOrderType = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+        rawBayerType = BayerPatternType::BAYER_UNKNOW;
+        rawByteOrderType = ByteOrderType::RAW_LITTLE_ENDIAN;
         yuvDataBit = 0;
         yuvDataPtr = nullptr;
-        yuvType = YuvFileInfoDlg::YuvType::YUV_UNKNOW;
+        yuvType = YuvType::YUV_UNKNOW;
         pnmDataPtr = nullptr;
         pnmDataBit = 0;
         openedImgType = PGM_IMG;
@@ -2368,8 +1863,11 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
             input_f.read((char *)buffer, qint64(pixSize) * width * height);
             input_f.close();
 
+            normalDataPixMap = new QImage(width, height, QImage::Format_Grayscale8);
+
             int bytesperline = pixMap->bytesPerLine();
             unsigned char *bufferShow = pixMap->bits();
+            unsigned char *bufferShowBak = normalDataPixMap->bits();
 
             if (pixSize == 1)
             {
@@ -2378,6 +1876,7 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
                     for (qint64 j = 0; j < width; j++)
                     {
                         bufferShow[i * bytesperline + j] = buffer[i * width + j];
+                        bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
                     }
                 }
             }
@@ -2390,6 +1889,7 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
                     {
                         buffer_us[i * width + j] = ((buffer_us[i * width + j] & 0xff00) >> 8) | ((buffer_us[i * width + j] & 0x00ff) << 8);
                         bufferShow[i * bytesperline + j] = buffer_us[i * width + j] >> (bitDepth - 8);
+                        bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
                     }
                 }
             }
@@ -2401,8 +1901,11 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
             input_f.read((char *)buffer, qint64(pixSize) * width * height * 3);
             input_f.close();
 
+            normalDataPixMap = new QImage(width, height, QImage::Format_RGB888);
+
             int bytesperline = pixMap->bytesPerLine();
             unsigned char *bufferShow = pixMap->bits();
+            unsigned char *bufferShowBak = normalDataPixMap->bits();
 
             if (pixSize == 1)
             {
@@ -2411,6 +1914,7 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
                     for (qint64 j = 0; j < width * 3; j++)
                     {
                         bufferShow[i * bytesperline + j] = buffer[i * width * 3 + j];
+                        bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
                     }
                 }
             }
@@ -2423,6 +1927,7 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
                     {
                         buffer_us[i * width * 3 + j] = ((buffer_us[i * width * 3 + j] & 0xff00) >> 8) | ((buffer_us[i * width * 3 + j] & 0x00ff) << 8);
                         bufferShow[i * bytesperline + j] = buffer_us[i * width * 3 + j] >> (bitDepth - 8);
+                        bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
                     }
                 }
             }
@@ -2430,11 +1935,11 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
 
         rawDataPtr = nullptr;
         rawDataBit = 0;
-        rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
-        rawByteOrderType = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+        rawBayerType = BayerPatternType::BAYER_UNKNOW;
+        rawByteOrderType = ByteOrderType::RAW_LITTLE_ENDIAN;
         yuvDataBit = 0;
         yuvDataPtr = nullptr;
-        yuvType = YuvFileInfoDlg::YuvType::YUV_UNKNOW;
+        yuvType = YuvType::YUV_UNKNOW;
         openedImgType = PNM_IMG;
         pnmDataPtr = buffer;
         pnmDataBit = bitDepth;
@@ -2448,9 +1953,10 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
     {
         releaseBuffer();
         pixMap = new QImage(*imgName);
+        normalDataPixMap = new QImage(*pixMap);
         openedImgType = NORMAL_IMG;
-        rawBayerType = RawFileInfoDlg::BayerPatternType::BAYER_UNKNOW;
-        rawByteOrderType = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+        rawBayerType = BayerPatternType::BAYER_UNKNOW;
+        rawByteOrderType = ByteOrderType::RAW_LITTLE_ENDIAN;
         rawDataBit = 0;
         rawDataPtr = nullptr;
         pnmDataBit = 0;
@@ -2459,7 +1965,7 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
         pgmDataPtr = nullptr;
         yuvDataBit = 0;
         yuvDataPtr = nullptr;
-        yuvType = YuvFileInfoDlg::YuvType::YUV_UNKNOW;
+        yuvType = YuvType::YUV_UNKNOW;
 
         resize(pixMap->size() * zoomList[zoomIdx]);
         repaint();
@@ -2506,7 +2012,7 @@ static void decompress14BitData(uint8_t *inputData, int width, int height, uint1
     }
 }
 
-void ImageWidget::setPixmap(RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height) // raw
+void ImageWidget::setPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height) // raw
 {
     if(imgName == nullptr)
     {
@@ -2580,7 +2086,7 @@ void ImageWidget::setPixmap(RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg:
     else if (pixSize == 2)
     {
         unsigned short *buffer_us = (unsigned short *)buffer;
-        if (order == RawFileInfoDlg::RAW_BIG_ENDIAN)
+        if (order == RAW_BIG_ENDIAN)
         {
             for (qint64 i = 0; i < height; i++)
             {
@@ -2604,7 +2110,7 @@ void ImageWidget::setPixmap(RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg:
     else if (pixSize == 4)
     {
         unsigned int *buffer_ui = (unsigned int *)buffer;
-        if (order == RawFileInfoDlg::RAW_BIG_ENDIAN)
+        if (order == RAW_BIG_ENDIAN)
         {
             for (qint64 i = 0; i < height; i++)
             {
@@ -2637,344 +2143,15 @@ void ImageWidget::setPixmap(RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg:
     pgmDataBit = 0;
     yuvDataBit = 0;
     yuvDataPtr = nullptr;
-    yuvType = YuvFileInfoDlg::YuvType::YUV_UNKNOW;
+    normalDataPixMap = nullptr;
+    yuvType = YuvType::YUV_UNKNOW;
 
     resize(pixMap->size() * zoomList[zoomIdx]);
     repaint();
 }
 
-static void convertYUV2RGB888(unsigned char *yuvBuf, unsigned char *rgb888Buf, int bitDepth, int width, int height, YuvFileInfoDlg::YuvType tp, int wholepixperline)
-{
-    if (tp == YuvFileInfoDlg::YuvType::YUV444_INTERLEAVE)
-    {
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width * 3 + j * 3 + 0] >> (bitDepth - 8);
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[i * width * 3 + j * 3 + 1] >> (bitDepth - 8);
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[i * width * 3 + j * 3 + 2] >> (bitDepth - 8);
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width * 3 + j * 3 + 0];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 3 + j * 3 + 1];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 3 + j * 3 + 2];
-                }
-            }
-        }
-    }
-    else if (tp == YuvFileInfoDlg::YuvType::YUV444_PLANAR)
-    {
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[width * height + i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[width * height * 2 + i * width + j] >> (bitDepth - 8);
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + i * width + j];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height * 2 + i * width + j];
-                }
-            }
-        }
-    }
-    else if (tp == YuvFileInfoDlg::YuvType::YUV422_UYVY)
-    {
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8);
-                    if (j % 2 == 0)
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8);     // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2 + 2] >> (bitDepth - 8); // v
-                    }
-                    else
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2 - 2] >> (bitDepth - 8); // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8);     // v
-                    }
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width * 2 + j * 2 + 1];
-                    if (j % 2 == 0)
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2];     // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 2]; // v
-                    }
-                    else
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 - 2]; // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2];     // v
-                    }
-                }
-            }
-        }
-    }
-    else if (tp == YuvFileInfoDlg::YuvType::YUV422_YUYV)
-    {
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2] >> (bitDepth - 8);
-                    if (j % 2 == 0)
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8); // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2 + 3] >> (bitDepth - 8); // v
-                    }
-                    else
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2 - 1] >> (bitDepth - 8); // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[i * width * 2 + j * 2 + 1] >> (bitDepth - 8); // v
-                    }
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width * 2 + j * 2];
-                    if (j % 2 == 0)
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 + 1]; // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 3]; // v
-                    }
-                    else
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[i * width * 2 + j * 2 - 1]; // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[i * width * 2 + j * 2 + 1]; // v
-                    }
-                }
-            }
-        }
-    }
-    else if (tp == YuvFileInfoDlg::YuvType::YUV420_NV12)
-    { // yyyyy...uvuv
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    if (j % 2 == 0)
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8);     // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width + j + 1] >> (bitDepth - 8); // v
-                    }
-                    else
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width + j - 1] >> (bitDepth - 8); // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8);     // v
-                    }
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    if (j % 2 == 0)
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j];     // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j + 1]; // v
-                    }
-                    else
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j - 1]; // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j];     // v
-                    }
-                }
-            }
-        }
-    }
-    else if (tp == YuvFileInfoDlg::YuvType::YUV420_NV21)
-    { // yyyyy...vuvu
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    if (j % 2 == 0)
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width + j + 1] >> (bitDepth - 8); // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8);     // v
-                    }
-                    else
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width + j] >> (bitDepth - 8);     // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width + j - 1] >> (bitDepth - 8); // v
-                    }
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    if (j % 2 == 0)
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j + 1]; // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j];     // v
-                    }
-                    else
-                    {
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width + j];     // u
-                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width + j - 1]; // v
-                    }
-                }
-            }
-        }
-    }
-    else if (tp == YuvFileInfoDlg::YuvType::YUV420P_YU12)
-    {
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8);                      // u
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8);                      // u
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // v
-                }
-            }
-        }
-    }
-    else if (tp == YuvFileInfoDlg::YuvType::YUV420P_YV12)
-    {
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = ((uint16_t *)yuvBuf)[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8);                      // v
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = ((uint16_t *)yuvBuf)[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = yuvBuf[width * height + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8);                      // v
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = yuvBuf[width * height + width * height / 4 + (i / 2) * width / 2 + j / 2] >> (bitDepth - 8); // u
-                }
-            }
-        }
-    }
-    else if (tp == YuvFileInfoDlg::YuvType::YUV400)
-    {
-        if (bitDepth > 8 && bitDepth <= 16)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = ((uint16_t *)yuvBuf)[i * width + j] >> (bitDepth - 8);
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
-                }
-            }
-        }
-        else if (bitDepth <= 8)
-        {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = yuvBuf[i * width + j];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
-                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
-                }
-            }
-        }
-    }
 
-    if (tp != YuvFileInfoDlg::YuvType::YUV400)
-    {
-        for (int i = 0; i < height; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                short y = rgb888Buf[i * wholepixperline * 3 + j * 3 + 0];
-                short cb = (short)(rgb888Buf[i * wholepixperline * 3 + j * 3 + 1]) - 128;
-                short cr = (short)(rgb888Buf[i * wholepixperline * 3 + j * 3 + 2]) - 128;
-                short r = y + 1.403f * cr;
-                short g = y - 0.714f * cr - 0.344f * cb;
-                short b = y + 1.773f * cb;
-
-                rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = CLIP3(r, 0, 255);
-                rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = CLIP3(g, 0, 255);
-                rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = CLIP3(b, 0, 255);
-            }
-        }
-    }
-}
-
-void ImageWidget::setPixmap(YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize) // yuv
+void ImageWidget::setPixmap(YuvType tp, int bitDepth, int width, int height, int pixSize) // yuv
 {
     if(imgName == nullptr)
     {
@@ -2983,19 +2160,19 @@ void ImageWidget::setPixmap(YuvFileInfoDlg::YuvType tp, int bitDepth, int width,
 
     qint64 total_size = 0;
 
-    if (tp == YuvFileInfoDlg::YUV444_INTERLEAVE || tp == YuvFileInfoDlg::YUV444_PLANAR)
+    if (tp == YUV444_INTERLEAVE || tp == YUV444_PLANAR)
     {
         total_size = pixSize * width * height * 3;
     }
-    else if (tp == YuvFileInfoDlg::YUV422_UYVY || tp == YuvFileInfoDlg::YUV422_YUYV)
+    else if (tp == YUV422_UYVY || tp == YUV422_YUYV)
     {
         total_size = pixSize * width * height * 2;
     }
-    else if (tp == YuvFileInfoDlg::YUV420_NV12 || tp == YuvFileInfoDlg::YUV420_NV21 || tp == YuvFileInfoDlg::YUV420P_YU12 || tp == YuvFileInfoDlg::YUV420P_YV12)
+    else if (tp == YUV420_NV12 || tp == YUV420_NV21 || tp == YUV420P_YU12 || tp == YUV420P_YV12)
     {
         total_size = pixSize * width * height * 3 / 2;
     }
-    else if (tp == YuvFileInfoDlg::YUV400)
+    else if (tp == YUV400)
     {
         total_size = pixSize * width * height;
     }
@@ -3016,8 +2193,8 @@ void ImageWidget::setPixmap(YuvFileInfoDlg::YuvType tp, int bitDepth, int width,
 
     rawDataPtr = nullptr;
     rawDataBit = 0;
-    rawBayerType = RawFileInfoDlg::BAYER_UNKNOW;
-    rawByteOrderType = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+    rawBayerType = BAYER_UNKNOW;
+    rawByteOrderType = ByteOrderType::RAW_LITTLE_ENDIAN;
     openedImgType = YUV_IMG;
     pnmDataPtr = nullptr;
     pnmDataBit = 0;
@@ -3026,6 +2203,7 @@ void ImageWidget::setPixmap(YuvFileInfoDlg::YuvType tp, int bitDepth, int width,
     yuvDataBit = bitDepth;
     yuvDataPtr = buffer;
     yuvType = tp;
+    normalDataPixMap = nullptr;
 
     resize(pixMap->size() * zoomList[zoomIdx]);
     repaint();
@@ -3193,6 +2371,11 @@ void ImageWidget::releaseBuffer()
         delete pixMap;
         pixMap = nullptr;
     }
+    if (normalDataPixMap != nullptr)
+    {
+        delete normalDataPixMap;
+        normalDataPixMap = nullptr;
+    }
     if (rawDataPtr != nullptr)
     {
         delete[] rawDataPtr;
@@ -3218,6 +2401,7 @@ void ImageWidget::releaseBuffer()
 void ImageWidget::acceptImgFromOther(const ImageWidget *other)
 {
     pixMapBak = pixMap;
+    normalDataPixMapBak = normalDataPixMap; 
     rawDataPtrBak = rawDataPtr;
     rawDataBitBak = rawDataBit;
     pnmDataPtrBak = pnmDataPtr;
@@ -3232,6 +2416,7 @@ void ImageWidget::acceptImgFromOther(const ImageWidget *other)
     openedImgTypeBak = openedImgType;
 
     pixMap = other->pixMap;
+    normalDataPixMap = other->normalDataPixMap;
     rawDataPtr = other->rawDataPtr;
     rawDataBit = other->rawDataBit;
     pnmDataPtr = other->pnmDataPtr;
@@ -3250,6 +2435,7 @@ void ImageWidget::acceptImgFromOther(const ImageWidget *other)
 void ImageWidget::restoreImg()
 {
     pixMap = pixMapBak;
+    normalDataPixMap = normalDataPixMapBak;
     rawDataPtr = rawDataPtrBak;
     rawDataBit = rawDataBitBak;
     pnmDataPtr = pnmDataPtrBak;
@@ -3263,4 +2449,60 @@ void ImageWidget::restoreImg()
     yuvType = yuvTypeBak;
     openedImgType = openedImgTypeBak;
     update();
+}
+
+void ImageWidget::adjustPreviewCurve()
+{
+    if (pixMap == nullptr || pixMap->isNull()) {
+        QMessageBox::warning(this, tr("Warning"), tr("No image loaded to adjust curve."));
+        return;
+    }
+
+    int img_bits = 8; // defalut normal image
+    void* src_img = normalDataPixMap; // defalut normal image
+    if(openedImgType == OpenedImageType::PGM_IMG)
+    {
+        img_bits = pgmDataBit;
+        src_img = pgmDataPtr;
+    }
+    else if(openedImgType == OpenedImageType::PNM_IMG)
+    {
+        img_bits = pnmDataBit;
+        src_img = pnmDataPtr;
+    }
+    else if(openedImgType == OpenedImageType::RAW_IMG)
+    {
+        img_bits = rawDataBit;
+        src_img = rawDataPtr;
+    }
+    else if(openedImgType == OpenedImageType::YUV_IMG)
+    {
+        img_bits = yuvDataBit;
+        src_img = yuvDataPtr;
+    }
+
+    qint32 max_v = (1 << img_bits) - 1;
+    qint32 v0 = (max_v + 1) / 8;
+    qint32 v1 = (max_v + 1) / 4;
+    qint32 v2 = (max_v + 1) * 3 / 8;
+    qint32 v3 = (max_v + 1) / 2;
+    qint32 v4 = (max_v + 1) * 5 / 8;
+    qint32 v5 = (max_v + 1) * 3 / 4;
+    qint32 v6 = (max_v + 1) * 7 / 8;
+
+    std::array<QPoint, 9> reset_curve = {QPoint{0, 0}, QPoint{v0, 32}, QPoint{v1, 64}, QPoint{v2, 96}, QPoint{v3, 128}, QPoint{v4, 160}, QPoint{v5, 192}, QPoint{v6, 224}, {max_v, 255}};
+
+    CurveAdjustDialog* curveDialog = new CurveAdjustDialog(pixMap, src_img, openedImgType, (quint16)img_bits, reset_curve, this);
+    if(openedImgType == OpenedImageType::YUV_IMG)
+    {
+        curveDialog->setYuvType(yuvType);
+    }
+    curveDialog->setAttribute(Qt::WA_DeleteOnClose);
+    
+    connect(curveDialog, &CurveAdjustDialog::updateDisp, this, [this]() {this->repaint();});
+
+    // 显示非模态对话框
+    curveDialog->show();
+    curveDialog->raise();
+    curveDialog->activateWindow();
 }

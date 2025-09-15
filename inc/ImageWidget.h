@@ -1,6 +1,7 @@
 #pragma once
 #include "RawFileInfoDlg.h"
 #include "YuvFileInfoDlg.h"
+#include "common_type.h"
 #include "IIPOptionDialog.h"
 #include "AppSetting.h"
 #include <QColor>
@@ -12,22 +13,6 @@
 #include <QMenu>
 #include <array>
 
-enum OpenedImageType
-{
-    NORMAL_IMG = 1,
-    RAW_IMG = 2,
-    PNM_IMG = 3,
-    PGM_IMG = 4,
-    YUV_IMG = 5,
-    UNKNOW_IMG = -1
-};
-
-enum MouseActionType
-{
-    NONE_ACTION = -1,
-    PAINT_ROI_ACTION = 0,
-    DRAG_IMG_ACTION = 1
-};
 
 struct PaintCoordinateInfo {
     std::array<QPoint, 2> paintCoordinates;       // 记录鼠标绘制矩后的坐标，跟随倍率变换
@@ -51,8 +36,8 @@ public:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void setPixmap();
-    void setPixmap(RawFileInfoDlg::BayerPatternType by, RawFileInfoDlg::ByteOrderType order, int bitDepth, bool compact, int width, int height);
-    void setPixmap(YuvFileInfoDlg::YuvType tp, int bitDepth, int width, int height, int pixSize);
+    void setPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height);
+    void setPixmap(YuvType tp, int bitDepth, int width, int height, int pixSize);
     void zoomIn(int zoomIdx);
     void zoomOut(int zoomIdx);
     void setMouseActionPaintRoi()
@@ -100,11 +85,13 @@ private:
     void paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
-    RawFileInfoDlg::BayerPixelType getPixType(int y, int x, RawFileInfoDlg::BayerPatternType by);
+    void setPainterColorShape(QPainter &painter);
+    BayerPixelType getPixType(int y, int x, BayerPatternType by);
     QString generateRoiDataStr();
     void showRoiDataToText();
     void exportRoiDataToDisk();
     void exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi_bottom, int roi_left, int roi_right);
+    void adjustPreviewCurve();
 
 public:
     QMenu rightMouseContextMenu;
@@ -131,9 +118,10 @@ public:
     int pgmDataBit;
     unsigned char *yuvDataPtr;
     int yuvDataBit;
-    RawFileInfoDlg::BayerPatternType rawBayerType;
-    RawFileInfoDlg::ByteOrderType rawByteOrderType;
-    YuvFileInfoDlg::YuvType yuvType;
+    QImage *normalDataPixMap;
+    BayerPatternType rawBayerType;
+    ByteOrderType rawByteOrderType;
+    YuvType yuvType;
     OpenedImageType openedImgType;
     AppSettings* appSettings; // app设置信息，会通过顶层IIPviewer(QMainWindow)传递过来，只使用不持有
     QString* imgName; // 保存IIPviewer::openedFile
@@ -148,9 +136,10 @@ private:
     int pgmDataBitBak;
     unsigned char *yuvDataPtrBak;
     int yuvDataBitBak;
-    RawFileInfoDlg::BayerPatternType rawBayerTypeBak;
-    RawFileInfoDlg::ByteOrderType rawByteOrderTypeBak;
-    YuvFileInfoDlg::YuvType yuvTypeBak;
+    QImage *normalDataPixMapBak;
+    BayerPatternType rawBayerTypeBak;
+    ByteOrderType rawByteOrderTypeBak;
+    YuvType yuvTypeBak;
     OpenedImageType openedImgTypeBak;
 signals:
     void inform_real_Pos(QPointF, QPointF);

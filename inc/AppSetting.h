@@ -1,6 +1,5 @@
 #pragma once
-#include "RawFileInfoDlg.h"
-#include "YuvFileInfoDlg.h"
+#include "common_type.h"
 #include "IIPOptionDialog.h"
 #include <QJsonObject>
 #include <QString>
@@ -12,15 +11,15 @@ public:
     AppSettings();
     ~AppSettings();
     QString workPath;
-    YuvFileInfoDlg::YuvType yuvType;
+    YuvType yuvType;
     int yuv_bitDepth;
     int yuv_width;
     int yuv_height;
-    RawFileInfoDlg::BayerPatternType rawByType;
+    BayerPatternType rawByType;
     int raw_bitDepth;
     int raw_width;
     int raw_height;
-    RawFileInfoDlg::ByteOrderType rawByteOrder;
+    ByteOrderType rawByteOrder;
     bool raw_compact;
     QString theme;
     int uv_value_disp_mode;
@@ -39,3 +38,4 @@ private:
     void read(const QJsonObject &json);
     void write(QJsonObject &json) const;
 };
+

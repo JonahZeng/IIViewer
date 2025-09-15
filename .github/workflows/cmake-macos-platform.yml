@@ -63,17 +63,17 @@ jobs:
         file $(brew --prefix qt@5)/lib/QtWidgets.framework/Versions/5/QtWidgets
         ls $(brew --prefix qt@5)/lib/cmake/Qt5
 
-    - name: Install create-dmg
-      run: |
-        brew install create-dmg
-        ls $(brew --prefix create-dmg)/bin
+    # - name: Install create-dmg
+    #   run: |
+    #     brew install create-dmg
+    #     ls $(brew --prefix create-dmg)/bin
 
     - uses: actions/checkout@v4
       with:
         submodules: recursive
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5) -DLRELEASE_EXECUTABLE=$(brew --prefix qt@5)/bin/lrelease -DEXTRA_QT_INCLUDE_DIRS=$(brew --prefix qt@5)/include
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5)
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
@@ -81,19 +81,19 @@ jobs:
     - name: Install
       run: cmake --install ${{github.workspace}}/build
 
-    - name: Create DMG package
-      working-directory: ${{github.workspace}}/build
-      run: |
-        mkdir -p IIViewer.app/Contents/MacOS
-        mkdir -p IIViewer.app/Contents/Resources
-        cp -r install/* IIViewer.app/Contents/MacOS/
-        cp ${{github.workspace}}/icon/IIViewer_256.png IIViewer.app/Contents/Resources/icon.icns
-        $(brew --prefix create-dmg)/bin/create-dmg \
-        --volname "IIViewer Installer" \
-        --window-pos 200 120 \
-        --window-size 600 400 \
-        --icon-size 100 \
-        --app-drop-link 500 200 \
-        IIViewer.dmg \
-        IIViewer.app
+    # - name: Create DMG package
+    #   working-directory: ${{github.workspace}}/build
+    #   run: |
+    #     mkdir -p IIViewer.app/Contents/MacOS
+    #     mkdir -p IIViewer.app/Contents/Resources
+    #     cp -r install/* IIViewer.app/Contents/MacOS/
+    #     cp ${{github.workspace}}/icon/IIViewer_256.png IIViewer.app/Contents/Resources/icon.icns
+    #     $(brew --prefix create-dmg)/bin/create-dmg \
+    #     --volname "IIViewer Installer" \
+    #     --window-pos 200 120 \
+    #     --window-size 600 400 \
+    #     --icon-size 100 \
+    #     --app-drop-link 500 200 \
+    #     IIViewer.dmg \
+    #     IIViewer.app
 
