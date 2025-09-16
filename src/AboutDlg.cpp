@@ -20,7 +20,7 @@ void AboutDlg::initUI()
 {
     QVBoxLayout* vlayout = new QVBoxLayout();
     QLabel* log = new QLabel(this);
-    log->setStyleSheet("QLabel{image: url(:/image/resource/aboutlog.png)}");
+    log->setStyleSheet("QLabel{image: url(:/image/src/resource/aboutlog.png)}");
     log->setMinimumSize(QSize(96, 96));
     QString title = QString(u8"<h1>ISP intermediate photo viewer</h1>\n");
     QString builder_version = QString(u8"<p>Build by %1, version: %2.%3.%4, branch: %5</p>\n").arg(GIT_USER).arg(IIViewer_VERSION_MAJOR).arg(IIViewer_VERSION_MINOR).arg(IIViewer_VERSION_PATCH).arg(GIT_BRANCH);

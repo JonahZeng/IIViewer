@@ -70,6 +70,9 @@ jobs:
     - name: Show QT_ROOT_DIR
       run: echo "QT_ROOT_DIR is ${env:QT_ROOT_DIR}"
 
+    - name: Install NSIS via choco
+      run: choco install nsis -y
+
     - uses: actions/checkout@v4
       with:
         submodules: recursive

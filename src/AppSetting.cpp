@@ -8,15 +8,15 @@
 AppSettings::AppSettings()
 {
     workPath = QDir::homePath();
-    yuvType = YuvFileInfoDlg::YUV444_INTERLEAVE;
+    yuvType = YuvType::YUV444_INTERLEAVE;
     yuv_bitDepth = 8;
     yuv_width = 0;
     yuv_height = 0;
-    rawByType = RawFileInfoDlg::RGGB;
+    rawByType = BayerPatternType::RGGB;
     raw_bitDepth = 8;
     raw_width = 0;
     raw_height = 0;
-    rawByteOrder = RawFileInfoDlg::ByteOrderType::RAW_LITTLE_ENDIAN;
+    rawByteOrder = ByteOrderType::RAW_LITTLE_ENDIAN;
     uv_value_disp_mode = 0; // 0:0=gray 1: half-max=gray 
     theme = QStyleFactory::keys().first();
     windowGeometry = QRect(0, 0, 800, 600);
@@ -91,7 +91,7 @@ void AppSettings::read(const QJsonObject& json)
     }
     if (json.contains("yuvType"))
     {
-        yuvType = YuvFileInfoDlg::YuvType(json["yuvType"].toInt());
+        yuvType = YuvType(json["yuvType"].toInt());
     }
     if (json.contains("yuv_bitDepth"))
     {
@@ -107,7 +107,7 @@ void AppSettings::read(const QJsonObject& json)
     }
     if (json.contains("rawByType"))
     {
-        rawByType = RawFileInfoDlg::BayerPatternType(json["rawByType"].toInt());
+        rawByType = BayerPatternType(json["rawByType"].toInt());
     }
     if (json.contains("raw_bitDepth"))
     {
@@ -123,7 +123,7 @@ void AppSettings::read(const QJsonObject& json)
     }
     if (json.contains("raw_byte_order"))
     {
-        rawByteOrder = RawFileInfoDlg::ByteOrderType(json["raw_byte_order"].toInt());
+        rawByteOrder = ByteOrderType(json["raw_byte_order"].toInt());
     }
     if (json.contains("raw_compact"))
     {

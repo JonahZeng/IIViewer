@@ -30,6 +30,43 @@
     </message>
 </context>
 <context>
+    <name>CurveAdjustChart</name>
+    <message>
+        <location filename="../src/CurveAdjustDialog.cpp" line="36"/>
+        <source>Input</source>
+        <translation>输入</translation>
+    </message>
+    <message>
+        <location filename="../src/CurveAdjustDialog.cpp" line="37"/>
+        <source>Output</source>
+        <translation>输出</translation>
+    </message>
+</context>
+<context>
+    <name>CurveAdjustDialog</name>
+    <message>
+        <location filename="../src/CurveAdjustDialog.cpp" line="123"/>
+        <location filename="../src/CurveAdjustDialog.cpp" line="141"/>
+        <source>Curve Adjustment</source>
+        <translation>曲线调节</translation>
+    </message>
+    <message>
+        <location filename="../src/CurveAdjustDialog.cpp" line="150"/>
+        <source>Reset</source>
+        <translation>重置</translation>
+    </message>
+    <message>
+        <location filename="../src/CurveAdjustDialog.cpp" line="151"/>
+        <source>Apply</source>
+        <translation>应用</translation>
+    </message>
+    <message>
+        <location filename="../src/CurveAdjustDialog.cpp" line="152"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+</context>
+<context>
     <name>DataVisualDialog</name>
     <message>
         <location filename="../src/DataVisualDlg.cpp" line="25"/>
@@ -312,17 +349,17 @@
     <message>
         <location filename="../src/IIPviewerLrImgProcess.cpp" line="683"/>
         <source>no image exist on left or right side!</source>
-        <translation>左右两侧未同时打开文件</translation>
+        <translation>左右两侧未同时打开文件!</translation>
     </message>
     <message>
         <location filename="../src/IIPviewerLrImgProcess.cpp" line="688"/>
         <source>left image type not same as right side!</source>
-        <translation>左右两侧图像类型不一致</translation>
+        <translation>左右两侧图像类型不一致!</translation>
     </message>
     <message>
         <location filename="../src/IIPviewerLrImgProcess.cpp" line="693"/>
         <source>left image size not equal to right side!</source>
-        <translation>左右两侧图像尺寸不一致</translation>
+        <translation>左右两侧图像尺寸不一致!</translation>
     </message>
     <message>
         <location filename="../src/IIPviewerLrImgProcess.cpp" line="706"/>
@@ -330,20 +367,20 @@
         <location filename="../src/IIPviewerLrImgProcess.cpp" line="724"/>
         <location filename="../src/IIPviewerLrImgProcess.cpp" line="733"/>
         <source>left image bit width not equal to right side!</source>
-        <translation>左右两侧图像位深不一致</translation>
+        <translation>左右两侧图像位深不一致!</translation>
     </message>
     <message>
         <location filename="../src/IIPviewerLrImgProcess.cpp" line="738"/>
         <source>left image yuv type not equal to right side!</source>
-        <translation>左右两侧图像yuv类型不一致</translation>
+        <translation>左右两侧图像yuv类型不一致!</translation>
     </message>
 </context>
 <context>
     <name>ImageWidget</name>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="34"/>
+        <location filename="../src/ImageWidget.cpp" line="36"/>
         <source>export roi data</source>
-        <translation>导出roi数据</translation>
+        <translation>导出ROI数据</translation>
     </message>
     <message>
         <location filename="../src/ImageWidgetRoiShowText.cpp" line="36"/>
@@ -379,27 +416,42 @@
         <translation type="vanished">保存roi数据到txt文件</translation>
     </message>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="33"/>
+        <location filename="../src/ImageWidget.cpp" line="35"/>
         <source>show roi data</source>
         <translation>显示ROI数据</translation>
     </message>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="1912"/>
-        <location filename="../src/ImageWidget.cpp" line="1913"/>
+        <location filename="../src/ImageWidget.cpp" line="37"/>
+        <source>adjust preview curve</source>
+        <translation>调节预览曲线</translation>
+    </message>
+    <message>
+        <location filename="../src/ImageWidget.cpp" line="1393"/>
+        <location filename="../src/ImageWidget.cpp" line="1394"/>
         <source>drag image file here</source>
         <translation>拖动图像文件到这里</translation>
     </message>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="1915"/>
-        <location filename="../src/ImageWidget.cpp" line="1916"/>
+        <location filename="../src/ImageWidget.cpp" line="1396"/>
+        <location filename="../src/ImageWidget.cpp" line="1397"/>
         <source>or</source>
         <translation>或</translation>
     </message>
     <message>
-        <location filename="../src/ImageWidget.cpp" line="1918"/>
-        <location filename="../src/ImageWidget.cpp" line="1919"/>
+        <location filename="../src/ImageWidget.cpp" line="1399"/>
+        <location filename="../src/ImageWidget.cpp" line="1400"/>
         <source>double click here</source>
         <translation>双击这里打开图像</translation>
+    </message>
+    <message>
+        <location filename="../src/ImageWidget.cpp" line="2457"/>
+        <source>Warning</source>
+        <translation>警告</translation>
+    </message>
+    <message>
+        <location filename="../src/ImageWidget.cpp" line="2457"/>
+        <source>No image loaded to adjust curve.</source>
+        <translation>无图像可用于调节曲线</translation>
     </message>
 </context>
 <context>
@@ -413,7 +465,7 @@
 <context>
     <name>ImgInfoDlg</name>
     <message>
-        <location filename="../src/ImgInfoDlg.cpp" line="17"/>
+        <location filename="../src/ImgInfoDlg.cpp" line="18"/>
         <source>image info</source>
         <translation>图像信息</translation>
     </message>

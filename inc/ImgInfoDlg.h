@@ -1,7 +1,7 @@
 #pragma once
 #include <QDialog>
-#include "RawFileInfoDlg.h"
-#include "YuvFileInfoDlg.h"
+#include <QLabel>
+#include "common_type.h"
 
 class ImgInfoDlg final : public QDialog
 {
@@ -12,7 +12,7 @@ public:
     {
     }
 
-    void setImgInfo(QString &filePath, QSize &imgSize, RawFileInfoDlg::BayerPatternType by, YuvFileInfoDlg::YuvType yt, int bits, bool left);
+    void setImgInfo(QString &filePath, QSize &imgSize, BayerPatternType by, YuvType yt, int bits, bool left);
     
 private:
     QLabel *leftLabel;
