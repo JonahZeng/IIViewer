@@ -661,7 +661,7 @@ void CurveAdjustDialog::onResetClicked()
 
     updateChartFromCurve();
     applyCurveToImage();
-    emit updateDisp();
+    emit updateDisp(m_rgbCurve);
 }
 
 void CurveAdjustDialog::onApplyClicked()
@@ -669,7 +669,7 @@ void CurveAdjustDialog::onApplyClicked()
     // accept();
     updateCurveFromChart();
     applyCurveToImage();
-    emit updateDisp();
+    emit updateDisp(m_rgbCurve);
 }
 
 void CurveAdjustDialog::onCancelClicked()

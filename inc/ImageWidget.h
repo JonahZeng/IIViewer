@@ -125,6 +125,7 @@ public:
     OpenedImageType openedImgType;
     AppSettings* appSettings; // app设置信息，会通过顶层IIPviewer(QMainWindow)传递过来，只使用不持有
     QString* imgName; // 保存IIPviewer::openedFile
+    std::array<QPoint, 9> lastCurve;
 
 private:
     QImage *pixMapBak;

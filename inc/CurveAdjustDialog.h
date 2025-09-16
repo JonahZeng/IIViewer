@@ -56,7 +56,7 @@ public:
         }
     }
 signals:
-    void updateDisp();
+    void updateDisp(const std::array<QPoint, 9>&);
 
 private slots:
     void onResetClicked();

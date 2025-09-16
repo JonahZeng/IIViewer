@@ -1285,6 +1285,7 @@ void IIPviewer::setImage(QString &imageName, int leftOrRight)
     ui.imageLabel[leftOrRight]->paintEnd = false;
     ui.imageLabel[leftOrRight]->imgName = &imageName;
     ui.imageLabel[leftOrRight]->setPixmap();
+    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, 9>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
 }
 
 void IIPviewer::setRawImage(QString &imageName, BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight)
@@ -1293,6 +1294,7 @@ void IIPviewer::setRawImage(QString &imageName, BayerPatternType by, ByteOrderTy
     ui.imageLabel[leftOrRight]->paintEnd = false;
     ui.imageLabel[leftOrRight]->imgName = &imageName;
     ui.imageLabel[leftOrRight]->setPixmap(by, order, bitDepth, compact, width, height);
+    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, 9>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
 }
 
 void IIPviewer::setYuvImage(QString &imageName, YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)
@@ -1301,6 +1303,7 @@ void IIPviewer::setYuvImage(QString &imageName, YuvType tp, int bitDepth, int wi
     ui.imageLabel[leftOrRight]->paintEnd = false;
     ui.imageLabel[leftOrRight]->imgName = &imageName;
     ui.imageLabel[leftOrRight]->setPixmap(tp, bitDepth, width, height, pixSize);
+    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, 9>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
 }
 
 void IIPviewer::onCloseLeftFileAction()

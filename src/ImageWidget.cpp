@@ -30,7 +30,8 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       normalDataPixMap(nullptr),
       rawBayerType(BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RAW_LITTLE_ENDIAN), yuvType(YuvType::YUV_UNKNOW),
       openedImgType(UNKNOW_IMG),
-      imgName(nullptr)
+      imgName(nullptr),
+      lastCurve{QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}}
 {
     QAction* showRoiData = rightMouseContextMenu.addAction(tr("show roi data"));
     QAction* exportRoiData = rightMouseContextMenu.addAction(tr("export roi data"));
@@ -2481,18 +2482,26 @@ void ImageWidget::adjustPreviewCurve()
         src_img = yuvDataPtr;
     }
 
-    qint32 max_v = (1 << img_bits) - 1;
-    qint32 v0 = (max_v + 1) / 8;
-    qint32 v1 = (max_v + 1) / 4;
-    qint32 v2 = (max_v + 1) * 3 / 8;
-    qint32 v3 = (max_v + 1) / 2;
-    qint32 v4 = (max_v + 1) * 5 / 8;
-    qint32 v5 = (max_v + 1) * 3 / 4;
-    qint32 v6 = (max_v + 1) * 7 / 8;
+    CurveAdjustDialog* curveDialog = nullptr;
+    if (lastCurve[0] == QPoint(0, 0) && lastCurve[8] == QPoint(0, 0)) // no last curve
+    {
+        qint32 max_v = (1 << img_bits) - 1;
+        qint32 v0 = (max_v + 1) / 8;
+        qint32 v1 = (max_v + 1) / 4;
+        qint32 v2 = (max_v + 1) * 3 / 8;
+        qint32 v3 = (max_v + 1) / 2;
+        qint32 v4 = (max_v + 1) * 5 / 8;
+        qint32 v5 = (max_v + 1) * 3 / 4;
+        qint32 v6 = (max_v + 1) * 7 / 8;
 
-    std::array<QPoint, 9> reset_curve = {QPoint{0, 0}, QPoint{v0, 32}, QPoint{v1, 64}, QPoint{v2, 96}, QPoint{v3, 128}, QPoint{v4, 160}, QPoint{v5, 192}, QPoint{v6, 224}, {max_v, 255}};
+        std::array<QPoint, 9> reset_curve = {QPoint{0, 0}, QPoint{v0, 32}, QPoint{v1, 64}, QPoint{v2, 96}, QPoint{v3, 128}, QPoint{v4, 160}, QPoint{v5, 192}, QPoint{v6, 224}, {max_v, 255}};
+        curveDialog = new CurveAdjustDialog(pixMap, src_img, openedImgType, (quint16)img_bits, reset_curve, this);
+    }
+    else
+    {
+        curveDialog = new CurveAdjustDialog(pixMap, src_img, openedImgType, (quint16)img_bits, lastCurve, this);
+    }
 
-    CurveAdjustDialog* curveDialog = new CurveAdjustDialog(pixMap, src_img, openedImgType, (quint16)img_bits, reset_curve, this);
     if(openedImgType == OpenedImageType::YUV_IMG)
     {
         curveDialog->setYuvType(yuvType);
