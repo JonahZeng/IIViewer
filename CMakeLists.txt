@@ -246,7 +246,7 @@ elseif(UNIX AND NOT APPLE)
     if(NOT EXISTS ${_qm_translation_path})
         file(MAKE_DIRECTORY ${_qm_translation_path})
     endif()
-    add_custom_command(TARGET ${target} POST_BUILD
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_BINARY_DIR}/IIViewer_zh.qm
         $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
