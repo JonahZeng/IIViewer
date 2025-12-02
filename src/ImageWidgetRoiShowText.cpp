@@ -57,7 +57,7 @@ QString ImageWidget::generateRoiDataStr()
 
             if(row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -93,7 +93,7 @@ QString ImageWidget::generateRoiDataStr()
 
             if(row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -135,7 +135,7 @@ QString ImageWidget::generateRoiDataStr()
 
             if(row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -214,7 +214,7 @@ QString ImageWidget::generateRoiDataStr()
 
             if(row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -309,7 +309,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -341,7 +341,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -373,7 +373,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -407,7 +407,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -440,7 +440,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -473,7 +473,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -507,7 +507,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -540,7 +540,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -573,7 +573,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -608,7 +608,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -641,7 +641,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -674,7 +674,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -710,7 +710,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -745,7 +745,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -779,7 +779,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -815,7 +815,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -850,7 +850,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -884,7 +884,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -921,7 +921,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -957,7 +957,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -993,7 +993,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -1030,7 +1030,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -1066,7 +1066,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -1102,7 +1102,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {
@@ -1136,7 +1136,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
             if (row != roi_bottom - 1)
             {
-                roiPixelValStr.append("]\n");
+                roiPixelValStr.append("],\n");
             }
             else
             {

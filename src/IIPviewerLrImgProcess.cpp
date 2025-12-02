@@ -8,11 +8,17 @@ void IIPviewer::updateExchangeBtn()
     if (ui.imageLabel[0]->openedImgType != UNKNOW_IMG && ui.imageLabel[1]->openedImgType != UNKNOW_IMG)
     {
         ui.exchangeAreaPreviewBtn->setEnabled(true);
+        ui.imageDiffInfoBtn->setEnabled(true);
     }
     else
     {
         ui.exchangeAreaPreviewBtn->setEnabled(false);
+        ui.imageDiffInfoBtn->setEnabled(false);
     }
+
+
+    ui.imageInfoBtn->setEnabled((ui.imageLabel[0]->openedImgType != UNKNOW_IMG) || (ui.imageLabel[1]->openedImgType != UNKNOW_IMG));
+    
 }
 
 void IIPviewer::updateZoomLabelText()
