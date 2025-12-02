@@ -2508,7 +2508,10 @@ void ImageWidget::adjustPreviewCurve()
     }
     curveDialog->setAttribute(Qt::WA_DeleteOnClose);
     
-    connect(curveDialog, &CurveAdjustDialog::updateDisp, this, [this]() {this->repaint();});
+    connect(curveDialog, &CurveAdjustDialog::updateDisp, this, [this](const std::array<QPoint,9> & curve) {
+        lastCurve = curve;
+        this->repaint();
+    });
 
     // 显示非模态对话框
     curveDialog->show();

@@ -8,11 +8,17 @@ void IIPviewer::updateExchangeBtn()
     if (ui.imageLabel[0]->openedImgType != UNKNOW_IMG && ui.imageLabel[1]->openedImgType != UNKNOW_IMG)
     {
         ui.exchangeAreaPreviewBtn->setEnabled(true);
+        ui.imageDiffInfoBtn->setEnabled(true);
     }
     else
     {
         ui.exchangeAreaPreviewBtn->setEnabled(false);
+        ui.imageDiffInfoBtn->setEnabled(false);
     }
+
+
+    ui.imageInfoBtn->setEnabled((ui.imageLabel[0]->openedImgType != UNKNOW_IMG) || (ui.imageLabel[1]->openedImgType != UNKNOW_IMG));
+    
 }
 
 void IIPviewer::updateZoomLabelText()
@@ -51,6 +57,10 @@ void IIPviewer::showImageInfo()
     {
         dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[0]->pnmDataBit, true);
     }
+    else if (openedFile[0].endsWith("pgm", Qt::CaseSensitivity::CaseInsensitive))
+    {
+        dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[0]->pgmDataBit, true);
+    }
     else if (openedFile[0].endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
     {
         dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, ui.imageLabel[0]->yuvType, ui.imageLabel[0]->yuvDataBit, true);
@@ -68,6 +78,10 @@ void IIPviewer::showImageInfo()
     else if (openedFile[1].endsWith("pnm", Qt::CaseSensitivity::CaseInsensitive))
     {
         dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[1]->pnmDataBit, false);
+    }
+    else if (openedFile[1].endsWith("pgm", Qt::CaseSensitivity::CaseInsensitive))
+    {
+        dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[1]->pgmDataBit, false);
     }
     else if (openedFile[1].endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
     {

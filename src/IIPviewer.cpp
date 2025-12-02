@@ -192,6 +192,8 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     ui.dataAnalyseAction->setChecked(false);
     ui.playListAction->setChecked(false);
     ui.exchangeAreaPreviewBtn->setEnabled(false);
+    ui.imageInfoBtn->setEnabled(false);
+    ui.imageDiffInfoBtn->setEnabled(false);
     setWindowIcon(QIcon(":/image/src/resource/aboutlog.png"));
 
     if(settings.workAreaDoubleImgMode)
