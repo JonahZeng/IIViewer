@@ -116,15 +116,15 @@ QString ImageWidget::generateRoiDataStr()
                 unsigned int b_ = 0;
                 if (pnmDataBit <= 8)
                 {
-                    r_ = ((unsigned char *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 0];
-                    g_ = ((unsigned char *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 1];
-                    b_ = ((unsigned char *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 2];
+                    r_ = ((unsigned char *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 0];
+                    g_ = ((unsigned char *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 1];
+                    b_ = ((unsigned char *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 2];
                 }
-                else if (pgmDataBit > 8 && pgmDataBit <= 16)
+                else if (pnmDataBit > 8 && pnmDataBit <= 16)
                 {
-                    r_ = ((unsigned short *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 0];
-                    g_ = ((unsigned short *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 1];
-                    b_ = ((unsigned short *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 2];
+                    r_ = ((unsigned short *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 0];
+                    g_ = ((unsigned short *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 1];
+                    b_ = ((unsigned short *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 2];
                 }
 
                 if(col != roi_right - 1)
