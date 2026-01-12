@@ -2,6 +2,7 @@
 #include <QBoxLayout>
 #include <QButtonGroup>
 #include <QGridLayout>
+#include <QHeaderView>
 #include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
@@ -16,8 +17,7 @@ Ui::IIPviewerUi::IIPviewerUi() : openFileLeftAction(nullptr), openFileRightActio
     syncRight(nullptr), syncLeft(nullptr), clearPaintBtn(nullptr), start_x_edit0(nullptr), start_y_edit0(nullptr), 
     start_x_edit1(nullptr), start_y_edit1(nullptr), end_x_edit0(nullptr), end_y_edit0(nullptr), end_x_edit1(nullptr), 
     end_y_edit1(nullptr), plot_rgb_contourf_line(nullptr), plot_rgb_hist(nullptr), plot_yuv_contourf_line(nullptr), 
-    plot_yuv_hist(nullptr), plot_hsv_contourf_line(nullptr), plot_hsv_hist(nullptr), rgb2yuv_mat_0(nullptr), rgb2yuv_mat_1(nullptr), 
-    rgb2yuv_mat_2(nullptr), rgb2yuv_mat_3(nullptr), rgb2yuv_mat_4(nullptr), rgb2yuv_mat_5(nullptr), rgb2yuv_mat_6(nullptr), rgb2yuv_mat_7(nullptr), rgb2yuv_mat_8(nullptr)
+    plot_yuv_hist(nullptr), plot_hsv_contourf_line(nullptr), plot_hsv_hist(nullptr)
 {
 }
 
@@ -251,7 +251,7 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
 {
     dataAnalyseDockWgt = new QDockWidget(mainWindow);
     dataAnalyseDockWgt->setWindowTitle(QCoreApplication::translate("mainWindow", "data analysis", nullptr));
-    dataAnalyseDockWgt->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dataAnalyseDockWgt->setAllowedAreas(Qt::DockWidgetArea::LeftDockWidgetArea | Qt::DockWidgetArea::RightDockWidgetArea);
     QWidget *toolBoxContainer = new QWidget();
     // QFrame *toolBoxContainer = new QFrame();
     // toolBoxContainer->setFrameShape(QFrame::Shape::Box);
@@ -358,51 +358,51 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
 
     vlayout->addLayout(plot_btn_layout);
 
-    QGridLayout *rgb2yuv_mat_layout = new QGridLayout();
-    QLabel *rgb2yuv_mat_label = new QLabel("rgb2yuv:");
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_label, 0, 0, 1, 1);
-    QDoubleValidator *validtor = new QDoubleValidator(-5.0, 5.0, 10, dataAnalyseDockWgt);
-    rgb2yuv_mat_0 = new QLineEdit("0.299");
-    rgb2yuv_mat_0->setMaximumWidth(55);
-    rgb2yuv_mat_0->setValidator(validtor);
-    rgb2yuv_mat_1 = new QLineEdit("0.587");
-    rgb2yuv_mat_1->setMaximumWidth(55);
-    rgb2yuv_mat_1->setValidator(validtor);
-    rgb2yuv_mat_2 = new QLineEdit("0.114");
-    rgb2yuv_mat_2->setMaximumWidth(55);
-    rgb2yuv_mat_2->setValidator(validtor);
-    rgb2yuv_mat_3 = new QLineEdit("-0.147");
-    rgb2yuv_mat_3->setMaximumWidth(55);
-    rgb2yuv_mat_3->setValidator(validtor);
-    rgb2yuv_mat_4 = new QLineEdit("-0.289");
-    rgb2yuv_mat_4->setMaximumWidth(55);
-    rgb2yuv_mat_4->setValidator(validtor);
-    rgb2yuv_mat_5 = new QLineEdit("0.436");
-    rgb2yuv_mat_5->setMaximumWidth(55);
-    rgb2yuv_mat_5->setValidator(validtor);
-    rgb2yuv_mat_6 = new QLineEdit("0.615");
-    rgb2yuv_mat_6->setMaximumWidth(55);
-    rgb2yuv_mat_6->setValidator(validtor);
-    rgb2yuv_mat_7 = new QLineEdit("-0.515");
-    rgb2yuv_mat_7->setMaximumWidth(55);
-    rgb2yuv_mat_7->setValidator(validtor);
-    rgb2yuv_mat_8 = new QLineEdit("-0.100");
-    rgb2yuv_mat_8->setMaximumWidth(55);
-    rgb2yuv_mat_8->setValidator(validtor);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_0, 1, 0, 1, 1);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_1, 1, 1, 1, 1);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_2, 1, 2, 1, 1);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_3, 2, 0, 1, 1);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_4, 2, 1, 1, 1);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_5, 2, 2, 1, 1);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_6, 3, 0, 1, 1);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_7, 3, 1, 1, 1);
-    rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_8, 3, 2, 1, 1);
-    rgb2yuv_mat_layout->setColumnMinimumWidth(0, 20);
-    rgb2yuv_mat_layout->setColumnMinimumWidth(1, 20);
-    rgb2yuv_mat_layout->setColumnMinimumWidth(2, 20);
+    // QGridLayout *rgb2yuv_mat_layout = new QGridLayout();
+    // QLabel *rgb2yuv_mat_label = new QLabel("rgb2yuv:");
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_label, 0, 0, 1, 1);
+    // QDoubleValidator *validtor = new QDoubleValidator(-5.0, 5.0, 10, dataAnalyseDockWgt);
+    // rgb2yuv_mat_0 = new QLineEdit("0.299");
+    // rgb2yuv_mat_0->setMaximumWidth(55);
+    // rgb2yuv_mat_0->setValidator(validtor);
+    // rgb2yuv_mat_1 = new QLineEdit("0.587");
+    // rgb2yuv_mat_1->setMaximumWidth(55);
+    // rgb2yuv_mat_1->setValidator(validtor);
+    // rgb2yuv_mat_2 = new QLineEdit("0.114");
+    // rgb2yuv_mat_2->setMaximumWidth(55);
+    // rgb2yuv_mat_2->setValidator(validtor);
+    // rgb2yuv_mat_3 = new QLineEdit("-0.147");
+    // rgb2yuv_mat_3->setMaximumWidth(55);
+    // rgb2yuv_mat_3->setValidator(validtor);
+    // rgb2yuv_mat_4 = new QLineEdit("-0.289");
+    // rgb2yuv_mat_4->setMaximumWidth(55);
+    // rgb2yuv_mat_4->setValidator(validtor);
+    // rgb2yuv_mat_5 = new QLineEdit("0.436");
+    // rgb2yuv_mat_5->setMaximumWidth(55);
+    // rgb2yuv_mat_5->setValidator(validtor);
+    // rgb2yuv_mat_6 = new QLineEdit("0.615");
+    // rgb2yuv_mat_6->setMaximumWidth(55);
+    // rgb2yuv_mat_6->setValidator(validtor);
+    // rgb2yuv_mat_7 = new QLineEdit("-0.515");
+    // rgb2yuv_mat_7->setMaximumWidth(55);
+    // rgb2yuv_mat_7->setValidator(validtor);
+    // rgb2yuv_mat_8 = new QLineEdit("-0.100");
+    // rgb2yuv_mat_8->setMaximumWidth(55);
+    // rgb2yuv_mat_8->setValidator(validtor);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_0, 1, 0, 1, 1);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_1, 1, 1, 1, 1);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_2, 1, 2, 1, 1);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_3, 2, 0, 1, 1);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_4, 2, 1, 1, 1);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_5, 2, 2, 1, 1);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_6, 3, 0, 1, 1);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_7, 3, 1, 1, 1);
+    // rgb2yuv_mat_layout->addWidget(rgb2yuv_mat_8, 3, 2, 1, 1);
+    // rgb2yuv_mat_layout->setColumnMinimumWidth(0, 20);
+    // rgb2yuv_mat_layout->setColumnMinimumWidth(1, 20);
+    // rgb2yuv_mat_layout->setColumnMinimumWidth(2, 20);
 
-    vlayout->addLayout(rgb2yuv_mat_layout);
+    // vlayout->addLayout(rgb2yuv_mat_layout);
     vlayout->addStretch(1);
 
     mainWindow->addDockWidget(Qt::LeftDockWidgetArea, dataAnalyseDockWgt);
@@ -411,8 +411,13 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
 void Ui::IIPviewerUi::createDockWidget1(IIPviewer *mainWindow)
 {
     playListDockWgt = new QDockWidget(mainWindow);
-    playListDockWgt->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    playListDockWgt->setAllowedAreas(Qt::DockWidgetArea::LeftDockWidgetArea | Qt::DockWidgetArea::RightDockWidgetArea);
     playListDockWgt->setWindowTitle(QApplication::translate("mainWindow", "play list", nullptr));
+
+    // playListDockWgt->setStyleSheet(
+    //     "QDockWidget { border: 2px solid #448aff; border-radius: 4px; } QDockWidget::title { background: #e0e0e0;  padding: 4px; }"
+    // );
+    
     // playListDockWgt.setFeatures(QDockWidget.DockWidgetClosable |
     // QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable |
     // QDockWidget.DockWidgetVerticalTitleBar)
@@ -421,6 +426,24 @@ void Ui::IIPviewerUi::createDockWidget1(IIPviewer *mainWindow)
     pltWgtContainer->setLayout(vlayout);
     playListDockWgt->setWidget(pltWgtContainer);
 
-    vlayout->addStretch(1);
-    mainWindow->addDockWidget(Qt::LeftDockWidgetArea, playListDockWgt);
+    // Create file history table
+    fileHistoryTable = new QTableWidget(pltWgtContainer);
+    fileHistoryTable->setColumnCount(2);
+    fileHistoryTable->setHorizontalHeaderLabels(QStringList() << QApplication::translate("mainWindow", "File Name", nullptr) << QApplication::translate("mainWindow", "Operation", nullptr));
+    fileHistoryTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    fileHistoryTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    fileHistoryTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    // fileHistoryTable->horizontalHeader()->setStretchLastSection(true);
+    fileHistoryTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    fileHistoryTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
+    fileHistoryTable->setColumnWidth(1, 70);
+
+    fileHistoryTable->verticalHeader()->setVisible(false);
+    fileHistoryTable->setAlternatingRowColors(true);
+    fileHistoryTable->setMouseTracking(true);
+    fileHistoryTable->viewport()->setMouseTracking(true);
+
+    vlayout->addWidget(fileHistoryTable);
+    // vlayout->addStretch(1);
+    mainWindow->addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, playListDockWgt);
 }

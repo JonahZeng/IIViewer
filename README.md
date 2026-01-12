@@ -83,17 +83,13 @@ cmake --build . --config Release
 
 ### linux(amd64 & arm64)
 #### prepare
-install gcc, openssl and Qt5 on ubuntu 20.04
-```bash
-sudo apt install build-essential libssl-dev qt5-default libqt5datavisualization5-dev qttools5-dev-tools
-```
-ubuntu 22.04
+install gcc, openssl and Qt5 on ubuntu 22.04
 ```bash
 sudo apt install build-essential libssl-dev qtbase5-dev libqt5datavisualization5-dev qtbase5-dev-tools
 ```
 install cmake by download from [newest release ](https://github.com/Kitware/CMake/releases) or build from source.
 #### build
-these build steps had been tested on ubuntu 20.04(cmake 3.31, Qt5.12.8, gcc 9.4.0)
+these build steps had been tested on ubuntu 22.04(cmake 3.31, Qt5.15.2, gcc 11.4.0)
 ```bash
 git clone https://github.com/JonahZeng/IIViewer.git
 cd IIViewer

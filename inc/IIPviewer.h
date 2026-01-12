@@ -32,6 +32,7 @@ private:
     void setYuvImage(QString &imageName, YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
     void setRawImage(QString &image, BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
     void openGivenFileFromCmdArgv(QString image);
+    void addFileToHistory(const QString &filePath);
 
 protected:
     void showEvent(QShowEvent *event) override;

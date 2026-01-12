@@ -11,6 +11,7 @@ class IIPviewer;
 #include <QPushButton>
 #include <QRadioButton>
 #include <QScrollArea>
+#include <QTableWidget>
 #include <QToolBar>
 #include <array>
 
@@ -76,15 +77,7 @@ namespace Ui
         QPushButton *plot_yuv_hist;
         QPushButton *plot_hsv_contourf_line;
         QPushButton *plot_hsv_hist;
-        QLineEdit *rgb2yuv_mat_0;
-        QLineEdit *rgb2yuv_mat_1;
-        QLineEdit *rgb2yuv_mat_2;
-        QLineEdit *rgb2yuv_mat_3;
-        QLineEdit *rgb2yuv_mat_4;
-        QLineEdit *rgb2yuv_mat_5;
-        QLineEdit *rgb2yuv_mat_6;
-        QLineEdit *rgb2yuv_mat_7;
-        QLineEdit *rgb2yuv_mat_8;
+        QTableWidget *fileHistoryTable;
 
     private:
         void createDockWidget0(IIPviewer *mainWindow);

@@ -116,15 +116,15 @@ QString ImageWidget::generateRoiDataStr()
                 unsigned int b_ = 0;
                 if (pnmDataBit <= 8)
                 {
-                    r_ = ((unsigned char *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 0];
-                    g_ = ((unsigned char *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 1];
-                    b_ = ((unsigned char *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 2];
+                    r_ = ((unsigned char *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 0];
+                    g_ = ((unsigned char *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 1];
+                    b_ = ((unsigned char *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 2];
                 }
-                else if (pgmDataBit > 8 && pgmDataBit <= 16)
+                else if (pnmDataBit > 8 && pnmDataBit <= 16)
                 {
-                    r_ = ((unsigned short *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 0];
-                    g_ = ((unsigned short *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 1];
-                    b_ = ((unsigned short *)pgmDataPtr)[row * pnmWidth * 3 + col * 3 + 2];
+                    r_ = ((unsigned short *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 0];
+                    g_ = ((unsigned short *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 1];
+                    b_ = ((unsigned short *)pnmDataPtr)[row * pnmWidth * 3 + col * 3 + 2];
                 }
 
                 if(col != roi_right - 1)
@@ -286,7 +286,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
 
     if (yuvType == YuvType::YUV444_INTERLEAVE)
     {
-        roiPixelValStr.append("Y: [");
+        roiPixelValStr.append("Y: \n[");
         for (int row = roi_top; row < roi_bottom; row++)
         {
             roiPixelValStr.append("[");
@@ -297,7 +297,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 3 + col * 3 + 0];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 3 + col * 3 + 0];
                 }
@@ -318,7 +318,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("U: [");
+        roiPixelValStr.append("U: \n[");
         for (int row = roi_top; row < roi_bottom; row++)
         {
             roiPixelValStr.append("[");
@@ -329,7 +329,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     u_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 3 + col * 3 + 1];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     u_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 3 + col * 3 + 1];
                 }
@@ -350,7 +350,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("V: [");
+        roiPixelValStr.append("V: \n[");
         for (int row = roi_top; row < roi_bottom; row++)
         {
             roiPixelValStr.append("[");
@@ -361,7 +361,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     v_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 3 + col * 3 + 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     v_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 3 + col * 3 + 2];
                 }
@@ -384,7 +384,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
     }
     else if (yuvType == YuvType::YUV444_PLANAR)
     {
-        roiPixelValStr.append("Y: [");
+        roiPixelValStr.append("Y: \n[");
         for (int row = roi_top; row < roi_bottom; row++)
         {
             roiPixelValStr.append("[");
@@ -395,7 +395,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth + col];
                 }
@@ -416,7 +416,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("U: [");
+        roiPixelValStr.append("U: \n[");
         unsigned int u_oft = yWidth * yHeight;
         for (int row = roi_top; row < roi_bottom; row++)
         {
@@ -428,7 +428,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     u_ = ((unsigned char *)yuvDataPtr)[u_oft + row * yWidth + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     u_ = ((unsigned short *)yuvDataPtr)[u_oft + row * yWidth + col];
                 }
@@ -449,7 +449,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("V: [");
+        roiPixelValStr.append("V: \n[");
         unsigned int v_oft = yWidth * yHeight * 2;
         for (int row = roi_top; row < roi_bottom; row++)
         {
@@ -461,7 +461,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     v_ = ((unsigned char *)yuvDataPtr)[v_oft + row * yWidth + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     v_ = ((unsigned short *)yuvDataPtr)[v_oft + row * yWidth + col];
                 }
@@ -484,7 +484,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
     }
     else if (yuvType == YuvType::YUV422_UYVY)
     {
-        roiPixelValStr.append("Y: [");
+        roiPixelValStr.append("Y: \n[");
         for (int row = roi_top; row < roi_bottom; row++)
         {
             roiPixelValStr.append("[");
@@ -495,7 +495,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 2 + col * 2 + 1];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 2 + col * 2 + 1];
                 }
@@ -516,7 +516,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("U: [");
+        roiPixelValStr.append("U: \n[");
         // UYVY....UYVY....
         for (int row = roi_top; row < roi_bottom; row++)
         {
@@ -528,7 +528,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     u_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 2 + col * 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     u_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 2 + col * 2];
                 }
@@ -549,7 +549,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("V: [");
+        roiPixelValStr.append("V: \n[");
         // UYVY....UYVY....
         for (int row = roi_top; row < roi_bottom; row++)
         {
@@ -561,7 +561,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     v_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 2 + col * 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     v_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 2 + col * 2];
                 }
@@ -584,7 +584,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
     }
     else if (yuvType == YuvType::YUV422_YUYV)
     {
-        roiPixelValStr.append("Y: [");
+        roiPixelValStr.append("Y: \n[");
         // YUYV....YUYV....
         for (int row = roi_top; row < roi_bottom; row++)
         {
@@ -596,7 +596,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 2 + col * 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 2 + col * 2];
                 }
@@ -617,7 +617,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("U: [");
+        roiPixelValStr.append("U: \n[");
         // YUYV....YUYV....
         for (int row = roi_top; row < roi_bottom; row++)
         {
@@ -629,7 +629,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     u_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 2 + col * 2 + 1];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     u_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 2 + col * 2 + 1];
                 }
@@ -650,7 +650,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("V: [");
+        roiPixelValStr.append("V: \n[");
         // YUYV....YUYV....
         for (int row = roi_top; row < roi_bottom; row++)
         {
@@ -662,7 +662,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     v_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 2 + col * 2 + 1];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     v_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 2 + col * 2 + 1];
                 }
@@ -685,7 +685,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
     }
     else if (yuvType == YuvType::YUV420_NV12)
     {
-        roiPixelValStr.append("Y: [");
+        roiPixelValStr.append("Y: \n[");
         // YYYYYY
         // UVUVUV
         for (int row = roi_top; row < roi_bottom; row++)
@@ -698,7 +698,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth + col];
                 }
@@ -719,7 +719,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("U: [");
+        roiPixelValStr.append("U: \n[");
         // YYYYYY
         // UVUVUV
         unsigned int y_oft = yWidth * yHeight;
@@ -733,7 +733,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[y_oft + row * yWidth / 2 + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[y_oft + row * yWidth / 2 + col];
                 }
@@ -754,7 +754,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("V: [");
+        roiPixelValStr.append("V: \n[");
         // YYYYYY
         // UVUVUV
         for (int row = (roi_top & 0x1) ? roi_top + 1 : roi_top; row < roi_bottom; row += 2)
@@ -767,7 +767,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[y_oft + row * yWidth / 2 + col + 1];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[y_oft + row * yWidth / 2 + col + 1];
                 }
@@ -790,7 +790,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
     }
     else if (yuvType == YuvType::YUV420_NV21)
     {
-        roiPixelValStr.append("Y: [");
+        roiPixelValStr.append("Y: \n[");
         // YYYYYY
         // VUVUVU
         for (int row = roi_top; row < roi_bottom; row++)
@@ -803,7 +803,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth + col];
                 }
@@ -824,7 +824,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("U: [");
+        roiPixelValStr.append("U: \n[");
         // YYYYYY
         // VUVUVU
         unsigned int y_oft = yWidth * yHeight;
@@ -838,7 +838,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[y_oft + row * yWidth / 2 + col + 1];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[y_oft + row * yWidth / 2 + col + 1];
                 }
@@ -859,7 +859,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("V: [");
+        roiPixelValStr.append("V: \n[");
         // YYYYYY
         // VUVUVU
         for (int row = (roi_top & 0x1) ? roi_top + 1 : roi_top; row < roi_bottom; row += 2)
@@ -872,7 +872,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[y_oft + row * yWidth / 2 + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[y_oft + row * yWidth / 2 + col];
                 }
@@ -895,7 +895,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
     }
     else if (yuvType == YuvType::YUV420P_YU12)
     {
-        roiPixelValStr.append("Y: [");
+        roiPixelValStr.append("Y: \n[");
         // YYYYYY
         // UUU
         // VVV
@@ -909,7 +909,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth + col];
                 }
@@ -930,7 +930,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("U: [");
+        roiPixelValStr.append("U: \n[");
         // YYYYYY
         // UUU
         // VVV
@@ -945,7 +945,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[y_oft + row * yWidth / 4 + col / 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[y_oft + row * yWidth / 4 + col / 2];
                 }
@@ -966,7 +966,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("V: [");
+        roiPixelValStr.append("V: \n[");
         // YYYYYY
         // UUU
         // VVV
@@ -981,7 +981,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[u_oft + row * yWidth / 4 + col / 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[u_oft + row * yWidth / 4 + col / 2];
                 }
@@ -1004,7 +1004,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
     }
     else if (yuvType == YuvType::YUV420P_YV12)
     {
-        roiPixelValStr.append("Y: [");
+        roiPixelValStr.append("Y: \n[");
         // YYYYYY
         // VVV
         // UUU
@@ -1018,7 +1018,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth + col];
                 }
@@ -1039,7 +1039,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("U: [");
+        roiPixelValStr.append("U: \n[");
         // YYYYYY
         // VVV
         // UUU
@@ -1054,7 +1054,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[u_oft + row * yWidth / 4 + col / 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[u_oft + row * yWidth / 4 + col / 2];
                 }
@@ -1075,7 +1075,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
         }
         roiPixelValStr.append("]\n");
 
-        roiPixelValStr.append("V: [");
+        roiPixelValStr.append("V: \n[");
         // YYYYYY
         // VVV
         // UUU
@@ -1090,7 +1090,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[y_oft + row * yWidth / 4 + col / 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[y_oft + row * yWidth / 4 + col / 2];
                 }
@@ -1124,7 +1124,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth + col];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth + col];
                 }
