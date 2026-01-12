@@ -5,6 +5,7 @@
 #include "IIPOptionDialog.h"
 #include <QApplication>
 #include <QColorDialog>
+#include <QCursor>
 #include <QDir>
 #include <QEvent>
 #include <QFileDialog>
@@ -20,6 +21,7 @@
 #include <QNetworkReply>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QToolTip>
 #include <QVersionNumber>
 #include <QStyleFactory>
 
@@ -176,6 +178,19 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
 
     connect(ui.dataAnalyseAction, &QAction::toggled, this, &IIPviewer::toggleDataAnalyseDockWgt);
     connect(ui.playListAction, &QAction::toggled, this, &IIPviewer::togglePlayListDockWgt);
+
+    // Connect file history table hover event to show tooltip with file path
+    connect(ui.fileHistoryTable, &QTableWidget::cellEntered, this, [this](int row, int column) {
+        if (column == 0) {
+            QTableWidgetItem *item = ui.fileHistoryTable->item(row, 0);
+            if (item) {
+                QString filePath = item->data(Qt::UserRole).toString();
+                if (!filePath.isEmpty()) {
+                    QToolTip::showText(QCursor::pos(), filePath, ui.fileHistoryTable);
+                }
+            }
+        }
+    });
 
     connect(this, &IIPviewer::updateExchangeBtnStatus, this, &IIPviewer::updateExchangeBtn);
     connect(this, &IIPviewer::updateZoomLabelStatus, this, &IIPviewer::updateZoomLabelText);
@@ -529,6 +544,143 @@ void IIPviewer::setTitle()
     }
 }
 
+void IIPviewer::addFileToHistory(const QString &filePath)
+{
+    QFileInfo fileInfo(filePath);
+    QString fileName = fileInfo.fileName();
+    
+    // Check if file already exists in history
+    bool fileExists = false;
+    int existingRow = -1;
+    for (int i = 0; i < ui.fileHistoryTable->rowCount(); ++i)
+    {
+        QTableWidgetItem *item = ui.fileHistoryTable->item(i, 0);
+        if (item && item->data(Qt::UserRole).toString() == filePath)
+        {
+            fileExists = true;
+            existingRow = i;
+            break;
+        }
+    }
+    
+    if (fileExists)
+    {
+        // Move existing file to top
+        ui.fileHistoryTable->insertRow(0);
+        QTableWidgetItem *newItem = new QTableWidgetItem(fileName);
+        newItem->setData(Qt::UserRole, filePath);
+        ui.fileHistoryTable->setItem(0, 0, newItem);
+
+        // Create button widget for second column
+        QWidget *buttonWidget = new QWidget();
+        QHBoxLayout *buttonLayout = new QHBoxLayout(buttonWidget);
+        buttonLayout->setContentsMargins(2, 2, 2, 2);
+        buttonLayout->setSpacing(2);
+        
+        QPushButton *leftBtn = new QPushButton("L", buttonWidget);
+        leftBtn->setMaximumWidth(25);
+        leftBtn->setToolTip(QCoreApplication::translate("mainWindow", "Open in left", nullptr));
+        connect(leftBtn, &QPushButton::clicked, this, [this, filePath]() {
+            QFileInfo fileInfo(filePath);
+            if (fileInfo.isFile()) {
+                onCloseLeftFileAction();
+                loadFile(const_cast<QString&>(filePath), LEFT_IMG_WIDGET);
+                masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+                openedFileWatcher.addPath(filePath);
+                openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(filePath).lastModified();
+                setTitle();
+                emit updateExchangeBtnStatus();
+                emit updateZoomLabelStatus();
+            }
+        });
+        
+        QPushButton *rightBtn = new QPushButton("R", buttonWidget);
+        rightBtn->setMaximumWidth(25);
+        rightBtn->setToolTip(QCoreApplication::translate("mainWindow", "Open in right", nullptr));
+        connect(rightBtn, &QPushButton::clicked, this, [this, filePath]() {
+            QFileInfo fileInfo(filePath);
+            if (fileInfo.isFile()) {
+                onCloseRightFileAction();
+                loadFile(const_cast<QString&>(filePath), RIGHT_IMG_WIDGET);
+                masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
+                openedFileWatcher.addPath(filePath);
+                openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = QFileInfo(filePath).lastModified();
+                setTitle();
+                emit updateExchangeBtnStatus();
+                emit updateZoomLabelStatus();
+            }
+        });
+        
+        buttonLayout->addStretch();
+        buttonLayout->addWidget(leftBtn);
+        buttonLayout->addWidget(rightBtn);
+        
+        ui.fileHistoryTable->setCellWidget(0, 1, buttonWidget);
+
+        ui.fileHistoryTable->removeRow(existingRow + 1);
+    }
+    else
+    {
+        // Add new file to top
+        ui.fileHistoryTable->insertRow(0);
+        QTableWidgetItem *newItem = new QTableWidgetItem(fileName);
+        newItem->setData(Qt::UserRole, filePath);
+        ui.fileHistoryTable->setItem(0, 0, newItem);
+    
+        // Create button widget for second column
+        QWidget *buttonWidget = new QWidget();
+        QHBoxLayout *buttonLayout = new QHBoxLayout(buttonWidget);
+        buttonLayout->setContentsMargins(2, 2, 2, 2);
+        buttonLayout->setSpacing(2);
+        
+        QPushButton *leftBtn = new QPushButton("L", buttonWidget);
+        leftBtn->setMaximumWidth(25);
+        leftBtn->setToolTip(QCoreApplication::translate("mainWindow", "Open in left", nullptr));
+        connect(leftBtn, &QPushButton::clicked, this, [this, filePath]() {
+            QFileInfo fileInfo(filePath);
+            if (fileInfo.isFile()) {
+                onCloseLeftFileAction();
+                loadFile(const_cast<QString&>(filePath), LEFT_IMG_WIDGET);
+                masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
+                openedFileWatcher.addPath(filePath);
+                openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(filePath).lastModified();
+                setTitle();
+                emit updateExchangeBtnStatus();
+                emit updateZoomLabelStatus();
+            }
+        });
+        
+        QPushButton *rightBtn = new QPushButton("R", buttonWidget);
+        rightBtn->setMaximumWidth(25);
+        rightBtn->setToolTip(QCoreApplication::translate("mainWindow", "Open in right", nullptr));
+        connect(rightBtn, &QPushButton::clicked, this, [this, filePath]() {
+            QFileInfo fileInfo(filePath);
+            if (fileInfo.isFile()) {
+                onCloseRightFileAction();
+                loadFile(const_cast<QString&>(filePath), RIGHT_IMG_WIDGET);
+                masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
+                openedFileWatcher.addPath(filePath);
+                openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = QFileInfo(filePath).lastModified();
+                setTitle();
+                emit updateExchangeBtnStatus();
+                emit updateZoomLabelStatus();
+            }
+        });
+        
+        buttonLayout->addStretch();
+        buttonLayout->addWidget(leftBtn);
+        buttonLayout->addWidget(rightBtn);
+        
+        ui.fileHistoryTable->setCellWidget(0, 1, buttonWidget);
+       
+        // Remove oldest file if exceeds 50 entries
+        if (ui.fileHistoryTable->rowCount() > 50)
+        {
+            ui.fileHistoryTable->removeRow(50);
+        }
+    }
+}
+
 void IIPviewer::onOpenFileAction()
 {
     // QString path = settings.workPath;
@@ -752,6 +904,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
             setImage(openedFile[0], LEFT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
 
             loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+            addFileToHistory(fileName);
         }
         else if (scrollArea == RIGHT_IMG_WIDGET)
         {
@@ -770,6 +923,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
             setImage(openedFile[1], RIGHT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
 
             loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+            addFileToHistory(fileName);
         }
     }
     else if (fileName.endsWith(".raw", Qt::CaseInsensitive))
@@ -942,7 +1096,10 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
         setYuvImage(openedFile[0], tp, bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
-        if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
@@ -961,7 +1118,10 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
         setYuvImage(openedFile[1], tp, bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
-        if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
     }
 }
 
@@ -1160,7 +1320,10 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
         setRawImage(openedFile[0], by, order, bitDepth, raw_compact, width, height, LEFT_IMG_WIDGET);
-        if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET); }
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET); 
+            addFileToHistory(fileName);
+        }
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
@@ -1179,7 +1342,10 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
         setRawImage(openedFile[1], by, order, bitDepth, raw_compact, width, height, RIGHT_IMG_WIDGET);
-        if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
     }
 }
 
@@ -1209,7 +1375,10 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
         openedFile[0] = fileName;
         originSize[0] = reader.size();
         setImage(openedFile[0], LEFT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
-        if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
@@ -1228,7 +1397,10 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
         openedFile[1] = fileName;
         originSize[1] = reader.size();
         setImage(openedFile[1], RIGHT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
-        if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
     }
 }
 
@@ -1258,7 +1430,10 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
         openedFile[0] = fileName;
         originSize[0] = reader.size();
         setImage(openedFile[0], LEFT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
-        if(!reload) { loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);}
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
@@ -1277,7 +1452,10 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
         openedFile[1] = fileName;
         originSize[1] = reader.size();
         setImage(openedFile[1], RIGHT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
-        if(!reload) { loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);}
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
     }
 }
 
