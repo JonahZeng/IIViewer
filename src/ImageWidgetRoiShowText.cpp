@@ -596,7 +596,7 @@ void ImageWidget::exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi
                 {
                     y_ = ((unsigned char *)yuvDataPtr)[row * yWidth * 2 + col * 2];
                 }
-                else if (rawDataBit > 8 && rawDataBit <= 16)
+                else if (yuvDataBit > 8 && yuvDataBit <= 16)
                 {
                     y_ = ((unsigned short *)yuvDataPtr)[row * yWidth * 2 + col * 2];
                 }
