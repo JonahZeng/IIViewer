@@ -2165,7 +2165,7 @@ void ImageWidget::setPixmap(YuvType tp, int bitDepth, int width, int height, int
     {
         total_size = pixSize * width * height * 3;
     }
-    else if (tp == YUV422_UYVY || tp == YUV422_YUYV)
+    else if (tp == YUV422_UYVY || tp == YUV422_YUYV || tp == YUV422_UYVY_AS1 || tp == YUV422_YUYV_AS1)
     {
         total_size = pixSize * width * height * 2;
     }
