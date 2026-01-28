@@ -143,6 +143,108 @@ void convertYUV2RGB888(unsigned char *yuvBuf, unsigned char *rgb888Buf, int bitD
             }
         }
     }
+    else if (tp == YuvType::YUV422_YUYV_AS1)
+    {
+        if (bitDepth > 8 && bitDepth <= 16)
+        {
+            uint32_t y_mask = bitDepth == 16 ? UINT32_MAX : (1U << (2 * bitDepth)) - 1U;
+            uint32_t uv_mask = (1U << bitDepth) - 1U;
+            y_mask = y_mask - uv_mask;
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j] & y_mask) >> (bitDepth + bitDepth - 8));
+                    if (j % 2 == 0)
+                    {
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j] & uv_mask) >> (bitDepth - 8)); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j + 1] & uv_mask) >> (bitDepth - 8)); // v
+                    }
+                    else
+                    {
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j - 1] & uv_mask) >> (bitDepth - 8)); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j] & uv_mask) >> (bitDepth - 8)); // v
+                    }
+                }
+            }
+        }
+        else if (bitDepth <= 8)
+        {
+            uint16_t y_mask = bitDepth == 8 ? UINT16_MAX : (1U << (2 * bitDepth)) - 1U;
+            uint16_t uv_mask = (1U << bitDepth) - 1U;
+            y_mask = y_mask - uv_mask;
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j] & y_mask) >> (bitDepth + bitDepth - 8));
+                    if (j % 2 == 0)
+                    {
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j] & uv_mask) >> (bitDepth - 8)); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j + 1] & uv_mask) >> (bitDepth - 8)); // v
+                    }
+                    else
+                    {
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j - 1] & uv_mask) >> (bitDepth - 8)); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j] & uv_mask) >> (bitDepth - 8)); // v
+                    }
+                }
+            }
+        }
+    }
+    else if (tp == YuvType::YUV422_UYVY_AS1)
+    {
+        if (bitDepth > 8 && bitDepth <= 16)
+        {
+            uint32_t uv_mask = bitDepth == 16 ? UINT32_MAX : (1U << (2 * bitDepth)) - 1U;
+            uint32_t y_mask = (1U << bitDepth) - 1U;
+            uv_mask = uv_mask - y_mask;
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j] & y_mask) >> (bitDepth - 8));
+                    if (j % 2 == 0)
+                    {
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j] & uv_mask) >> (bitDepth + bitDepth - 8));     // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j + 1] & uv_mask) >> (bitDepth + bitDepth - 8)); // v
+                    }
+                    else
+                    {
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j - 1] & uv_mask) >> (bitDepth + bitDepth - 8)); // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint32_t *)yuvBuf)[i * width + j] & uv_mask) >> (bitDepth + bitDepth - 8));     // v
+                    }
+                }
+            }
+        }
+        else if (bitDepth <= 8)
+        {
+            uint16_t uv_mask = bitDepth == 8 ? UINT16_MAX : (1U << (2 * bitDepth)) - 1U;
+            uint16_t y_mask = (1U << bitDepth) - 1U;
+            uv_mask = uv_mask - y_mask;
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * wholepixperline * 3 + j * 3 + 0] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j] & y_mask) >> (bitDepth - 8));
+                    if (j % 2 == 0)
+                    {
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j] & uv_mask) >> (bitDepth + bitDepth - 8));     // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j + 1] & uv_mask) >> (bitDepth + bitDepth - 8));     // v
+                    }
+                    else
+                    {
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j - 1] & uv_mask) >> (bitDepth + bitDepth - 8));     // u
+                        rgb888Buf[i * wholepixperline * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint16_t *)yuvBuf)[i * width + j] & uv_mask) >> (bitDepth + bitDepth - 8));     // v
+                    }
+                }
+            }
+        }
+    }
     else if (tp == YuvType::YUV420_NV12)
     { // yyyyy...uvuv
         if (bitDepth > 8 && bitDepth <= 16)

@@ -28,6 +28,8 @@ enum YuvType
     YUV420P_YU12 = 6,
     YUV420P_YV12 = 7,
     YUV400 = 8,
+    YUV422_YUYV_AS1 = 9,
+    YUV422_UYVY_AS1 = 10,
     YUV_UNKNOW = -1
 };
 

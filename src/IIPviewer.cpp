@@ -954,41 +954,9 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     YuvFileInfoDlg dlg(this);
 
     auto yuvtp = settings.yuvType;
-    if (yuvtp == YuvType::YUV444_INTERLEAVE)
+    if(yuvtp >= YuvType::YUV444_INTERLEAVE && yuvtp <= YuvType::YUV422_UYVY_AS1)
     {
-        dlg.ui.formatComboBox->setCurrentIndex(0);
-    }
-    else if (yuvtp == YuvType::YUV444_PLANAR)
-    {
-        dlg.ui.formatComboBox->setCurrentIndex(1);
-    }
-    else if (yuvtp == YuvType::YUV422_UYVY)
-    {
-        dlg.ui.formatComboBox->setCurrentIndex(2);
-    }
-    else if (yuvtp == YuvType::YUV422_YUYV)
-    {
-        dlg.ui.formatComboBox->setCurrentIndex(3);
-    }
-    else if (yuvtp == YuvType::YUV420_NV12)
-    {
-        dlg.ui.formatComboBox->setCurrentIndex(4);
-    }
-    else if (yuvtp == YuvType::YUV420_NV21)
-    {
-        dlg.ui.formatComboBox->setCurrentIndex(5);
-    }
-    else if (yuvtp == YuvType::YUV420P_YU12)
-    {
-        dlg.ui.formatComboBox->setCurrentIndex(6);
-    }
-    else if (yuvtp == YuvType::YUV420P_YV12)
-    {
-        dlg.ui.formatComboBox->setCurrentIndex(7);
-    }
-    else if (yuvtp == YuvType::YUV400)
-    {
-        dlg.ui.formatComboBox->setCurrentIndex(8);
+        dlg.ui.formatComboBox->setCurrentIndex(int(yuvtp));
     }
     dlg.ui.bitDepthSpinBox->setValue(settings.yuv_bitDepth);
     dlg.ui.widthLineEdit->setText(QString::asprintf("%d", settings.yuv_width));
@@ -1065,6 +1033,16 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     {
         tp = YuvType::YUV400;
         totalSize = width * height * pixSize;
+    }
+    else if (curIdx == 9)
+    {
+        tp = YuvType::YUV422_YUYV_AS1;
+        totalSize = width * height * pixSize * 2;
+    }
+    else if (curIdx == 10)
+    {
+        tp = YuvType::YUV422_UYVY_AS1;
+        totalSize = width * height * pixSize * 2;
     }
 
     settings.yuvType = tp;

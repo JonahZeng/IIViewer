@@ -139,6 +139,16 @@
          <string>YUV400</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>YUYV_AS1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>UYVY_AS1</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
