@@ -24,6 +24,7 @@ this repo is designed for open and view ISP intermediate image. we support these
 - mipi-raw(10/12/14 bit)
 - rgbir-raw(8/10/12/14/16/18/20/22/24 bit)
 - yuv(8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)
+- heif(.heic)
 
 ## Usage
 download it from [release page](https://github.com/JonahZeng/IIViewer/releases)(we provide precompiled x64 exe and deb file), start this app on your PC, you can see this if no unexpect error occurred:
@@ -41,8 +42,67 @@ that's all.
 1. install cmake(>=3.20)
 2. install MSVC or MinGW64 (should support **C++17 at least**)
 3. build and install OpenSSL, here is offical [repo](https://github.com/openssl/openssl) and build [guide](https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md), once you build and install it successed, copy its install dir to this git repo **thirdparty** directory. 
+4. build libde265
+    ```bash
+    wget https://github.com/strukturag/libde265/releases/download/v1.0.16/libde265-1.0.16.tar.gz
+    tar -zxf libde265-1.0.16.tar.gz
+    cd libde265-1.0.16
+    mkdir build
+    cd build
+    cmake .. -G "Visual Studio 17 2022" -A x64 \
+        -DENABLE_DECODER=OFF \
+        -DENABLE_ENCODER=OFF \
+        -DENABLE_SDL=OFF \
+        -DBUILD_SHARED_LIBS=ON
+    cmake --build . --config Release -j 4
+    cmake --install . --prefix=${you_libde265_install_path} --config Release
+    ```
+5. build libheif
+    ```bash
+    wget https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz
+    tar -zxf libheif-1.21.2.tar.gz
+    cd libheif-1.21.2
+    mkdir build
+    cd build
+    cmake .. -G "Visual Studio 17 2022" -A x64 \
+        -DWITH_LIBDE265=ON \
+        -DWITH_X265=OFF \
+        -DWITH_KVAZAAR=OFF \
+        -DWITH_UVG266=OFF \
+        -DWITH_VVDEC=OFF \
+        -DWITH_VVENC=OFF \
+        -DWITH_X264=OFF \
+        -DWITH_OpenH264_ENCODER=OFF \
+        -DWITH_OpenH264_DECODER=OFF \
+        -DWITH_DAV1D=OFF \
+        -DWITH_AOM_ENCODER=OFF \
+        -DWITH_AOM_DECODER=OFF \
+        -DWITH_SvtEnc=OFF \
+        -DWITH_RAV1E=OFF \
+        -DWITH_JPEG_ENCODER=OFF \
+        -DWITH_JPEG_DECODER=OFF \
+        -DWITH_OpenJPEG_ENCODER=OFF \
+        -DWITH_OpenJPEG_DECODER=OFF \
+        -DWITH_FFMPEG_DECODER=OFF \
+        -DWITH_OPENJPH_ENCODER=OFF \
+        -DWITH_OPENJPH_DECODER=OFF \
+        -DWITH_UNCOMPRESSED_CODEC=OFF \
+        -DWITH_WEBCODECS=OFF \
+        -DWITH_LIBSHARPYUV=OFF \
+        -DWITH_EXAMPLES=OFF \
+        -DWITH_EXAMPLE_HEIF_THUMB=OFF \
+        -DWITH_EXAMPLE_HEIF_VIEW=OFF \
+        -DWITH_GDK_PIXBUF=OFF \
+        -DBUILD_DOCUMENTATION=OFF \
+        -DBUILD_TESTING=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+        -DLIBDE265_INCLUDE_DIR="${you_libde265_install_path}\\include" \
+        -DLIBDE265_LIBRARY="${you_libde265_install_path}\\lib\\de265.lib"
+    cmake --build . --config Release -j 4
+    cmake --install . --prefix=${you_install_path} --config Release
+    ```
 
-4. install Qt5 with necessary module:
+6. install Qt5 with necessary module:
     - Widgets
     - Gui
     - Core 
@@ -67,7 +127,22 @@ if you install Qt by build from soure, here is my configuration(MinGW64 13.2.0, 
 ```
 MSVC build Qt5.15.16:
 ```bat
-configure -prefix %CD%\qtbase -opensource -confirm-license -nomake tests -nomake examples -release -skip webview -skip webengine -skip webglplugin -skip webchannel -openssl-runtime -I {openssl3 header direcotry} -L {openssl3 library directory} -make-tool jom -platform win32-msvc
+configure -prefix \
+%CD%\qtbase \
+-opensource \
+-confirm-license \
+-nomake tests \
+-nomake examples \
+-release \
+-skip webview \
+-skip webengine \
+-skip webglplugin \
+-skip webchannel \
+-openssl-runtime \
+-I {openssl3 header direcotry} \
+-L {openssl3 library directory} \
+-make-tool jom \
+-platform win32-msvc
 ```
 #### build
 I have test it both on windows10 with mingw64 13.2.0 and windows11 with MSVC v143, Qt version >= 5.15.2.

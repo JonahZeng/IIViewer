@@ -32,14 +32,34 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets DataVisualization Network LinguistTools Charts)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization Network LinguistTools Charts)
 
+find_package(Threads REQUIRED)
+
 if(MSVC)
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/msvc/lib/cmake/OpenSSL")
     find_package(OpenSSL CONFIG REQUIRED)
+    set(libde265_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libde265/msvc/lib/cmake/libde265")
+    find_package(libde265 CONFIG REQUIRED)
+    set(libheif_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libheif/msvc/lib/cmake/libheif")
+    find_package(libheif CONFIG REQUIRED)
 elseif ((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/mingw64/lib/cmake/OpenSSL")
     find_package(OpenSSL CONFIG REQUIRED)
-else()
+    set(libde265_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libde265/mingw64/lib/cmake/libde265")
+    find_package(libde265 CONFIG REQUIRED)
+    set(libheif_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libheif/mingw64/lib/cmake/libheif")
+    find_package(libheif CONFIG REQUIRED)
+elseif(UNIX AND NOT APPLE)
     find_package(OpenSSL REQUIRED)
+    set(libde265_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libde265/linux/lib/cmake/libde265")
+    find_package(libde265 CONFIG REQUIRED)
+    set(libheif_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libheif/linux/lib/cmake/libheif")
+    find_package(libheif CONFIG REQUIRED)
+elseif(APPLE)
+    find_package(OpenSSL REQUIRED)
+    set(libde265_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libde265/apple/lib/cmake/libde265")
+    find_package(libde265 CONFIG REQUIRED)
+    set(libheif_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libheif/apple/lib/cmake/libheif")
+    find_package(libheif CONFIG REQUIRED)
 endif()
 
 get_target_property(_qmake_executable Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
@@ -179,7 +199,7 @@ else()
             target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
         endif()
     elseif(UNIX)
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${PROJECT_SOURCES} ${RESOURCE_FILES} ${QM_FILES})
+        add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${RESOURCE_FILES} ${QM_FILES})
         target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
     elseif(APPLE)
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${PROJECT_SOURCES} ${RESOURCE_FILES} ${QM_FILES})
@@ -189,6 +209,7 @@ endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Charts)
+target_link_libraries(${PROJECT_NAME} PRIVATE heif de265)
 if(APPLE)
     target_include_directories(${PROJECT_NAME} PRIVATE ${EXTRA_QT_INCLUDE_DIRS})
 endif()
@@ -227,6 +248,32 @@ if(WIN32)
             COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_LIBCRYPTO_SHARED}  ${BIN_OUTPUT_DIRECTORY}
             COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_LIBSSL_SHARED}  ${BIN_OUTPUT_DIRECTORY}
             COMMENT "Copying OpenSSL libraries to bin directory"
+        )
+    endif()
+    
+    # Copy libde265.dll to bin directory
+    if(MSVC)
+        set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/msvc/bin/libde265.dll")
+        set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/msvc/bin/heif.dll")
+    elseif((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+        set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/mingw64/bin/libde265.dll")
+        set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/mingw64/bin/heif.dll")
+    endif()
+    
+    if((EXISTS "${LIBDE265_DLL_PATH}") AND NOT (EXISTS "${BIN_OUTPUT_DIRECTORY}/libde265.dll"))
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIBDE265_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}
+            COMMENT "Copying libde265.dll to bin directory"
+        )
+    endif()
+    if((EXISTS "${LIBHEIF_DLL_PATH}") AND NOT (EXISTS "${BIN_OUTPUT_DIRECTORY}/heif.dll"))
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}
+            COMMENT "Copying heif.dll to bin directory"
         )
     endif()
 endif()

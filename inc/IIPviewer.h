@@ -27,6 +27,7 @@ private:
     void loadRawFile(QString &fileName, int scrollArea, bool reload=false);
     void loadPnmFile(QString &fileName, int scrollArea, bool reload=false);
     void loadPgmFile(QString &fileName, int scrollArea, bool reload=false);
+    void loadHeifFile(QString &fileName, int scrollArea, bool reload=false);
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);

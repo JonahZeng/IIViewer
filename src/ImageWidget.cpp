@@ -9,6 +9,10 @@
 #include <QPainter>
 #include <QAction>
 #include <stdexcept>
+#if (defined _MSC_VER) && (defined HAVE_VISIBILITY)
+#undef HAVE_VISIBILITY
+#endif
+#include <libheif/heif.h>
 
 ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, QWidget *parent)
     : QWidget(parent),
@@ -1947,6 +1951,110 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
         pnmDataBit = bitDepth;
         pgmDataPtr = nullptr;
         pgmDataBit = 0;
+
+        resize(pixMap->size() * zoomList[zoomIdx]);
+        repaint();
+    }
+    else if (imgName->endsWith(".heic", Qt::CaseInsensitive))
+    {
+        // Load HEIC image using libheif
+        heif_context *ctx = heif_context_alloc();
+        if (!ctx)
+        {
+            QString t = QString("Failed to allocate heif context for ") + *imgName;
+            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+            return;
+        }
+
+        heif_error error = heif_context_read_from_file(ctx, imgName->toUtf8().constData(), nullptr);
+        if (error.code != heif_error_Ok)
+        {
+            QString t = QString("Failed to read HEIC file: ") + *imgName + QString("\nError: ") + error.message;
+            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+            heif_context_free(ctx);
+            return;
+        }
+
+        heif_image_handle *handle;
+        error = heif_context_get_primary_image_handle(ctx, &handle);
+        if (error.code != heif_error_Ok)
+        {
+            QString t = QString("Failed to get primary image handle from ") + *imgName;
+            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+            heif_context_free(ctx);
+            return;
+        }
+
+        int width = heif_image_handle_get_width(handle);
+        int height = heif_image_handle_get_height(handle);
+        releaseBuffer();
+
+        // Decode HEIC image to RGB format
+        heif_image *img;
+        heif_decoding_options *options = heif_decoding_options_alloc();
+        error = heif_decode_image(handle, &img, heif_colorspace_YCbCr, heif_chroma_420, options);
+        heif_decoding_options_free(options);
+        if (error.code != heif_error_Ok)
+        {
+            QString t = QString("Failed to decode HEIC image: ") + *imgName + QString("\nError: ") + error.message;
+            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+            heif_image_handle_release(handle);
+            heif_context_free(ctx);
+            return;
+        }
+
+        // Get image data
+        int stride_y, stride_cb, stride_cr;
+        const uint8_t* data_y = heif_image_get_plane_readonly(img, heif_channel_Y, &stride_y);
+        const uint8_t* data_cb = heif_image_get_plane_readonly(img, heif_channel_Cb, &stride_cb);
+        const uint8_t* data_cr = heif_image_get_plane_readonly(img, heif_channel_Cr, &stride_cr);
+        if (!data_y || !data_cb || !data_cr)
+        {
+            QString t = QString("Failed to get HEIC image data from ") + *imgName;
+            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+            heif_image_release(img);
+            heif_image_handle_release(handle);
+            heif_context_free(ctx);
+            return;
+        }
+
+        // Create QImage and fill with HEIC data
+        pixMap = new QImage(width, height, QImage::Format_RGB888);
+        normalDataPixMap = new QImage(width, height, QImage::Format_RGB888);
+
+        int bytesperline = pixMap->bytesPerLine();
+        unsigned char *bufferShow = pixMap->bits();
+        unsigned char *bufferShowBak = normalDataPixMap->bits();
+
+        convertYUV2RGB888(data_y, data_cb, data_cr, bufferShow, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV420, bytesperline / 3);
+        convertYUV2RGB888(data_y, data_cb, data_cr, bufferShowBak, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV420, bytesperline / 3);
+        // Copy HEIC data to QImage buffer
+        /* for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width * 3; j++)
+            {
+                bufferShow[i * bytesperline + j] = heif_data[i * stride + j];
+                bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
+            }
+        } */
+
+        // Clean up heif resources
+        heif_image_release(img);
+        heif_image_handle_release(handle);
+        heif_context_free(ctx);
+
+        openedImgType = NORMAL_IMG;
+        rawBayerType = BayerPatternType::BAYER_UNKNOW;
+        rawByteOrderType = ByteOrderType::RAW_LITTLE_ENDIAN;
+        rawDataBit = 0;
+        rawDataPtr = nullptr;
+        pnmDataBit = 0;
+        pnmDataPtr = nullptr;
+        pgmDataBit = 0;
+        pgmDataPtr = nullptr;
+        yuvDataBit = 0;
+        yuvDataPtr = nullptr;
+        yuvType = YuvType::YUV_UNKNOW;
 
         resize(pixMap->size() * zoomList[zoomIdx]);
         repaint();
