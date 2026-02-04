@@ -68,7 +68,7 @@ jobs:
     
     - name: Build libde265
       run: |
-        wget https://github.com/strukturag/libde265/releases/download/v1.0.16/libde265-1.0.16.tar.gz
+        curl -L -o libde265-1.0.16.tar.gz https://github.com/strukturag/libde265/releases/download/v1.0.16/libde265-1.0.16.tar.gz
         tar -zxf libde265-1.0.16.tar.gz
         cd libde265-1.0.16
         mkdir build
@@ -79,7 +79,7 @@ jobs:
     
     - name: Build libheif
       run: |
-        wget https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz
+        curl -L -o libheif-1.21.2.tar.gz https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz
         tar -zxf libheif-1.21.2.tar.gz
         cd libheif-1.21.2
         mkdir build

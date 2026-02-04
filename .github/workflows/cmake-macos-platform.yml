@@ -126,7 +126,7 @@ jobs:
           -DBUILD_TESTING=OFF \
           -DBUILD_SHARED_LIBS=ON \
           -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/apple/include" \
-          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/apple/lib/libde265.so"
+          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/apple/lib/libde265.dylib"
         cmake --build . -j 4
         cmake --install .
 
