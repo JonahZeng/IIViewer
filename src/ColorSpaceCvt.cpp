@@ -433,3 +433,136 @@ void convertYUV2RGB888(unsigned char *yuvBuf, unsigned char *rgb888Buf, int bitD
         }
     }
 }
+
+void convertYUV2RGB888(const unsigned char *yBuf, const unsigned char *uBuf, const unsigned char *vBuf, unsigned char *rgb888Buf, 
+    int bitDepth, int y_stride, int u_stride, int v_stride, int width, int height, YuvRatioType tp, int rgb_line_stride)
+{
+    if (tp == YuvRatioType::UV444)
+    {
+        if (bitDepth > 8 && bitDepth <= 16)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = static_cast<unsigned char>((((uint16_t *)yBuf)[i * y_stride + j]) >> (bitDepth - 8));
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = static_cast<unsigned char>((((uint16_t *)uBuf)[i * u_stride + j]) >> (bitDepth - 8));
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = static_cast<unsigned char>((((uint16_t *)vBuf)[i * v_stride + j]) >> (bitDepth - 8));
+                }
+            }
+        }
+        else if (bitDepth <= 8)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = yBuf[i * y_stride + j];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = uBuf[i * u_stride + j];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = vBuf[i * v_stride + j];
+                }
+            }
+        }
+    }
+    else if (tp == YuvRatioType::UV422)
+    {
+        if (bitDepth > 8 && bitDepth <= 16)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = static_cast<unsigned char>(((uint16_t *)yBuf)[i * y_stride + j] >> (bitDepth - 8));
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = static_cast<unsigned char>(((uint16_t *)uBuf)[i * u_stride + j / 2] >> (bitDepth - 8));
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = static_cast<unsigned char>(((uint16_t *)vBuf)[i * v_stride + j / 2] >> (bitDepth - 8));
+                }
+            }
+        }
+        else if (bitDepth <= 8)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = yBuf[i * y_stride + j];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = uBuf[i * u_stride + j / 2];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = vBuf[i * v_stride + j / 2];
+                }
+            }
+        }
+    }
+    else if (tp == YuvRatioType::UV420)
+    {
+        if (bitDepth > 8 && bitDepth <= 16)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = static_cast<unsigned char>(((uint16_t *)yBuf)[i * y_stride + j] >> (bitDepth - 8));
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = static_cast<unsigned char>(((uint16_t *)uBuf)[(i / 2) * u_stride + j / 2] >> (bitDepth - 8));
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = static_cast<unsigned char>(((uint16_t *)vBuf)[(i / 2) * v_stride + j / 2] >> (bitDepth - 8));
+                }
+            }
+        }
+        else if (bitDepth <= 8)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = yBuf[i * y_stride + j];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = uBuf[(i / 2) * u_stride + j / 2];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = vBuf[(i / 2) * v_stride + j / 2];
+                }
+            }
+        }
+    }
+    else if (tp == YuvRatioType::UV400)
+    {
+        if (bitDepth > 8 && bitDepth <= 16)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = static_cast<unsigned char>(((uint16_t *)yBuf)[i * y_stride + j] >> (bitDepth - 8));
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0];
+                }
+            }
+        }
+        else if (bitDepth <= 8)
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = yBuf[i * y_stride + j];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0];
+                    rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0];
+                }
+            }
+        }
+    }
+
+    if (tp != YuvRatioType::UV400)
+    {
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                short y = rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0];
+                short cb = (short)(rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1]) - 128;
+                short cr = (short)(rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2]) - 128;
+                short r = static_cast<short>(y + 1.403f * cr);
+                short g = static_cast<short>(y - 0.714f * cr - 0.344f * cb);
+                short b = static_cast<short>(y + 1.773f * cb);
+
+                rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 0] = static_cast<unsigned char>(CLIP3(r, 0, 255));
+                rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 1] = static_cast<unsigned char>(CLIP3(g, 0, 255));
+                rgb888Buf[i * rgb_line_stride * 3 + j * 3 + 2] = static_cast<unsigned char>(CLIP3(b, 0, 255));
+            }
+        }
+    }
+}

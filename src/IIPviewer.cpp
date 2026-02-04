@@ -24,6 +24,10 @@
 #include <QToolTip>
 #include <QVersionNumber>
 #include <QStyleFactory>
+#if (defined _MSC_VER) && (defined HAVE_VISIBILITY)
+#undef HAVE_VISIBILITY
+#endif
+#include <libheif/heif.h>
 
 constexpr int LEFT_IMG_WIDGET = 0;
 constexpr int RIGHT_IMG_WIDGET = 1;
@@ -702,7 +706,7 @@ void IIPviewer::onOpenFileAction()
 {
     // QString path = settings.workPath;
     auto fileName = QFileDialog::getOpenFileName(this, tr("open images"), settings.workPath,
-        "Images files(*.jpg *JPG *.jpeg *JPEG *.png *PNG *.bmp *BMP *.tif *TIF *.tiff *TIFF);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;Pgm files(*.pgm *.PGM);;yuv files(*.yuv *.YUV);;Tiff files(*.tif *.TIF *.tiff *.TIFF);;All files(*.*)");
+        "Images files(*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.bmp *.BMP *.tif *.TIF *.tiff *.TIFF *.heic *.HEIC);;Raw files(*.raw *.RAW);;Pnm files(*.pnm *.PNM);;Pgm files(*.pgm *.PGM);;yuv files(*.yuv *.YUV);;Tiff files(*.tif *.TIF *.tiff *.TIFF);;All files(*.*)");
 
     if (fileName.isEmpty())
     {
@@ -743,7 +747,7 @@ void IIPviewer::openGivenFileFromCmdArgv(QString image)
     QFileInfo info(image);
     // qDebug() << info.suffix();
     QString suf = info.suffix().toLower();
-    if(suf == "jpg" || suf == "png" || suf == "bmp" || suf == "tif" || suf == "tiff" || suf == "raw" || suf == "yuv" || suf == "pnm" || suf == "pgm")
+    if(suf == "jpg" || suf == "png" || suf == "bmp" || suf == "tif" || suf == "tiff" || suf == "raw" || suf == "yuv" || suf == "pnm" || suf == "pgm" || suf == "heic")
     {
         onCloseLeftFileAction();
         loadFile(image, LEFT_IMG_WIDGET);
@@ -880,6 +884,10 @@ void IIPviewer::reLoadFile(int scrollArea)
     {
         loadYuvFile(dstFn, scrollArea, true);
     }
+    else if (dstFn.endsWith(".heic", Qt::CaseInsensitive))
+    {
+        loadHeifFile(dstFn, scrollArea, true);
+    }
     else
     {
         QMessageBox::warning(this, tr("not support"), tr("this format file not support yet!"), QMessageBox::StandardButton::Ok);
@@ -942,6 +950,10 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
             loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
             addFileToHistory(fileName);
         }
+    }
+    else if (fileName.endsWith(".heic", Qt::CaseInsensitive))
+    {
+        loadHeifFile(fileName, scrollArea);
     }
     else if (fileName.endsWith(".raw", Qt::CaseInsensitive))
     {
@@ -1447,6 +1459,107 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
         openedFile[1] = fileName;
         originSize[1] = reader.size();
         setImage(openedFile[1], RIGHT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
+    }
+}
+
+void IIPviewer::loadHeifFile(QString &fileName, int scrollArea, bool reload)
+{
+    // Load HEIC image using libheif
+    heif_context* ctx = heif_context_alloc();
+    if (!ctx)
+    {
+        QString t = QString("Failed to allocate heif context for ") + fileName;
+        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        return;
+    }
+
+    heif_error error = heif_context_read_from_file(ctx, fileName.toUtf8().constData(), nullptr);
+    if (error.code != heif_error_Ok)
+    {
+        QString t = QString("Failed to read HEIC file: ") + fileName + QString("\nError: ") + error.message;
+        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        heif_context_free(ctx);
+        return;
+    }
+
+    heif_image_handle* handle;
+    error = heif_context_get_primary_image_handle(ctx, &handle);
+    if (error.code != heif_error_Ok)
+    {
+        QString t = QString("Failed to get primary image handle from ") + fileName;
+        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        heif_context_free(ctx);
+        return;
+    }
+
+    int width = heif_image_handle_get_width(handle);
+    int height = heif_image_handle_get_height(handle);
+
+    int l_bit_depth = heif_image_handle_get_luma_bits_per_pixel(handle);
+    int c_bit_depth = heif_image_handle_get_chroma_bits_per_pixel(handle);
+    heif_colorspace sp;
+    heif_chroma ch;
+    heif_image_handle_get_preferred_decoding_colorspace(handle, &sp, &ch);
+    if (l_bit_depth > 8 || c_bit_depth > 8 || sp != heif_colorspace::heif_colorspace_YCbCr || ch != heif_chroma::heif_chroma_420)
+    {
+        QString t = QString("Failed to decode HEIC image: ") + fileName + QString("\nError: ") + QString("not 8bit yuv420 image");
+        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        heif_image_handle_release(handle);
+        heif_context_free(ctx);
+        return;
+    }
+
+    if (scrollArea == LEFT_IMG_WIDGET)
+    {
+        if(!reload)
+        {
+            onCloseLeftFileAction();
+        }
+        if (!openedFile[1].isEmpty())
+        {
+            if (QSize(width, height) != originSize[1])
+            {
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
+                heif_image_handle_release(handle);
+                heif_context_free(ctx);
+                return;
+            }
+        }
+        heif_image_handle_release(handle);
+        heif_context_free(ctx);
+        openedFile[0] = fileName;
+        originSize[0] = QSize(width, height);
+        setImage(openedFile[0], LEFT_IMG_WIDGET);
+        if(!reload) { 
+            loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
+    }
+    else if (scrollArea == RIGHT_IMG_WIDGET)
+    {
+        if(!reload)
+        {
+            onCloseRightFileAction();
+        }
+        if (openedFile[0].length() > 0)
+        {
+            if (QSize(width, height) != originSize[0])
+            {
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
+                heif_image_handle_release(handle);
+                heif_context_free(ctx);
+                return;
+            }
+        }
+        heif_image_handle_release(handle);
+        heif_context_free(ctx);
+        openedFile[1] = fileName;
+        originSize[1] = QSize(width, height);
+        setImage(openedFile[1], RIGHT_IMG_WIDGET);
         if(!reload) { 
             loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
             addFileToHistory(fileName);

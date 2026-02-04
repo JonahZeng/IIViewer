@@ -33,6 +33,14 @@ enum YuvType
     YUV_UNKNOW = -1
 };
 
+enum YuvRatioType
+{
+    UV444 = 0,
+    UV422 = 1,
+    UV420 = 2,
+    UV400 = 3,
+};
+
 enum BayerPatternType
 {
     RGGB = 0,

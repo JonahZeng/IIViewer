@@ -59,6 +59,64 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
+    
+    - name: Build libde265
+      run: |
+        cd ${{github.workspace}}
+        wget https://github.com/strukturag/libde265/releases/download/v1.0.16/libde265-1.0.16.tar.gz
+        tar -zxf libde265-1.0.16.tar.gz
+        cd libde265-1.0.16
+        mkdir build
+        cd build
+        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake --build . -j 4
+        cmake --install . --prefix=${{github.workspace}}/thirdparty/libde265/linux
+    
+    - name: Build libheif
+      run: |
+        cd ${{github.workspace}}
+        wget https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz
+        tar -zxf libheif-1.21.2.tar.gz
+        cd libheif-1.21.2
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -DWITH_LIBDE265=ON \
+          -DWITH_X265=OFF \
+          -DWITH_KVAZAAR=OFF \
+          -DWITH_UVG266=OFF \
+          -DWITH_VVDEC=OFF \
+          -DWITH_VVENC=OFF \
+          -DWITH_X264=OFF \
+          -DWITH_OpenH264_ENCODER=OFF \
+          -DWITH_OpenH264_DECODER=OFF \
+          -DWITH_DAV1D=OFF \
+          -DWITH_AOM_ENCODER=OFF \
+          -DWITH_AOM_DECODER=OFF \
+          -DWITH_SvtEnc=OFF \
+          -DWITH_RAV1E=OFF \
+          -DWITH_JPEG_ENCODER=OFF \
+          -DWITH_JPEG_DECODER=OFF \
+          -DWITH_OpenJPEG_ENCODER=OFF \
+          -DWITH_OpenJPEG_DECODER=OFF \
+          -DWITH_FFMPEG_DECODER=OFF \
+          -DWITH_OPENJPH_ENCODER=OFF \
+          -DWITH_OPENJPH_DECODER=OFF \
+          -DWITH_UNCOMPRESSED_CODEC=OFF \
+          -DWITH_WEBCODECS=OFF \
+          -DWITH_LIBSHARPYUV=OFF \
+          -DWITH_EXAMPLES=OFF \
+          -DWITH_EXAMPLE_HEIF_THUMB=OFF \
+          -DWITH_EXAMPLE_HEIF_VIEW=OFF \
+          -DWITH_GDK_PIXBUF=OFF \
+          -DBUILD_DOCUMENTATION=OFF \
+          -DBUILD_TESTING=OFF \
+          -DBUILD_SHARED_LIBS=ON \
+          -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/linux/include" \
+          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/linux/lib/libde265.so"
+        cmake --build . -j 4
+        cmake --install . --prefix=${{github.workspace}}/thirdparty/libheif/linux
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
