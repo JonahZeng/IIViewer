@@ -36,8 +36,8 @@ QString detectSystemLanguage()
 
 int main(int argc, char* argv[])
 {
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    // QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    // QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication app(argc, argv);
     // QCoreApplication::setOrganizationName("IIViewer.org");
     // QCoreApplication::setOrganizationDomain("IIViewer.com");

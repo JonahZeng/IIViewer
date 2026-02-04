@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/image">
         <file>src/resource/aboutlog.png</file>
+        <file>src/resource/right2left_w20.png</file>
+        <file>src/resource/right2left-pressed_w20.png</file>
         <file>src/resource/right2left.png</file>
         <file>src/resource/right2left-pressed.png</file>
         <file>src/resource/close_button.png</file>

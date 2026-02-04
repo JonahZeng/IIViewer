@@ -196,24 +196,24 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     imageLabel[0] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[0]);
     imgLabelContianerLayout0->addWidget(imageLabel[0]);
     
-    zoomRatioLabel = new QLabel("1.00x");
+    zoomRatioLabel = new QLabel("1x");
     zoomRatioLabel->setAlignment(Qt::AlignmentFlag::AlignHCenter);
 
     exchangeAreaPreviewBtn = new QPushButton();
-    exchangeAreaPreviewBtn->setMaximumWidth(40);
-    exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left.png"));
+    exchangeAreaPreviewBtn->setMaximumWidth(20);
+    exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left_w20.png"));
     exchangeAreaPreviewBtn->setStyleSheet("QPushButton{border: none}");
     exchangeAreaPreviewBtn->setIconSize(QSize(30, 16));
 
     imageInfoBtn = new QPushButton();
     imageInfoBtn->setIcon(QIcon(":/image/src/resource/info.svg"));
-    imageInfoBtn->setMaximumWidth(40);
+    imageInfoBtn->setMaximumWidth(20);
     imageInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
     imageInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show image infomation", nullptr));
 
     imageDiffInfoBtn = new QPushButton();
     imageDiffInfoBtn->setIcon(QIcon(":/image/src/resource/compare_diff.svg"));
-    imageDiffInfoBtn->setMaximumWidth(40);
+    imageDiffInfoBtn->setMaximumWidth(20);
     imageDiffInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
     imageDiffInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show left and right image difference report", nullptr));
 
@@ -226,6 +226,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     centerLayout->addWidget(imageInfoBtn);
     centerLayout->addWidget(imageDiffInfoBtn);
     centerLayout->addStretch(1);
+    centerLayout->setContentsMargins(0, 0, 0, 0);
 
     scrollArea[1] = new QScrollArea();
     imageLabelContianer[1] = new QWidget();

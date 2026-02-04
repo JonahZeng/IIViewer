@@ -197,6 +197,15 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     connect(this, &IIPviewer::needOpenFileFromCmdArgv, this, &IIPviewer::openGivenFileFromCmdArgv);
 
     connect(&openedFileWatcher, &QFileSystemWatcher::fileChanged, this, &IIPviewer::openedFileChanged);
+    connect(window()->windowHandle(), &QWindow::screenChanged, this, [this] {
+        QScreen* screen = window()->windowHandle()->screen(); 
+        if (!screen) 
+            return; 
+        qreal scale = screen->logicalDotsPerInch() / 96.0; // 96 DPI 为基准 
+        int base = 24; // 你希望在 100% 下的大小 
+        ui.toolBar->setIconSize(QSize(base * scale, base * scale));
+    });
+
 
     ui.dataAnalyseDockWgt->installEventFilter(this);
     ui.playListDockWgt->installEventFilter(this);
@@ -248,6 +257,14 @@ void IIPviewer::showEvent(QShowEvent *event)
         ui.imageLabelContianer[RIGHT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
         ui.imageLabelContianer[RIGHT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
     }
+
+    QScreen* screen = window()->windowHandle()->screen(); 
+    if (!screen) 
+        return; 
+    qreal scale = screen->logicalDotsPerInch() / 96.0; // 96 DPI 为基准 
+    int base = 24; // 你希望在 100% 下的大小 
+    ui.toolBar->setIconSize(QSize(base * scale, base * scale));
+
     QMainWindow::showEvent(event);
 }
 
@@ -1774,8 +1791,7 @@ void IIPviewer::zoomIn0(int zoomIdx)
     masterScrollarea = ui.scrollArea[1];
     if (zoomIdx <= ZOOM_LIST_LENGTH - 1 && zoomIdx >= 0)
     {
-        float ra = ui.imageLabel[0]->zoomList[zoomIdx];
-        ui.zoomRatioLabel->setText(QString::asprintf("%.2fx", ra));
+        ui.zoomRatioLabel->setText(ui.imageLabel[0]->zoomListLabel[zoomIdx]);
     }
     if (ui.imageLabel[0]->pixMap != nullptr)
     {
@@ -1795,8 +1811,7 @@ void IIPviewer::zoomIn1(int zoomIdx)
     masterScrollarea = ui.scrollArea[0];
     if (zoomIdx <= ZOOM_LIST_LENGTH - 1 && zoomIdx >= 0)
     {
-        float ra = ui.imageLabel[0]->zoomList[zoomIdx];
-        ui.zoomRatioLabel->setText(QString::asprintf("%.2fx", ra));
+        ui.zoomRatioLabel->setText(ui.imageLabel[1]->zoomListLabel[zoomIdx]);
     }
     if (ui.imageLabel[1]->pixMap != nullptr)
     {
@@ -1816,8 +1831,7 @@ void IIPviewer::zoomOut0(int zoomIdx)
     masterScrollarea = ui.scrollArea[1];
     if (zoomIdx <= ZOOM_LIST_LENGTH - 1 && zoomIdx >= 0)
     {
-        float ra = ui.imageLabel[0]->zoomList[zoomIdx];
-        ui.zoomRatioLabel->setText(QString::asprintf("%.2fx", ra));
+        ui.zoomRatioLabel->setText(ui.imageLabel[0]->zoomListLabel[zoomIdx]);
     }
     if (ui.imageLabel[0]->pixMap != nullptr)
     {
@@ -1832,8 +1846,7 @@ void IIPviewer::zoomOut1(int zoomIdx)
     masterScrollarea = ui.scrollArea[0];
     if (zoomIdx <= ZOOM_LIST_LENGTH - 1 && zoomIdx >= 0)
     {
-        float ra = ui.imageLabel[0]->zoomList[zoomIdx];
-        ui.zoomRatioLabel->setText(QString::asprintf("%.2fx", ra));
+        ui.zoomRatioLabel->setText(ui.imageLabel[1]->zoomListLabel[zoomIdx]);
     }
     if (ui.imageLabel[1]->pixMap != nullptr)
     {
