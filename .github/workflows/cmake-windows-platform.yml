@@ -75,7 +75,7 @@ jobs:
         cd build
         cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON
         cmake --build . --config Release -j 4
-        cmake --install . --prefix=${{github.workspace}}\thirdparty\libde265\msvc --config Release
+        cmake --install . --prefix=${{github.workspace}}/thirdparty/libde265/msvc --config Release
     
     - name: Build libheif
       run: |
@@ -84,42 +84,42 @@ jobs:
         cd libheif-1.21.2
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 17 2022" -A x64 \
-          -DWITH_LIBDE265=ON \
-          -DWITH_X265=OFF \
-          -DWITH_KVAZAAR=OFF 
-          -DWITH_UVG266=OFF \
-          -DWITH_VVDEC=OFF \
-          -DWITH_VVENC=OFF \
-          -DWITH_X264=OFF \
-          -DWITH_OpenH264_ENCODER=OFF \
-          -DWITH_OpenH264_DECODER=OFF \
-          -DWITH_DAV1D=OFF \
-          -DWITH_AOM_ENCODER=OFF \
-          -DWITH_AOM_DECODER=OFF \
-          -DWITH_SvtEnc=OFF \
-          -DWITH_RAV1E=OFF \
-          -DWITH_JPEG_ENCODER=OFF \
-          -DWITH_JPEG_DECODER=OFF \
-          -DWITH_OpenJPEG_ENCODER=OFF \
-          -DWITH_OpenJPEG_DECODER=OFF \
-          -DWITH_FFMPEG_DECODER=OFF \
-          -DWITH_OPENJPH_ENCODER=OFF \
-          -DWITH_OPENJPH_DECODER=OFF \
-          -DWITH_UNCOMPRESSED_CODEC=OFF \
-          -DWITH_WEBCODECS=OFF \
-          -DWITH_LIBSHARPYUV=OFF \
-          -DWITH_EXAMPLES=OFF \
-          -DWITH_EXAMPLE_HEIF_THUMB=OFF \
-          -DWITH_EXAMPLE_HEIF_VIEW=OFF \
-          -DWITH_GDK_PIXBUF=OFF \
-          -DBUILD_DOCUMENTATION=OFF \
-          -DBUILD_TESTING=OFF \
-          -DBUILD_SHARED_LIBS=ON \
-          -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/msvc/include" \
+        cmake .. -G "Visual Studio 17 2022" -A x64 `
+          -DWITH_LIBDE265=ON `
+          -DWITH_X265=OFF `
+          -DWITH_KVAZAAR=OFF `
+          -DWITH_UVG266=OFF `
+          -DWITH_VVDEC=OFF `
+          -DWITH_VVENC=OFF `
+          -DWITH_X264=OFF `
+          -DWITH_OpenH264_ENCODER=OFF `
+          -DWITH_OpenH264_DECODER=OFF `
+          -DWITH_DAV1D=OFF `
+          -DWITH_AOM_ENCODER=OFF `
+          -DWITH_AOM_DECODER=OFF `
+          -DWITH_SvtEnc=OFF `
+          -DWITH_RAV1E=OFF `
+          -DWITH_JPEG_ENCODER=OFF `
+          -DWITH_JPEG_DECODER=OFF `
+          -DWITH_OpenJPEG_ENCODER=OFF `
+          -DWITH_OpenJPEG_DECODER=OFF `
+          -DWITH_FFMPEG_DECODER=OFF `
+          -DWITH_OPENJPH_ENCODER=OFF `
+          -DWITH_OPENJPH_DECODER=OFF `
+          -DWITH_UNCOMPRESSED_CODEC=OFF `
+          -DWITH_WEBCODECS=OFF `
+          -DWITH_LIBSHARPYUV=OFF `
+          -DWITH_EXAMPLES=OFF `
+          -DWITH_EXAMPLE_HEIF_THUMB=OFF `
+          -DWITH_EXAMPLE_HEIF_VIEW=OFF `
+          -DWITH_GDK_PIXBUF=OFF `
+          -DBUILD_DOCUMENTATION=OFF `
+          -DBUILD_TESTING=OFF `
+          -DBUILD_SHARED_LIBS=ON `
+          -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/msvc/include" `
           -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/msvc/lib/de265.lib"
         cmake --build . --config Release -j 4
-        cmake --install . --prefix=${{github.workspace}}\thirdparty\libheif\msvc --config Release
+        cmake --install . --prefix=${{github.workspace}}/thirdparty/libheif/msvc --config Release
 
     - name: Configure CMake
       # shell: bash
