@@ -108,6 +108,7 @@ public:
     QImage *pixMap;
     int zoomIdx;
     const std::array<float, ZOOM_LIST_LENGTH> zoomList;
+    const std::array<QString, ZOOM_LIST_LENGTH> zoomListLabel;
     QRectF zoomTextRect;
     QRectF pixValPaintRect;
     unsigned char *rawDataPtr;

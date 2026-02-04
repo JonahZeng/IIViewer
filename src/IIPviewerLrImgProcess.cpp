@@ -26,7 +26,7 @@ void IIPviewer::updateZoomLabelText()
     if (ui.imageLabel[0]->openedImgType == UNKNOW_IMG && ui.imageLabel[1]->openedImgType == UNKNOW_IMG)
     {
         ui.zoomRatioLabel->setEnabled(false);
-        ui.zoomRatioLabel->setText("1.00x");
+        ui.zoomRatioLabel->setText("1x");
     }
     else
     {
@@ -37,13 +37,13 @@ void IIPviewer::updateZoomLabelText()
 void IIPviewer::exchangeRight2LeftImg()
 {
     ui.imageLabel[0]->acceptImgFromOther(ui.imageLabel[1]);
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left-pressed.png"));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left-pressed_w20.png"));
 }
 
 void IIPviewer::restoreLeftImg()
 {
     ui.imageLabel[0]->restoreImg();
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left.png"));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left_w20.png"));
 }
 
 void IIPviewer::showImageInfo()
