@@ -67,9 +67,7 @@ jobs:
         submodules: recursive
     
     - name: Build libde265
-      shell: bash
       run: |
-        cd ${{github.workspace}}
         wget https://github.com/strukturag/libde265/releases/download/v1.0.16/libde265-1.0.16.tar.gz
         tar -zxf libde265-1.0.16.tar.gz
         cd libde265-1.0.16
@@ -80,9 +78,7 @@ jobs:
         cmake --install . --prefix=${{github.workspace}}\thirdparty\libde265\msvc --config Release
     
     - name: Build libheif
-      shell: bash
       run: |
-        cd ${{github.workspace}}
         wget https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz
         tar -zxf libheif-1.21.2.tar.gz
         cd libheif-1.21.2

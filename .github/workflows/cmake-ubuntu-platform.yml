@@ -68,9 +68,9 @@ jobs:
         cd libde265-1.0.16
         mkdir build
         cd build
-        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libde265/linux
         cmake --build . -j 4
-        cmake --install . --prefix=${{github.workspace}}/thirdparty/libde265/linux
+        cmake --install .
     
     - name: Build libheif
       run: |
@@ -82,6 +82,7 @@ jobs:
         cd build
         cmake .. \
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libheif/linux \
           -DWITH_LIBDE265=ON \
           -DWITH_X265=OFF \
           -DWITH_KVAZAAR=OFF \
@@ -116,7 +117,7 @@ jobs:
           -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/linux/include" \
           -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/linux/lib/libde265.so"
         cmake --build . -j 4
-        cmake --install . --prefix=${{github.workspace}}/thirdparty/libheif/linux
+        cmake --install .
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.

@@ -80,9 +80,9 @@ jobs:
         cd libde265-1.0.16
         mkdir build
         cd build
-        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libde265/apple
         cmake --build . -j 4
-        cmake --install . --prefix=${{github.workspace}}/thirdparty/libde265/apple
+        cmake --install .
     - name: Build libheif
       run: |
         cd ${{github.workspace}}
@@ -93,6 +93,7 @@ jobs:
         cd build
         cmake .. \
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libheif/apple \
           -DWITH_LIBDE265=ON \
           -DWITH_X265=OFF \
           -DWITH_KVAZAAR=OFF \
@@ -124,10 +125,10 @@ jobs:
           -DBUILD_DOCUMENTATION=OFF \
           -DBUILD_TESTING=OFF \
           -DBUILD_SHARED_LIBS=ON \
-          -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/linux/include" \
-          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/linux/lib/libde265.so"
+          -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/apple/include" \
+          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/apple/lib/libde265.so"
         cmake --build . -j 4
-        cmake --install . --prefix=${{github.workspace}}/thirdparty/libheif/apple
+        cmake --install .
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5)
