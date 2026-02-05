@@ -36,7 +36,7 @@ jobs:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Update system packages 
@@ -46,16 +46,15 @@ jobs:
     - name: Verify OpenSSL installation 
       run: openssl version
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: '5.15.2'
-        host: 'linux'
-        target: 'desktop'
-        cache: true
-        # arch: 'win64_msvc2019_64'
-        # dir: '${{ github.workspace }}/example/'
-        install-deps: 'true'
-        modules: 'qtcharts qtdatavis3d'
+      run: sudo apt install qtbase5-dev libqt5datavisualization5-dev qtbase5-dev-tools libqt5charts5-dev qttools5-dev-tools qttools5-dev
+      # uses: jurplel/install-qt-action@v4
+      # with:
+      #   version: '5.15.3'
+      #   host: 'linux'
+      #   target: 'desktop'
+      #   cache: true
+      #   install-deps: 'true'
+      #   modules: 'qtcharts qtdatavis3d'
     - uses: actions/checkout@v4
       with:
         submodules: recursive

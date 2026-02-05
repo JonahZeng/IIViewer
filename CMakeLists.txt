@@ -276,6 +276,37 @@ if(WIN32)
             COMMENT "Copying heif.dll to bin directory"
         )
     endif()
+elseif(UNIX AND NOT APPLE)
+    set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/linux/lib/libde265.so")
+    set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/linux/lib/libheif.so.1.21.2") # libheif.so.1 + libheif.so.1.21.2
+    if((EXISTS "${LIBDE265_DLL_PATH}") AND NOT (EXISTS "${BIN_OUTPUT_DIRECTORY}/libde265.so"))
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIBDE265_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}
+            COMMENT "Copying libde265.so to bin directory"
+        )
+    endif()
+    if((EXISTS "${LIBHEIF_DLL_PATH}") AND NOT (EXISTS "${BIN_OUTPUT_DIRECTORY}/libheif.so.1.21.2"))
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}
+            COMMAND ${CMAKE_COMMAND} -E create_symlink  ${BIN_OUTPUT_DIRECTORY}/libheif.so.1.21.2 ${BIN_OUTPUT_DIRECTORY}/libheif.so.1
+            COMMENT "Copying libheif.so.1.21.2 to bin directory"
+        )
+    endif()
+elseif(APPLE)
+    set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/apple/lib/libde265.dylib")
+    set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/apple/lib/libheif.1.21.2.dylib") #libheif.1.dylib + libheif.1.21.2.dylib
+    add_custom_target(FixAppBundle ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIBDE265_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks/libde265.dylib
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks/libheif.1.21.2.dylib
+        COMMAND ${CMAKE_COMMAND} -E create_symlink libheif.1.21.2.dylib ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks/libheif.1.dylib
+        DEPENDS ${PROJECT_NAME}   # 依赖可执行文件，但不修改它
+        COMMENT "Fixing macOS app bundle: copying dylibs and creating symlinks"
+    )
 endif()
 
 
@@ -385,7 +416,7 @@ set(CPACK_PACKAGE_VERSION_MINOR "${IIViewer_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${IIViewer_VERSION_PATCH}")
 if(WIN32)
     set(CPACK_SOURCE_GENERATOR "NSIS")
-elseif(UNIX)
+elseif(UNIX AND NOT APPLE)
     set(CPACK_SOURCE_GENERATOR "TGZ")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
     SET(CPACK_PACKAGE_CONTACT "JonahZeng@github")
