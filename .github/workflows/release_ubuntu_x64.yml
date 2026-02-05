@@ -22,7 +22,7 @@ jobs:
     - name: Update system packages 
       run: sudo apt update
     - name: Install dependencies
-      run: sudo apt install -y openssl libssl-dev libfuse2
+      run: sudo apt install -y openssl libssl-dev libfuse2 patchelf
     - name: Verify OpenSSL installation 
       run: openssl version
     - name: Install Qt
@@ -135,14 +135,19 @@ jobs:
         cp ../icon/default.png ./Appdir/default.png
         cp ./${{env.BUILD_TYPE}}/IIViewer ./Appdir/usr/bin/
         cp ./${{env.BUILD_TYPE}}/libde265.so ./Appdir/usr/lib/
-        cp ./${{env.BUILD_TYPE}}/libheif.so.1.21.2 ./Appdir/usr/lib/
-        ln -s ./Appdir/usr/lib/libheif.so.1.21.2 ./Appdir/usr/lib/libheif.so.1
+        cp ./${{env.BUILD_TYPE}}/libheif.so.1.21.2 ./Appdir/usr/lib
+        cd ./Appdir/usr/lib
+        ln -sf libheif.so.1.21.2 libheif.so.1
+        cd ../../..
         cp ./${{env.BUILD_TYPE}}/translations/IIViewer_zh.qm ./Appdir/usr/translations/
+        patchelf --set-rpath '$ORIGIN/../lib' ./Appdir/usr/bin/IIViewer
+        patchelf --set-rpath '$ORIGIN' ./Appdir/usr/lib/libheif.so.1.21.2
+        patchelf --set-rpath '$ORIGIN' ./Appdir/usr/lib/libde265.so
         cd ..
         export VERSION="${{ github.ref_name }}"
         wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage && 
         chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage && 
-        ./linuxdeployqt-continuous-x86_64.AppImage ./bin/Appdir/usr/bin/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
+        ./linuxdeployqt-continuous-x86_64.AppImage ./bin/Appdir/usr/bin/IIViewer -export-only -verbose=2 -bundle-non-qt-libs -appimage -no-copy-copyright-files
         rm ./linuxdeployqt-continuous-x86_64.AppImage
 
     - name: Package artifacts
@@ -162,6 +167,7 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
