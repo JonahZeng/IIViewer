@@ -26,16 +26,15 @@ jobs:
     - name: Verify OpenSSL installation 
       run: openssl version
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: '5.15.3'
-        host: 'linux'
-        target: 'desktop'
-        cache: true
-        # arch: 'win64_msvc2019_64'
-        # dir: '${{ github.workspace }}/example/'
-        install-deps: 'true'
-        modules: 'qtcharts qtdatavis3d'
+      run: sudo apt install qtbase5-dev libqt5datavisualization5-dev qtbase5-dev-tools libqt5charts5-dev qttools5-dev-tools qttools5-dev
+      # uses: jurplel/install-qt-action@v4
+      # with:
+      #   version: '5.15.3'
+      #   host: 'linux'
+      #   target: 'desktop'
+      #   cache: true
+      #   install-deps: 'true'
+      #   modules: 'qtcharts qtdatavis3d'
 
     - uses: actions/checkout@v4
       with:

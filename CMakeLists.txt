@@ -311,6 +311,7 @@ elseif(APPLE)
         add_custom_command(
             TARGET ${PROJECT_NAME}
             POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks
             COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks
             COMMAND ${CMAKE_COMMAND} -E create_symlink  ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks/libheif.1.21.2.dylib ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks/libheif.1.dylib
             COMMENT "Copying libheif.1.21.2.dylib to bin directory"
