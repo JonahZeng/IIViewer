@@ -54,7 +54,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON
+        cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /MP"
         cmake --build . --config Release -j 4
         cmake --install . --prefix=${{github.workspace}}/thirdparty/libde265/msvc --config Release
 
@@ -74,6 +74,7 @@ jobs:
         mkdir build
         cd build
         cmake .. -G "Visual Studio 17 2022" -A x64 `
+          -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /MP" `
           -DWITH_LIBDE265=ON `
           -DWITH_X265=OFF `
           -DWITH_KVAZAAR=OFF `

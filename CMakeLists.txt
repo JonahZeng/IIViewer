@@ -35,6 +35,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets DataVisualization
 find_package(Threads REQUIRED)
 
 if(MSVC)
+    add_compile_options("/MP")
     set(OpenSSL_DIR "${CMAKE_SOURCE_DIR}/thirdparty/OpenSSL/msvc/lib/cmake/OpenSSL")
     find_package(OpenSSL CONFIG REQUIRED)
     set(libde265_DIR "${CMAKE_SOURCE_DIR}/thirdparty/libde265/msvc/lib/cmake/libde265")
