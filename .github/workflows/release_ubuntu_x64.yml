@@ -125,11 +125,24 @@ jobs:
     - name: generate appimage package
       working-directory: ${{github.workspace}}
       run: |
-        cp ./icon/default.png ./bin/${{env.BUILD_TYPE}}/ &&
-        cp ./icon/default.desktop ./bin/${{env.BUILD_TYPE}}/ &&
+        cd bin
+        mkdir -p Appdir
+        mkdir -p Appdir/usr
+        mkdir -p Appdir/usr/bin
+        mkdir -p Appdir/usr/lib
+        mkdir -p Appdir/usr/translations
+        cp ../icon/default.desktop ./Appdir/IIViewer.desktop
+        cp ../icon/default.png ./Appdir/default.png
+        cp ./${{env.BUILD_TYPE}}/IIViewer ./Appdir/usr/bin/
+        cp ./${{env.BUILD_TYPE}}/libde265.so ./Appdir/usr/lib/
+        cp ./${{env.BUILD_TYPE}}/libheif.so.1.21.2 ./Appdir/usr/lib/
+        ln -s ./Appdir/usr/lib/libheif.so.1.21.2 ./Appdir/usr/lib/libheif.so.1
+        cp ./${{env.BUILD_TYPE}}/translations/IIViewer_zh.qm ./Appdir/usr/translations/
+        cd ..
+        export VERSION="${{ github.ref_name }}"
         wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage && 
         chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage && 
-        ./linuxdeployqt-continuous-x86_64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
+        ./linuxdeployqt-continuous-x86_64.AppImage ./bin/Appdir/usr/bin/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
         rm ./linuxdeployqt-continuous-x86_64.AppImage
 
     - name: Package artifacts
@@ -149,6 +162,7 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
