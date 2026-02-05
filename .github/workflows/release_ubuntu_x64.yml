@@ -22,7 +22,7 @@ jobs:
     - name: Update system packages 
       run: sudo apt update
     - name: Install dependencies
-      run: sudo apt install -y openssl libssl-dev libfuse2 patchelf
+      run: sudo apt install -y openssl libssl-dev libfuse2
     - name: Verify OpenSSL installation 
       run: openssl version
     - name: Install Qt
@@ -48,7 +48,7 @@ jobs:
         cd libde265-1.0.16
         mkdir build
         cd build
-        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libde265/linux
+        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libde265/linux
         cmake --build . -j 4
         cmake --install .
     
@@ -63,6 +63,7 @@ jobs:
         cmake .. \
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
           -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libheif/linux \
+          -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -DLIBDE265_STATIC_BUILD" \
           -DWITH_LIBDE265=ON \
           -DWITH_X265=OFF \
           -DWITH_KVAZAAR=OFF \
@@ -93,9 +94,9 @@ jobs:
           -DWITH_GDK_PIXBUF=OFF \
           -DBUILD_DOCUMENTATION=OFF \
           -DBUILD_TESTING=OFF \
-          -DBUILD_SHARED_LIBS=ON \
+          -DBUILD_SHARED_LIBS=OFF \
           -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/linux/include" \
-          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/linux/lib/libde265.so"
+          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/linux/lib/libde265.a"
         cmake --build . -j 4
         cmake --install .
 
@@ -125,29 +126,11 @@ jobs:
     - name: generate appimage package
       working-directory: ${{github.workspace}}
       run: |
-        cd bin
-        mkdir -p Appdir
-        mkdir -p Appdir/usr
-        mkdir -p Appdir/usr/bin
-        mkdir -p Appdir/usr/lib
-        mkdir -p Appdir/usr/translations
-        cp ../icon/default.desktop ./Appdir/IIViewer.desktop
-        cp ../icon/default.png ./Appdir/default.png
-        cp ./${{env.BUILD_TYPE}}/IIViewer ./Appdir/usr/bin/
-        cp ./${{env.BUILD_TYPE}}/libde265.so ./Appdir/usr/lib/
-        cp ./${{env.BUILD_TYPE}}/libheif.so.1.21.2 ./Appdir/usr/lib
-        cd ./Appdir/usr/lib
-        ln -sf libheif.so.1.21.2 libheif.so.1
-        cd ../../..
-        cp ./${{env.BUILD_TYPE}}/translations/IIViewer_zh.qm ./Appdir/usr/translations/
-        patchelf --set-rpath '$ORIGIN/../lib' ./Appdir/usr/bin/IIViewer
-        patchelf --set-rpath '$ORIGIN' ./Appdir/usr/lib/libheif.so.1.21.2
-        patchelf --set-rpath '$ORIGIN' ./Appdir/usr/lib/libde265.so
-        cd ..
-        export VERSION="${{ github.ref_name }}"
+        cp ./icon/default.png ./bin/${{env.BUILD_TYPE}}/ &&
+        cp ./icon/default.desktop ./bin/${{env.BUILD_TYPE}}/ &&
         wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage && 
         chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage && 
-        ./linuxdeployqt-continuous-x86_64.AppImage ./bin/Appdir/usr/bin/IIViewer -export-only -verbose=2 -bundle-non-qt-libs -appimage -no-copy-copyright-files
+        ./linuxdeployqt-continuous-x86_64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage -no-copy-copyright-files
         rm ./linuxdeployqt-continuous-x86_64.AppImage
 
     - name: Package artifacts
