@@ -24,7 +24,7 @@ this repo is designed for open and view ISP intermediate image. we support these
 - mipi-raw(10/12/14 bit)
 - rgbir-raw(8/10/12/14/16/18/20/22/24 bit)
 - yuv(8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)
-- heif(.heic)
+- heif(.heic 8bit yuv420)
 
 ## Usage
 download it from [release page](https://github.com/JonahZeng/IIViewer/releases)(we provide precompiled x64 exe and deb file), start this app on your PC, you can see this if no unexpect error occurred:
@@ -160,11 +160,11 @@ cmake --build . --config Release
 #### prepare
 install gcc, openssl and Qt5 on ubuntu 22.04
 ```bash
-sudo apt install build-essential libssl-dev qtbase5-dev libqt5datavisualization5-dev qtbase5-dev-tools
+sudo apt install build-essential libssl-dev qtbase5-dev libqt5datavisualization5-dev qtbase5-dev-tools libqt5charts5-dev qttools5-dev-tools qttools5-dev
 ```
 install cmake by download from [newest release ](https://github.com/Kitware/CMake/releases) or build from source.
 #### build
-these build steps had been tested on ubuntu 22.04(cmake 3.31, Qt5.15.2, gcc 11.4.0)
+these build steps had been tested on ubuntu 22.04(cmake 3.31, Qt5.15.3, gcc 11.4.0)
 ```bash
 git clone https://github.com/JonahZeng/IIViewer.git
 cd IIViewer
