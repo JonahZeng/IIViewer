@@ -300,10 +300,10 @@ elseif(APPLE)
     set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/apple/lib/libde265.dylib")
     set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/apple/lib/libheif.1.21.2.dylib") #libheif.1.dylib + libheif.1.21.2.dylib
     add_custom_target(FixAppBundle ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIBDE265_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks/libde265.dylib
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks/libheif.1.21.2.dylib
-        COMMAND ${CMAKE_COMMAND} -E create_symlink libheif.1.21.2.dylib ${BIN_OUTPUT_DIRECTORY}/IIViewer.app/Contents/Frameworks/libheif.1.dylib
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${BIN_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/Frameworks
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIBDE265_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/Frameworks/libde265.dylib
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/Frameworks/libheif.1.21.2.dylib
+        COMMAND ${CMAKE_COMMAND} -E create_symlink libheif.1.21.2.dylib ${BIN_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/Frameworks/libheif.1.dylib
         DEPENDS ${PROJECT_NAME}   # 依赖可执行文件，但不修改它
         COMMENT "Fixing macOS app bundle: copying dylibs and creating symlinks"
     )
@@ -407,6 +407,15 @@ elseif(UNIX AND NOT APPLE)
         file(GLOB qm_files ${BIN_OUTPUT_DIRECTORY}/translations/*.qm)
         file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/translations FILES \${qm_files})
     "
+    )
+    install(
+        FILES ${BIN_OUTPUT_DIRECTORY}/libde265.so
+        DESTINATION bin
+    )
+    install(
+        FILES ${BIN_OUTPUT_DIRECTORY}/libheif.so.1.21.2
+        DESTINATION bin
+        RENAME libheif.so.1
     )
 endif()
 
