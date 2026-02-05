@@ -73,7 +73,7 @@ jobs:
         cd libde265-1.0.16
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /MP"
+        cmake .. -G "Visual Studio 17 2022" -A x64 -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /MP"
         cmake --build . --config Release -j 4
         cmake --install . --prefix=${{github.workspace}}/thirdparty/libde265/msvc --config Release
     
@@ -85,7 +85,7 @@ jobs:
         mkdir build
         cd build
         cmake .. -G "Visual Studio 17 2022" -A x64 `
-          -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /MP" `
+          -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /MP /D LIBDE265_STATIC_BUILD /EHsc" `
           -DWITH_LIBDE265=ON `
           -DWITH_X265=OFF `
           -DWITH_KVAZAAR=OFF `
@@ -116,9 +116,9 @@ jobs:
           -DWITH_GDK_PIXBUF=OFF `
           -DBUILD_DOCUMENTATION=OFF `
           -DBUILD_TESTING=OFF `
-          -DBUILD_SHARED_LIBS=ON `
+          -DBUILD_SHARED_LIBS=OFF `
           -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/msvc/include" `
-          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/msvc/lib/de265.lib"
+          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/msvc/lib/libde265.lib"
         cmake --build . --config Release -j 4
         cmake --install . --prefix=${{github.workspace}}/thirdparty/libheif/msvc --config Release
 

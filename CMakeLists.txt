@@ -210,7 +210,7 @@ endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Charts)
-target_link_libraries(${PROJECT_NAME} PRIVATE heif de265)
+target_link_libraries(${PROJECT_NAME} PRIVATE heif)
 if(APPLE)
     target_include_directories(${PROJECT_NAME} PRIVATE ${EXTRA_QT_INCLUDE_DIRS})
 endif()
@@ -251,63 +251,6 @@ if(WIN32)
             COMMENT "Copying OpenSSL libraries to bin directory"
         )
     endif()
-    
-    # Copy libde265.dll to bin directory
-    if(MSVC)
-        set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/msvc/bin/libde265.dll")
-        set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/msvc/bin/heif.dll")
-    elseif((WIN32) AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
-        set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/mingw64/bin/libde265.dll")
-        set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/mingw64/bin/heif.dll")
-    endif()
-    
-    if((EXISTS "${LIBDE265_DLL_PATH}") AND NOT (EXISTS "${BIN_OUTPUT_DIRECTORY}/libde265.dll"))
-        add_custom_command(
-            TARGET ${PROJECT_NAME}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIBDE265_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}
-            COMMENT "Copying libde265.dll to bin directory"
-        )
-    endif()
-    if((EXISTS "${LIBHEIF_DLL_PATH}") AND NOT (EXISTS "${BIN_OUTPUT_DIRECTORY}/heif.dll"))
-        add_custom_command(
-            TARGET ${PROJECT_NAME}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}
-            COMMENT "Copying heif.dll to bin directory"
-        )
-    endif()
-elseif(UNIX AND NOT APPLE)
-    set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/linux/lib/libde265.so")
-    set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/linux/lib/libheif.so.1.21.2") # libheif.so.1 + libheif.so.1.21.2
-    if((EXISTS "${LIBDE265_DLL_PATH}") AND NOT (EXISTS "${BIN_OUTPUT_DIRECTORY}/libde265.so"))
-        add_custom_command(
-            TARGET ${PROJECT_NAME}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIBDE265_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}
-            COMMENT "Copying libde265.so to bin directory"
-        )
-    endif()
-    if((EXISTS "${LIBHEIF_DLL_PATH}") AND NOT (EXISTS "${BIN_OUTPUT_DIRECTORY}/libheif.so.1.21.2"))
-        add_custom_command(
-            TARGET ${PROJECT_NAME}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}
-            COMMAND ${CMAKE_COMMAND} -E create_symlink  ${BIN_OUTPUT_DIRECTORY}/libheif.so.1.21.2 ${BIN_OUTPUT_DIRECTORY}/libheif.so.1
-            COMMENT "Copying libheif.so.1.21.2 to bin directory"
-        )
-    endif()
-elseif(APPLE)
-    set(LIBDE265_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libde265/apple/lib/libde265.dylib")
-    set(LIBHEIF_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/libheif/apple/lib/libheif.1.21.2.dylib") #libheif.1.dylib + libheif.1.21.2.dylib
-    add_custom_target(FixAppBundle ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${BIN_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/Frameworks
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIBDE265_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/Frameworks/libde265.dylib
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIBHEIF_DLL_PATH} ${BIN_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/Frameworks/libheif.1.21.2.dylib
-        COMMAND ${CMAKE_COMMAND} -E create_symlink libheif.1.21.2.dylib ${BIN_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/Frameworks/libheif.1.dylib
-        DEPENDS ${PROJECT_NAME}   # 依赖可执行文件，但不修改它
-        COMMENT "Fixing macOS app bundle: copying dylibs and creating symlinks"
-    )
 endif()
 
 
@@ -408,15 +351,6 @@ elseif(UNIX AND NOT APPLE)
         file(GLOB qm_files ${BIN_OUTPUT_DIRECTORY}/translations/*.qm)
         file(INSTALL DESTINATION \${CMAKE_INSTALL_PREFIX}/bin/translations FILES \${qm_files})
     "
-    )
-    install(
-        FILES ${BIN_OUTPUT_DIRECTORY}/libde265.so
-        DESTINATION bin
-    )
-    install(
-        FILES ${BIN_OUTPUT_DIRECTORY}/libheif.so.1.21.2
-        DESTINATION bin
-        RENAME libheif.so.1
     )
 endif()
 
