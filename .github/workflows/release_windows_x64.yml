@@ -119,6 +119,9 @@ jobs:
         arch: 'win64_msvc2019_64'
         modules: 'qtcharts qtdatavis3d'
 
+    - name: Install NSIS via choco
+      run: choco install nsis -y
+
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}\build -S ${{github.workspace}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\build\install
 
@@ -163,3 +166,4 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
+
