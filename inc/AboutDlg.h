@@ -9,7 +9,7 @@ class AboutDlg final : public QDialog
 public:
     AboutDlg() = delete;
     explicit AboutDlg(QWidget *parent);
-    ~AboutDlg();
+    ~AboutDlg() = default;
 public:
     void onCopyInfo();
 

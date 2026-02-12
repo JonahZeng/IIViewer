@@ -9,7 +9,7 @@ class AppSettings
 {
 public:
     AppSettings();
-    ~AppSettings();
+    ~AppSettings() = default;
     QString workPath;
     YuvType yuvType;
     int yuv_bitDepth;

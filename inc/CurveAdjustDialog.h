@@ -23,7 +23,7 @@ class CurveAdjustChart final : public QChart
 public:
     CurveAdjustChart() = delete;
     CurveAdjustChart(quint16 m_srcImgBits);
-    ~CurveAdjustChart();
+    ~CurveAdjustChart() = default;
 private slots:
     void pointSelected(QPointF pst);
 protected:
@@ -47,7 +47,7 @@ class CurveAdjustDialog final : public QDialog
 public:
     CurveAdjustDialog() = delete;
     CurveAdjustDialog(QImage* disp_image, void* src_img, OpenedImageType img_type, quint16 src_img_bits, const std::array<QPoint, 9>& preset_curve, QWidget* parent = nullptr);
-    ~CurveAdjustDialog();
+    ~CurveAdjustDialog() = default;
     void setYuvType(YuvType tp)
     {
         if(m_originImgType == OpenedImageType::YUV_IMG)

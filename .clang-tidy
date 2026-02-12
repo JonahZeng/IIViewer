@@ -1,0 +1,52 @@
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  performance-*,
+  readability-*,
+  modernize-*,
+  -modernize-use-auto,
+  -modernize-use-trailing-return-type,
+  -modernize-avoid-c-arrays,
+  -modernize-loop-convert,
+  -modernize-use-using,
+  portability-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-cstyle-cast,
+  clang-analyzer-*,
+  misc-*,
+  -misc-include-cleaner,
+  -misc-use-anonymous-namespace,
+  # 你可以按需开启
+  # google-*,
+  # llvm-*,
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: '^(src|inc)/.*'
+
+FormatStyle: none
+
+CheckOptions:
+  # modernize-use-nullptr：允许 MSVC 的 NULL 宏
+  - key:             modernize-use-nullptr.NullMacros
+    value:           'NULL'
+
+  # modernize-use-trailing-return-type：不要强制使用尾置返回类型
+  - key:             modernize-use-trailing-return-type.UseTrailingReturn
+    value:           'false'
+
+  # cppcoreguidelines-owning-memory：MSVC STL 会触发大量误报，关闭
+  - key:             cppcoreguidelines-owning-memory.CheckSmartPointers
+    value:           'false'
+
+  # bugprone-sizeof-expression：MSVC STL 内部大量使用 sizeof，关闭
+  - key:             bugprone-sizeof-expression.WarnOnSizeOfConstant
+    value:           'false'

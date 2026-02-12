@@ -38,47 +38,53 @@ int main(int argc, char* argv[])
 {
     // QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     // QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication app(argc, argv);
+    const QApplication app(argc, argv);
     // QCoreApplication::setOrganizationName("IIViewer.org");
     // QCoreApplication::setOrganizationDomain("IIViewer.com");
     QCoreApplication::setApplicationName("IIViewer");
 #ifdef Q_OS_WINDOWS
-    app.setFont(QFont("Microsoft YaHei UI", 10));
+    QApplication::setFont(QFont("Microsoft YaHei UI", 10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 #endif
 
     QTranslator qt_translator; 
 #ifdef Q_OS_MACOS
     QString qt_locale = detectSystemLanguage();
 #else
-    QString qt_locale = QLocale::system().name();
+    const QString qt_locale = QLocale::system().name();
 #endif
     // qDebug() << "System language: " << qt_locale;
     if(qt_translator.load(QString("qt_%1").arg(qt_locale), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
-        app.installTranslator(&qt_translator);
+    {
+        QApplication::installTranslator(&qt_translator);
+    }
 
     QTranslator translator;
-    QLocale locale = QLocale::system();
-    QString language = QLocale::languageToString(locale.language());
+    const QLocale locale = QLocale::system();
+    const QString language = QLocale::languageToString(locale.language());
     // QString localeName = locale.name();
     
     // 更健壮的语言检测：检查中文语言或中文区域设置
-    bool isChinese = (language == QString("Chinese")) || 
+    const bool isChinese = (language == QString("Chinese")) || 
                      qt_locale.startsWith("zh_") || 
                      qt_locale == "zh";
   
     if(isChinese)
     {
-        QDir appDir(QApplication::applicationDirPath());
+        const QDir appDir(QApplication::applicationDirPath());
         // qDebug() << "Application directory: " << appDir.absolutePath();
         QString zhTranslateFilePath;
         
 #ifdef Q_OS_MACOS
         QDir resourcesDir(appDir);
-        if (appDir.dirName() == "MacOS") {
+        if (appDir.dirName() == "MacOS")
+        {
             // 如果在.app bundle中，转到Resources目录
-            if (resourcesDir.cdUp() && resourcesDir.cd("Resources")) {
+            if (resourcesDir.cdUp() && resourcesDir.cd("Resources"))
+            {
                 zhTranslateFilePath = resourcesDir.absoluteFilePath("translations/IIViewer_zh.qm");
-            } else {
+            }
+            else
+            {
                 zhTranslateFilePath = appDir.absoluteFilePath("../Resources/translations/IIViewer_zh.qm");
             }
         } else {
@@ -88,21 +94,24 @@ int main(int argc, char* argv[])
 #else
         zhTranslateFilePath = appDir.absoluteFilePath("translations/IIViewer_zh.qm");
 #endif
-        if(translator.load(zhTranslateFilePath)) {
-            app.installTranslator(&translator);
+        if(translator.load(zhTranslateFilePath))
+        {
+            QApplication::installTranslator(&translator);
         }
     }
 
     QString needOpenFilePath{};
-    if(argc > 1) {
-        QString path = QString::fromLocal8Bit(argv[1]); 
-        QFileInfo fileInfo(path); // 检查路径是否有效 
-        if (fileInfo.exists() && fileInfo.isFile()) { 
+    if(argc > 1)
+    {
+        const QString path = QString::fromLocal8Bit(argv[1]); 
+        const QFileInfo fileInfo(path); // 检查路径是否有效 
+        if (fileInfo.exists() && fileInfo.isFile())
+        { 
             needOpenFilePath = path;
         }
     }
 
-    IIPviewer w{needOpenFilePath};
-    w.show();
-    return app.exec();
+    IIPviewer win{needOpenFilePath};
+    win.show();
+    return QApplication::exec();
 }

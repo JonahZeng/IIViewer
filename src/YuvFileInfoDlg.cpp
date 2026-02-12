@@ -9,7 +9,3 @@ YuvFileInfoDlg::YuvFileInfoDlg(QWidget* parent)
     //    ui.widthLineEdit->setValidator(validator);
     //    ui.heightLineEdit->setValidator(validator);
 }
-
-YuvFileInfoDlg::~YuvFileInfoDlg()
-{
-}

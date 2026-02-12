@@ -2617,7 +2617,7 @@ void ImageWidget::adjustPreviewCurve()
     }
     curveDialog->setAttribute(Qt::WA_DeleteOnClose);
     
-    connect(curveDialog, &CurveAdjustDialog::updateDisp, this, [this](const std::array<QPoint,9> & curve) {
+    connect(curveDialog, &CurveAdjustDialog::updateDisp, this, [this](const std::array<QPoint, IMG_PREVIEW_ADJ_CURVE_DOTS> & curve) {
         lastCurve = curve;
         this->repaint();
     });

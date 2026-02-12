@@ -7,11 +7,6 @@ RoiDataShowDlg::RoiDataShowDlg(QWidget *parent): QDialog(parent), roiInfoEdit(nu
     connect(closeBtn, &QPushButton::clicked, this, &RoiDataShowDlg::onCloseBtn);
 }
 
-RoiDataShowDlg::~RoiDataShowDlg()
-{
-
-}
-
 void RoiDataShowDlg::initUI()
 {
     QVBoxLayout* vlayout = new QVBoxLayout();
@@ -22,7 +17,7 @@ void RoiDataShowDlg::initUI()
     vlayout->addWidget(closeBtn, 0);
 
     setLayout(vlayout);
-    resize(640, 480);
+    resize(640, 480); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     setWindowTitle(tr("Roi data"));
 }
 

@@ -23,7 +23,6 @@
 #include <QJsonObject>
 #include <QToolTip>
 #include <QVersionNumber>
-#include <QStyleFactory>
 #if (defined _MSC_VER) && (defined HAVE_VISIBILITY)
 #undef HAVE_VISIBILITY
 #endif
@@ -31,13 +30,16 @@
 
 constexpr int LEFT_IMG_WIDGET = 0;
 constexpr int RIGHT_IMG_WIDGET = 1;
+constexpr int BIT8 = 8;
+constexpr int BIT16 = 16;
+constexpr int BIT24 = 24;
+constexpr int BIT32 = 32;
 
-IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
-    : QMainWindow(parent), ui(), 
+IIPviewer::IIPviewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readability-function-cognitive-complexity)
+    : QMainWindow(parent),
     originSize{QSize{0, 0}, QSize{0, 0}}, 
     openedFile{QString(), QString()},
     openedFileLastModifiedTime{QDateTime(), QDateTime()},
-    openedFileWatcher{},
     lastFileWatcherNotifyTime{QDateTime(), QDateTime()},
     lastFileWatcherNotifyPath{QString(), QString()},
     lastFileWatcherNotifyIsWaitProcess{false, false}
@@ -49,7 +51,7 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     else
     {
         auto pathList = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
-        if (pathList.length() > 0)
+        if (!pathList.empty())
         {
             workPath = pathList.last();
         }
@@ -70,11 +72,11 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     ui.imageLabel[LEFT_IMG_WIDGET]->appSettings = &settings;
     ui.imageLabel[RIGHT_IMG_WIDGET]->appSettings = &settings;
 
-    QList<QScreen *> screenInfoList = QApplication::screens();
+    const QList<QScreen *> screenInfoList = QApplication::screens();
     bool prevScreenExist = false;
-    for(auto sc: screenInfoList)
+    for(auto *scre: screenInfoList)
     {
-        if(sc->name() == settings.windowScreenName)
+        if(scre->name() == settings.windowScreenName)
         {
             prevScreenExist = true;
             break;
@@ -82,8 +84,8 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     }
     if(!prevScreenExist)
     {
-        QRect screenRect = screenInfoList.at(0)->geometry();
-        setGeometry(screenRect.width() / 6, screenRect.height() / 6, screenRect.width() * 2 / 3, screenRect.height() * 2 / 3);
+        const QRect screenRect = screenInfoList.at(0)->geometry();
+        setGeometry(screenRect.width() / 6, screenRect.height() / 6, screenRect.width() * 2 / 3, screenRect.height() * 2 / 3); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     }
     else
     {
@@ -91,9 +93,9 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
         QRect geometry = settings.windowGeometry;
         
         // Ensure window is visible on current screen
-        QScreen *screen = QApplication::screenAt(geometry.center());
-        if (screen) {
-            QRect screenRect = screen->geometry();
+        const QScreen *screen = QApplication::screenAt(geometry.center());
+        if (screen != nullptr) {
+            const QRect screenRect = screen->geometry();
             geometry = geometry.intersected(screenRect);
         }
         
@@ -109,7 +111,7 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
     // set theme idx by settings
     for(int t_idx=0; t_idx < ui.themes.size(); t_idx++)
     {
-        ui.themes[t_idx]->setChecked(t_idx == theme_idx ? true : false);
+        ui.themes[t_idx]->setChecked(t_idx == theme_idx);
     }
 
     connect(ui.openFileLeftAction, &QAction::triggered, this, &IIPviewer::onOpenFileAction);
@@ -185,11 +187,14 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
 
     // Connect file history table hover event to show tooltip with file path
     connect(ui.fileHistoryTable, &QTableWidget::cellEntered, this, [this](int row, int column) {
-        if (column == 0) {
-            QTableWidgetItem *item = ui.fileHistoryTable->item(row, 0);
-            if (item) {
-                QString filePath = item->data(Qt::UserRole).toString();
-                if (!filePath.isEmpty()) {
+        if (column == 0)
+        {
+            const QTableWidgetItem *item = ui.fileHistoryTable->item(row, 0);
+            if (item)
+            {
+                const QString filePath = item->data(Qt::UserRole).toString();
+                if (!filePath.isEmpty())
+                {
                     QToolTip::showText(QCursor::pos(), filePath, ui.fileHistoryTable);
                 }
             }
@@ -202,12 +207,14 @@ IIPviewer::IIPviewer(QString needOpenFilePath, QWidget *parent)
 
     connect(&openedFileWatcher, &QFileSystemWatcher::fileChanged, this, &IIPviewer::openedFileChanged);
     connect(window()->windowHandle(), &QWindow::screenChanged, this, [this] {
-        QScreen* screen = window()->windowHandle()->screen(); 
+        const QScreen* screen = window()->windowHandle()->screen(); 
         if (!screen) 
-            return; 
-        qreal scale = screen->logicalDotsPerInch() / 96.0; // 96 DPI 为基准 
-        int base = 24; // 你希望在 100% 下的大小 
-        ui.toolBar->setIconSize(QSize(base * scale, base * scale));
+        {
+            return;
+        }
+        const qreal scale = screen->logicalDotsPerInch() / 96.0; // 96 DPI 为基准 
+        constexpr int base = 24; // 你希望在 100% 下的大小 
+        ui.toolBar->setIconSize(QSize(int((qreal)base * scale), int((qreal)base * scale)));
     });
 
 
@@ -245,29 +252,31 @@ void IIPviewer::showEvent(QShowEvent *event)
 {
     if (ui.imageLabel[LEFT_IMG_WIDGET]->pixMap == nullptr)
     {
-        int scrollWidth = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().width();
-        int scrollHeight = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().height();
-        int scrollBarWidth = ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar()->width();
-        int scrollBarHeight = ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar()->height();
+        const int scrollWidth = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().width();
+        const int scrollHeight = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().height();
+        const int scrollBarWidth = ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar()->width();
+        const int scrollBarHeight = ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar()->height();
         ui.imageLabelContianer[LEFT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
         ui.imageLabelContianer[LEFT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
     }
     if (ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap == nullptr)
     {
-        int scrollWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().width();
-        int scrollHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().height();
-        int scrollBarWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->width();
-        int scrollBarHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->height();
+        const int scrollWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().width();
+        const int scrollHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().height();
+        const int scrollBarWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->width();
+        const int scrollBarHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->height();
         ui.imageLabelContianer[RIGHT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
         ui.imageLabelContianer[RIGHT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
     }
 
-    QScreen* screen = window()->windowHandle()->screen(); 
-    if (!screen) 
-        return; 
-    qreal scale = screen->logicalDotsPerInch() / 96.0; // 96 DPI 为基准 
-    int base = 24; // 你希望在 100% 下的大小 
-    ui.toolBar->setIconSize(QSize(base * scale, base * scale));
+    const QScreen* screen = window()->windowHandle()->screen(); 
+    if (screen == nullptr) 
+    {
+        return;
+    }
+    const qreal scale = screen->logicalDotsPerInch() / 96.0; // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers) // 96 DPI 为基准 
+    constexpr int base = 24; // 你希望在 100% 下的大小 
+    ui.toolBar->setIconSize(QSize(int((qreal)base * scale), int((qreal)base * scale)));
 
     QMainWindow::showEvent(event);
 }
@@ -280,7 +289,7 @@ void IIPviewer::onUseRoiAction(bool check)
         ui.imageLabel[LEFT_IMG_WIDGET]->setMouseActionPaintRoi();
         ui.imageLabel[RIGHT_IMG_WIDGET]->setMouseActionPaintRoi();
 
-        QPixmap penColorBtnIcon(32, 32);
+        QPixmap penColorBtnIcon(32, 32); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         penColorBtnIcon.fill(settings.penColor);
         ui.penColorSetBtn->setIcon(penColorBtnIcon);
 
@@ -361,16 +370,16 @@ void IIPviewer::onDoubleImgModeAction(bool check)
     }
     ui.mainWidget->adjustSize();
 
-    if(check && ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap && ui.imageLabel[LEFT_IMG_WIDGET]->pixMap)
+    if(check && ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap != nullptr && ui.imageLabel[LEFT_IMG_WIDGET]->pixMap != nullptr)
     {
-        if(ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar())
+        if(ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar() != nullptr)
         {
-            int hval = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->value();
+            const int hval = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->value();
             syncScrollArea0_horScBarVal(hval);
         }
-        if(ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()) 
+        if(ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar() != nullptr) 
         {
-            int vval = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->value();
+            const int vval = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->value();
             syncScrollArea0_verScBarVal(vval);
         }
     }
@@ -383,8 +392,7 @@ void IIPviewer::onSysOptionAction(bool check)
     dlg.set_uv_disp_mode(this->settings.uv_value_disp_mode);
     dlg.set_pix_val_bg_color_index(this->settings.pix_val_bg_index);
     dlg.set_pix_val_custom_bg_color(this->settings.pix_val_cus_bg_color);
-    int resp = dlg.exec();
-    if(resp == IIPOptionDialog::DialogCode::Accepted)
+    if(dlg.exec() == IIPOptionDialog::DialogCode::Accepted)
     {
         this->settings.uv_value_disp_mode = dlg.uv_disp_mode;
         this->settings.pix_val_bg_index = dlg.pix_val_bg_color_index;
@@ -397,18 +405,19 @@ void IIPviewer::checkUpdate()
     QNetworkAccessManager *manager = new QNetworkAccessManager();
     QObject::connect(manager, &QNetworkAccessManager::finished, [this, manager](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NoError) {
-             QByteArray response = reply->readAll(); 
-             QJsonDocument jsonDoc = QJsonDocument::fromJson(response); 
-             QJsonObject jsonObj = jsonDoc.object(); 
-             QString latestVersion = jsonObj["tag_name"].toString();
-             if(latestVersion.startsWith('v', Qt::CaseSensitivity::CaseInsensitive)) {
+            QByteArray const response = reply->readAll();
+            QJsonDocument const jsonDoc = QJsonDocument::fromJson(response);
+            QJsonObject jsonObj = jsonDoc.object();
+            QString latestVersion = jsonObj["tag_name"].toString();
+            if (latestVersion.startsWith('v', Qt::CaseSensitivity::CaseInsensitive))
+            {
                 latestVersion.remove(QChar('v'), Qt::CaseSensitivity::CaseInsensitive);
              }
-             QVersionNumber currentVersion{IIViewer_VERSION_MAJOR, IIViewer_VERSION_MINOR, IIViewer_VERSION_PATCH}; // 当前版本号 
-             QVersionNumber newVersion = QVersionNumber::fromString(latestVersion);
+             const QVersionNumber currentVersion{IIViewer_VERSION_MAJOR, IIViewer_VERSION_MINOR, IIViewer_VERSION_PATCH}; // 当前版本号 
+             const QVersionNumber newVersion = QVersionNumber::fromString(latestVersion);
             //  qDebug() << currentVersion << newVersion << latestVersion;
              if (newVersion > currentVersion) {
-                QString text("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>");
+                const QString text("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>");
                 QMessageBox msgBox(QMessageBox::Icon::Information, tr("find new version"), text, QMessageBox::StandardButton::Ok, this);
                 msgBox.exec();
                 // QMessageBox::information(this, tr("find new version"), tr("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>"), QMessageBox::StandardButton::Ok);
@@ -421,8 +430,8 @@ void IIPviewer::checkUpdate()
         reply->deleteLater();
         manager->deleteLater();
     }); 
-    QUrl url("https://api.github.com/repos/JonahZeng/IIViewer/releases/latest");
-    QNetworkRequest request(url); 
+    const QUrl url("https://api.github.com/repos/JonahZeng/IIViewer/releases/latest");
+    const QNetworkRequest request(url); 
     manager->get(request);
 }
 
@@ -430,16 +439,15 @@ void IIPviewer::openedFileChanged(const QString &filePath)
 {
     if(filePath == openedFile[LEFT_IMG_WIDGET])
     {
-        QDateTime curNotiyTime = QDateTime::currentDateTime();
-        if(filePath == lastFileWatcherNotifyPath[0] && (lastFileWatcherNotifyTime[0].msecsTo(curNotiyTime) < 100 || lastFileWatcherNotifyIsWaitProcess[0]))
+        const QDateTime curNotiyTime = QDateTime::currentDateTime();
+        if(filePath == lastFileWatcherNotifyPath[0] && (lastFileWatcherNotifyTime[0].msecsTo(curNotiyTime) < 100 || lastFileWatcherNotifyIsWaitProcess[0])) // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         {
             return;
         }
-        else
-        {
-            lastFileWatcherNotifyPath[0] = filePath;
-            lastFileWatcherNotifyTime[0] = curNotiyTime;
-        }
+
+        lastFileWatcherNotifyPath[0] = filePath;
+        lastFileWatcherNotifyTime[0] = curNotiyTime;
+
         auto curModifiedTime = QFileInfo(filePath).lastModified();
         if (curModifiedTime > openedFileLastModifiedTime[LEFT_IMG_WIDGET])
         {
@@ -456,16 +464,15 @@ void IIPviewer::openedFileChanged(const QString &filePath)
     }
     else if(filePath == openedFile[RIGHT_IMG_WIDGET])
     {
-        QDateTime curNotiyTime = QDateTime::currentDateTime();
-        if(filePath == lastFileWatcherNotifyPath[1] && (lastFileWatcherNotifyTime[1].msecsTo(curNotiyTime) < 100 || lastFileWatcherNotifyIsWaitProcess[1]))
+        const QDateTime curNotiyTime = QDateTime::currentDateTime();
+        if(filePath == lastFileWatcherNotifyPath[1] && (lastFileWatcherNotifyTime[1].msecsTo(curNotiyTime) < 100 || lastFileWatcherNotifyIsWaitProcess[1])) // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         {
             return;
         }
-        else
-        {
-            lastFileWatcherNotifyPath[1] = filePath;
-            lastFileWatcherNotifyTime[1] = curNotiyTime;
-        }
+
+        lastFileWatcherNotifyPath[1] = filePath;
+        lastFileWatcherNotifyTime[1] = curNotiyTime;
+
         auto curModifiedTime = QFileInfo(filePath).lastModified();
         if (curModifiedTime > openedFileLastModifiedTime[RIGHT_IMG_WIDGET])
         {
@@ -492,20 +499,20 @@ void IIPviewer::closeEvent(QCloseEvent *event)
     if (reply == QMessageBox::Yes)
     {
         // Save window position and screen info
-        QRect geometry = this->geometry();
-        QPoint center = geometry.center();
-        QScreen *screen = QApplication::screenAt(center);
+        const QRect geometry = this->geometry();
+        const QPoint center = geometry.center();
+        const QScreen *screen = QApplication::screenAt(center);
 
-        if (screen)
+        if (screen != nullptr)
         {
             settings.windowGeometry = geometry;
             settings.windowScreenName = screen->name();
 
             // Verify the screen still exists (multi-screen environment may change)
             bool screenExists = false;
-            for (QScreen *s : QApplication::screens())
+            for (const QScreen *screen_it : QApplication::screens())
             {
-                if (s->name() == screen->name())
+                if (screen_it->name() == screen->name())
                 {
                     screenExists = true;
                     break;
@@ -543,13 +550,13 @@ void IIPviewer::setTitle()
 {
     QString openedFile0_t(openedFile[0]);
     QString openedFile1_t(openedFile[1]);
-    if (openedFile[0].length() > 50)
+    if (openedFile[0].length() > 50) // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     {
-        openedFile0_t = openedFile[0].left(20) + ".........." + openedFile[0].right(20);
+        openedFile0_t = openedFile[0].left(20) + ".........." + openedFile[0].right(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     }
-    if (openedFile[1].length() > 50)
+    if (openedFile[1].length() > 50) // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     {
-        openedFile1_t = openedFile[1].left(20) + ".........." + openedFile[1].right(20);
+        openedFile1_t = openedFile[1].left(20) + ".........." + openedFile[1].right(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     }
     if (openedFile[0].isEmpty() && openedFile[1].isEmpty())
     {
@@ -567,16 +574,16 @@ void IIPviewer::setTitle()
 
 void IIPviewer::addFileToHistory(const QString &filePath)
 {
-    QFileInfo fileInfo(filePath);
-    QString fileName = fileInfo.fileName();
-    
+    QFileInfo const fileInfo(filePath);
+    QString const fileName = fileInfo.fileName();
+
     // Check if file already exists in history
     bool fileExists = false;
     int existingRow = -1;
     for (int i = 0; i < ui.fileHistoryTable->rowCount(); ++i)
     {
-        QTableWidgetItem *item = ui.fileHistoryTable->item(i, 0);
-        if (item && item->data(Qt::UserRole).toString() == filePath)
+        QTableWidgetItem const *item = ui.fileHistoryTable->item(i, 0);
+        if (item != nullptr && item->data(Qt::UserRole).toString() == filePath)
         {
             fileExists = true;
             existingRow = i;
@@ -599,30 +606,29 @@ void IIPviewer::addFileToHistory(const QString &filePath)
         buttonLayout->setSpacing(2);
         
         QPushButton *leftBtn = new QPushButton("L", buttonWidget);
-        leftBtn->setMaximumWidth(25);
+        leftBtn->setMaximumWidth(25); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         leftBtn->setToolTip(QCoreApplication::translate("mainWindow", "Open in left", nullptr));
         connect(leftBtn, &QPushButton::clicked, this, [this, filePath]() {
-            QFileInfo fileInfo(filePath);
+            QFileInfo const fileInfo(filePath);
             if (fileInfo.isFile()) {
                 onCloseLeftFileAction();
-                loadFile(const_cast<QString&>(filePath), LEFT_IMG_WIDGET);
+                loadFile(filePath, LEFT_IMG_WIDGET);
                 masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
                 openedFileWatcher.addPath(filePath);
                 openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(filePath).lastModified();
                 setTitle();
                 emit updateExchangeBtnStatus();
                 emit updateZoomLabelStatus();
-            }
-        });
-        
+            } });
+
         QPushButton *rightBtn = new QPushButton("R", buttonWidget);
-        rightBtn->setMaximumWidth(25);
+        rightBtn->setMaximumWidth(25); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         rightBtn->setToolTip(QCoreApplication::translate("mainWindow", "Open in right", nullptr));
         connect(rightBtn, &QPushButton::clicked, this, [this, filePath]() {
-            QFileInfo fileInfo(filePath);
+            QFileInfo const fileInfo(filePath);
             if (fileInfo.isFile()) {
                 onCloseRightFileAction();
-                loadFile(const_cast<QString&>(filePath), RIGHT_IMG_WIDGET);
+                loadFile(filePath, RIGHT_IMG_WIDGET);
                 masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
                 openedFileWatcher.addPath(filePath);
                 openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = QFileInfo(filePath).lastModified();
@@ -655,13 +661,13 @@ void IIPviewer::addFileToHistory(const QString &filePath)
         buttonLayout->setSpacing(2);
         
         QPushButton *leftBtn = new QPushButton("L", buttonWidget);
-        leftBtn->setMaximumWidth(25);
+        leftBtn->setMaximumWidth(25); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         leftBtn->setToolTip(QCoreApplication::translate("mainWindow", "Open in left", nullptr));
         connect(leftBtn, &QPushButton::clicked, this, [this, filePath]() {
-            QFileInfo fileInfo(filePath);
+            QFileInfo const fileInfo(filePath);
             if (fileInfo.isFile()) {
                 onCloseLeftFileAction();
-                loadFile(const_cast<QString&>(filePath), LEFT_IMG_WIDGET);
+                loadFile(filePath, LEFT_IMG_WIDGET);
                 masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
                 openedFileWatcher.addPath(filePath);
                 openedFileLastModifiedTime[LEFT_IMG_WIDGET] = QFileInfo(filePath).lastModified();
@@ -672,13 +678,13 @@ void IIPviewer::addFileToHistory(const QString &filePath)
         });
         
         QPushButton *rightBtn = new QPushButton("R", buttonWidget);
-        rightBtn->setMaximumWidth(25);
+        rightBtn->setMaximumWidth(25); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         rightBtn->setToolTip(QCoreApplication::translate("mainWindow", "Open in right", nullptr));
         connect(rightBtn, &QPushButton::clicked, this, [this, filePath]() {
-            QFileInfo fileInfo(filePath);
+            const QFileInfo fileInfo(filePath);
             if (fileInfo.isFile()) {
                 onCloseRightFileAction();
-                loadFile(const_cast<QString&>(filePath), RIGHT_IMG_WIDGET);
+                loadFile(filePath, RIGHT_IMG_WIDGET);
                 masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
                 openedFileWatcher.addPath(filePath);
                 openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = QFileInfo(filePath).lastModified();
@@ -695,9 +701,9 @@ void IIPviewer::addFileToHistory(const QString &filePath)
         ui.fileHistoryTable->setCellWidget(0, 1, buttonWidget);
        
         // Remove oldest file if exceeds 50 entries
-        if (ui.fileHistoryTable->rowCount() > 50)
+        if (ui.fileHistoryTable->rowCount() > 50) // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         {
-            ui.fileHistoryTable->removeRow(50);
+            ui.fileHistoryTable->removeRow(50); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
         }
     }
 }
@@ -713,7 +719,7 @@ void IIPviewer::onOpenFileAction()
         return;
     }
 
-    QFileInfo info(fileName);
+    const QFileInfo info(fileName);
     settings.workPath = info.absolutePath();
     if (sender() == static_cast<QObject *>(ui.openFileLeftAction) || sender() == static_cast<QObject*>(ui.imageLabel[LEFT_IMG_WIDGET]))
     {
@@ -742,11 +748,11 @@ void IIPviewer::onOpenFileAction()
  * 
  * @param image 
  */
-void IIPviewer::openGivenFileFromCmdArgv(QString image)
+void IIPviewer::openGivenFileFromCmdArgv(QString& image)
 {
-    QFileInfo info(image);
+    const QFileInfo info(image);
     // qDebug() << info.suffix();
-    QString suf = info.suffix().toLower();
+    const QString suf = info.suffix().toLower();
     if(suf == "jpg" || suf == "png" || suf == "bmp" || suf == "tif" || suf == "tiff" || suf == "raw" || suf == "yuv" || suf == "pnm" || suf == "pgm" || suf == "heic")
     {
         onCloseLeftFileAction();
@@ -775,7 +781,7 @@ void IIPviewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)
 
     if (!openedFile[slave].isEmpty())
     {
-        int zoomIdx = ui.imageLabel[slave]->zoomIdx;
+        const int zoomIdx = ui.imageLabel[slave]->zoomIdx;
         if (zoomIdx > 2)
         {
             ui.imageLabel[master]->zoomIn(zoomIdx);
@@ -794,8 +800,8 @@ void IIPviewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)
     }
     else
     {
-        int scrollAreaClientWidth = ui.scrollArea[master]->width() - ui.scrollArea[master]->verticalScrollBar()->width();
-        int scrollAreaClientHeight = ui.scrollArea[master]->height() - ui.scrollArea[master]->horizontalScrollBar()->height();
+        const int scrollAreaClientWidth = ui.scrollArea[master]->width() - ui.scrollArea[master]->verticalScrollBar()->width();
+        const int scrollAreaClientHeight = ui.scrollArea[master]->height() - ui.scrollArea[master]->horizontalScrollBar()->height();
 
         ui.imageLabelContianer[master]->resize(std::max(scrollAreaClientWidth, originSize[master].width()), std::max(scrollAreaClientHeight, originSize[master].height()));
         int margin_hor = 0;
@@ -810,17 +816,17 @@ void IIPviewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)
         }
         ui.imageLabelContianer[master]->layout()->setContentsMargins(margin_hor, margin_ver, margin_hor, margin_ver);
 
-        int hmax = ui.scrollArea[master]->horizontalScrollBar()->maximum();
-        int hmin = ui.scrollArea[master]->horizontalScrollBar()->minimum();
-        int vmax = ui.scrollArea[master]->verticalScrollBar()->maximum();
-        int vmin = ui.scrollArea[master]->verticalScrollBar()->minimum();
+        const int hmax = ui.scrollArea[master]->horizontalScrollBar()->maximum();
+        const int hmin = ui.scrollArea[master]->horizontalScrollBar()->minimum();
+        const int vmax = ui.scrollArea[master]->verticalScrollBar()->maximum();
+        const int vmin = ui.scrollArea[master]->verticalScrollBar()->minimum();
 
         ui.scrollArea[master]->horizontalScrollBar()->setValue((hmax - hmin) / 2);
         ui.scrollArea[master]->verticalScrollBar()->setValue((vmax - vmin) / 2);
     }
 }
 
-void IIPviewer::reLoadFile(int scrollArea)
+void IIPviewer::reLoadFile(int scrollArea) // NOLINT(readability-function-cognitive-complexity)
 {
     QString& dstFn = openedFile[scrollArea == LEFT_IMG_WIDGET ? 0 : 1];
     if (dstFn.endsWith(".jpg", Qt::CaseInsensitive) || dstFn.endsWith(".jpeg", Qt::CaseInsensitive) || dstFn.endsWith(".png", Qt::CaseInsensitive) || dstFn.endsWith(".bmp", Qt::CaseInsensitive))
@@ -829,8 +835,8 @@ void IIPviewer::reLoadFile(int scrollArea)
         reader.setAutoTransform(true);
         if (!reader.canRead())
         {
-            QString t = QString("can not open ") + dstFn + QString(" as image!");
-            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+            const QString txt_info = QString("can not open ") + dstFn + QString(" as image!");
+            QMessageBox::information(this, tr("error"), txt_info, QMessageBox::StandardButton::Ok);
             return;
         }
 
@@ -895,7 +901,7 @@ void IIPviewer::reLoadFile(int scrollArea)
     }
 }
 
-void IIPviewer::loadFile(QString &fileName, int scrollArea)
+void IIPviewer::loadFile(const QString &fileName, int scrollArea) // NOLINT(readability-function-cognitive-complexity)
 {
     if (fileName.endsWith(".jpg", Qt::CaseInsensitive) || 
         fileName.endsWith(".jpeg", Qt::CaseInsensitive) || 
@@ -908,8 +914,8 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
         reader.setAutoTransform(true);
         if (!reader.canRead())
         {
-            QString t = QString("can not open ") + fileName + QString(" as image!");
-            QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+            const QString txt_info = QString("can not open ") + fileName + QString(" as image!");
+            QMessageBox::information(this, tr("error"), txt_info, QMessageBox::StandardButton::Ok);
             return;
         }
 
@@ -978,7 +984,7 @@ void IIPviewer::loadFile(QString &fileName, int scrollArea)
     }
 }
 
-void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
+void IIPviewer::loadYuvFile(const QString &fileName, int scrollArea, bool reload) // NOLINT(readability-function-cognitive-complexity)
 {
     YuvFileInfoDlg dlg(this);
 
@@ -991,19 +997,18 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     dlg.ui.widthLineEdit->setText(QString::asprintf("%d", settings.yuv_width));
     dlg.ui.heightLineEdit->setText(QString::asprintf("%d", settings.yuv_height));
 
-    int reply = dlg.exec();
-    if (reply != YuvFileInfoDlg::Accepted)
+    if (dlg.exec() != YuvFileInfoDlg::Accepted)
     {
         return;
     }
 
-    int bitDepth = dlg.ui.bitDepthSpinBox->value();
+    const int bitDepth = dlg.ui.bitDepthSpinBox->value();
     int pixSize = 2;
-    if (bitDepth <= 8)
+    if (bitDepth <= BIT8)
     {
         pixSize = 1;
     }
-    else if (bitDepth > 8 && bitDepth <= 16)
+    else if (bitDepth > BIT8 && bitDepth <= BIT16)
     {
         pixSize = 2;
     }
@@ -1013,74 +1018,74 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         return;
     }
 
-    int width = dlg.ui.widthLineEdit->text().toInt();
-    int height = dlg.ui.heightLineEdit->text().toInt();
+    const int width = dlg.ui.widthLineEdit->text().toInt();
+    const int height = dlg.ui.heightLineEdit->text().toInt();
     qint64 totalSize = 0;
-    YuvType tp = YuvType::YUV444_INTERLEAVE;
-    int curIdx = dlg.ui.formatComboBox->currentIndex();
-    if (curIdx == 0)
+    YuvType yuv_tp = YuvType::YUV444_INTERLEAVE;
+    const int curIdx = dlg.ui.formatComboBox->currentIndex();
+    if (curIdx == YuvType::YUV444_INTERLEAVE)
     {
-        tp = YuvType::YUV444_INTERLEAVE;
-        totalSize = width * height * pixSize * 3;
+        yuv_tp = YuvType::YUV444_INTERLEAVE;
+        totalSize = qint64(width) * height * pixSize * 3U;
     }
-    else if (curIdx == 1)
+    else if (curIdx == YuvType::YUV444_PLANAR)
     {
-        tp = YuvType::YUV444_PLANAR;
-        totalSize = width * height * pixSize * 3;
+        yuv_tp = YuvType::YUV444_PLANAR;
+        totalSize = qint64(width) * height * pixSize * 3U;
     }
-    else if (curIdx == 2)
+    else if (curIdx == YuvType::YUV422_UYVY)
     {
-        tp = YuvType::YUV422_UYVY;
-        totalSize = width * height * pixSize * 2;
+        yuv_tp = YuvType::YUV422_UYVY;
+        totalSize = qint64(width) * height * pixSize * 2U;
     }
-    else if (curIdx == 3)
+    else if (curIdx == YuvType::YUV422_YUYV)
     {
-        tp = YuvType::YUV422_YUYV;
-        totalSize = width * height * pixSize * 2;
+        yuv_tp = YuvType::YUV422_YUYV;
+        totalSize = qint64(width) * height * pixSize * 2U;
     }
-    else if (curIdx == 4)
+    else if (curIdx == YuvType::YUV420_NV12)
     {
-        tp = YuvType::YUV420_NV12;
-        totalSize = width * height * pixSize * 3 / 2;
+        yuv_tp = YuvType::YUV420_NV12;
+        totalSize = qint64(width) * height * pixSize * 3U / 2U;
     }
-    else if (curIdx == 5)
+    else if (curIdx == YuvType::YUV420_NV21)
     {
-        tp = YuvType::YUV420_NV21;
-        totalSize = width * height * pixSize * 3 / 2;
+        yuv_tp = YuvType::YUV420_NV21;
+        totalSize = qint64(width) * height * pixSize * 3U / 2U;
     }
-    else if (curIdx == 6)
+    else if (curIdx == YuvType::YUV420P_YU12)
     {
-        tp = YuvType::YUV420P_YU12;
-        totalSize = width * height * pixSize * 3 / 2;
+        yuv_tp = YuvType::YUV420P_YU12;
+        totalSize = qint64(width) * height * pixSize * 3U / 2U;
     }
-    else if (curIdx == 7)
+    else if (curIdx == YuvType::YUV420P_YV12)
     {
-        tp = YuvType::YUV420P_YV12;
-        totalSize = width * height * pixSize * 3 / 2;
+        yuv_tp = YuvType::YUV420P_YV12;
+        totalSize = qint64(width) * height * pixSize * 3U / 2U;
     }
-    else if (curIdx == 8)
+    else if (curIdx == YuvType::YUV400)
     {
-        tp = YuvType::YUV400;
-        totalSize = width * height * pixSize;
+        yuv_tp = YuvType::YUV400;
+        totalSize = qint64(width) * height * pixSize;
     }
-    else if (curIdx == 9)
+    else if (curIdx == YuvType::YUV422_YUYV_AS1)
     {
-        tp = YuvType::YUV422_YUYV_AS1;
-        totalSize = width * height * pixSize * 2;
+        yuv_tp = YuvType::YUV422_YUYV_AS1;
+        totalSize = qint64(width) * height * pixSize * 2U;
     }
-    else if (curIdx == 10)
+    else if (curIdx == YuvType::YUV422_UYVY_AS1)
     {
-        tp = YuvType::YUV422_UYVY_AS1;
-        totalSize = width * height * pixSize * 2;
+        yuv_tp = YuvType::YUV422_UYVY_AS1;
+        totalSize = qint64(width) * height * pixSize * 2U;
     }
 
-    settings.yuvType = tp;
+    settings.yuvType = yuv_tp;
     settings.yuv_bitDepth = bitDepth;
     settings.yuv_width = width;
     settings.yuv_height = height;
 
-    QFileInfo fileInfo(fileName);
-    qint64 yuvFileSize = fileInfo.size();
+    const QFileInfo fileInfo(fileName);
+    const qint64 yuvFileSize = fileInfo.size();
     if (totalSize > yuvFileSize)
     {
         QMessageBox::warning(this, tr("error"), tr("yuv file size < your require"), QMessageBox::StandardButton::Ok);
@@ -1102,7 +1107,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
-        setYuvImage(openedFile[0], tp, bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
+        setYuvImage(openedFile[0], yuv_tp, bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
         if(!reload) { 
             loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
             addFileToHistory(fileName);
@@ -1124,7 +1129,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
-        setYuvImage(openedFile[1], tp, bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
+        setYuvImage(openedFile[1], yuv_tp, bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
         if(!reload) { 
             loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
             addFileToHistory(fileName);
@@ -1132,7 +1137,7 @@ void IIPviewer::loadYuvFile(QString &fileName, int scrollArea, bool reload)
     }
 }
 
-void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
+void IIPviewer::loadRawFile(const QString &fileName, int scrollArea, bool reload) // NOLINT(readability-function-cognitive-complexity)
 {
     RawFileInfoDlg dlg(this);
     switch (settings.rawByType)
@@ -1191,69 +1196,73 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         dlg.ui.big_endian->setChecked(true);
     }
     if(!settings.raw_compact)
+    {
         dlg.ui.BitDepthComboBox->setCurrentText(QString::asprintf("%d", settings.raw_bitDepth));
+    }
     else
+    {
         dlg.ui.BitDepthComboBox->setCurrentText(QString::asprintf("%d-comp", settings.raw_bitDepth));
+    }
 
     dlg.ui.WidthLineEdit->setText(QString::asprintf("%d", settings.raw_width));
     dlg.ui.HeightLineEdit->setText(QString::asprintf("%d", settings.raw_height));
-    int reply = dlg.exec();
-    if (reply != RawFileInfoDlg::Accepted)
+
+    if (dlg.exec() != RawFileInfoDlg::Accepted)
     {
         return;
     }
-    BayerPatternType by = BayerPatternType::BAYER_UNKNOW;
+    BayerPatternType bay = BayerPatternType::BAYER_UNKNOW;
     if (dlg.ui.RGGBRadioButton->isChecked())
     {
-        by = BayerPatternType::RGGB;
+        bay = BayerPatternType::RGGB;
     }
     else if (dlg.ui.GRBGRadioButton->isChecked())
     {
-        by = BayerPatternType::GRBG;
+        bay = BayerPatternType::GRBG;
     }
     else if (dlg.ui.GBRGRadioButton->isChecked())
     {
-        by = BayerPatternType::GBRG;
+        bay = BayerPatternType::GBRG;
     }
     else if (dlg.ui.BGGRRadioButton->isChecked())
     {
-        by = BayerPatternType::BGGR;
+        bay = BayerPatternType::BGGR;
     }
     else if (dlg.ui.RGGIRRadioButton->isChecked())
     {
-        by = BayerPatternType::RGGIR;
+        bay = BayerPatternType::RGGIR;
     }
     else if (dlg.ui.BGGIRRadioButton->isChecked())
     {
-        by = BayerPatternType::BGGIR;
+        bay = BayerPatternType::BGGIR;
     }
     else if (dlg.ui.GRIRGRadioButton->isChecked())
     {
-        by = BayerPatternType::GRIRG;
+        bay = BayerPatternType::GRIRG;
     }
     else if (dlg.ui.GBIRGRadioButton->isChecked())
     {
-        by = BayerPatternType::GBIRG;
+        bay = BayerPatternType::GBIRG;
     }
     else if (dlg.ui.GIRRGRadioButton->isChecked())
     {
-        by = BayerPatternType::GIRRG;
+        bay = BayerPatternType::GIRRG;
     }
     else if (dlg.ui.GIRBGRadioButton->isChecked())
     {
-        by = BayerPatternType::GIRBG;
+        bay = BayerPatternType::GIRBG;
     }
     else if (dlg.ui.IRGGRRadioButton->isChecked())
     {
-        by = BayerPatternType::IRGGR;
+        bay = BayerPatternType::IRGGR;
     }
     else if (dlg.ui.IRGGBRadioButton->isChecked())
     {
-        by = BayerPatternType::IRGGB;
+        bay = BayerPatternType::IRGGB;
     }
     else if (dlg.ui.MONORadioButton->isChecked())
     {
-        by = BayerPatternType::MONO;
+        bay = BayerPatternType::MONO;
     }
 
     auto order = ByteOrderType::RAW_LITTLE_ENDIAN;
@@ -1262,8 +1271,8 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         order = ByteOrderType::RAW_BIG_ENDIAN;
     }
     bool isInt = false;
-    QString bit_option_str = dlg.ui.BitDepthComboBox->currentText();
-    int bitDepth = bit_option_str.toInt(&isInt, 10);
+    const QString bit_option_str = dlg.ui.BitDepthComboBox->currentText();
+    int bitDepth = bit_option_str.toInt(&isInt, 10); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     bool raw_compact = false;
     if(!isInt && bit_option_str.endsWith(QString("-comp"))) // 12-comp, sep by '-'
     {
@@ -1271,10 +1280,10 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         bitDepth = bit_opt_list[0].toInt();
         raw_compact = true;
     }
-    int width = dlg.ui.WidthLineEdit->text().toInt();
-    int height = dlg.ui.HeightLineEdit->text().toInt();
+    const int width = dlg.ui.WidthLineEdit->text().toInt();
+    const int height = dlg.ui.HeightLineEdit->text().toInt();
 
-    settings.rawByType = by;
+    settings.rawByType = bay;
     settings.raw_bitDepth = bitDepth;
     settings.raw_width = width;
     settings.raw_height = height;
@@ -1282,24 +1291,24 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     settings.raw_compact = raw_compact;
 
     int pixSize = 2;
-    if (bitDepth <= 8)
+    if (bitDepth <= BIT8)
     {
         pixSize = 1;
     }
-    else if (bitDepth > 8 && bitDepth <= 16)
+    else if (bitDepth > BIT8 && bitDepth <= BIT16)
     {
         pixSize = 2;
     }
-    else if (bitDepth > 16 && bitDepth <= 32)
+    else if (bitDepth > BIT16 && bitDepth <= BIT32)
     {
         pixSize = 4;
     }
 
-    QFileInfo fileInfo(fileName);
-    qint64 rawFileSize = fileInfo.size();
+    const QFileInfo fileInfo(fileName);
+    const qint64 rawFileSize = fileInfo.size();
     if(raw_compact)
     {
-        if(width * height * bitDepth / 8 > rawFileSize)
+        if(width * height * bitDepth / BIT8 > rawFileSize)
         {
             QMessageBox::information(this, tr("error"), tr("raw file size < your input"), QMessageBox::StandardButton::Ok);
             return;
@@ -1326,7 +1335,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
-        setRawImage(openedFile[0], by, order, bitDepth, raw_compact, width, height, LEFT_IMG_WIDGET);
+        setRawImage(openedFile[0], bay, order, bitDepth, raw_compact, width, height, LEFT_IMG_WIDGET);
         if(!reload) { 
             loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET); 
             addFileToHistory(fileName);
@@ -1348,7 +1357,7 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
-        setRawImage(openedFile[1], by, order, bitDepth, raw_compact, width, height, RIGHT_IMG_WIDGET);
+        setRawImage(openedFile[1], bay, order, bitDepth, raw_compact, width, height, RIGHT_IMG_WIDGET);
         if(!reload) { 
             loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
             addFileToHistory(fileName);
@@ -1356,13 +1365,13 @@ void IIPviewer::loadRawFile(QString &fileName, int scrollArea, bool reload)
     }
 }
 
-void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
+void IIPviewer::loadPnmFile(const QString &fileName, int scrollArea, bool reload)
 {
-    QImageReader reader(fileName);
+    const QImageReader reader(fileName);
     if (!reader.canRead())
     {
-        QString t = QString("can not open ") + fileName + QString(" as image!");
-        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        const QString txt_info = QString("can not open ") + fileName + QString(" as image!");
+        QMessageBox::information(this, tr("error"), txt_info, QMessageBox::StandardButton::Ok);
         return;
     }
     if (scrollArea == LEFT_IMG_WIDGET)
@@ -1411,13 +1420,13 @@ void IIPviewer::loadPnmFile(QString &fileName, int scrollArea, bool reload)
     }
 }
 
-void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
+void IIPviewer::loadPgmFile(const QString &fileName, int scrollArea, bool reload)
 {
-    QImageReader reader(fileName);
+    const QImageReader reader(fileName);
     if (!reader.canRead())
     {
-        QString t = QString("can not open ") + fileName + QString(" as image!");
-        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        const QString txt_info = QString("can not open ") + fileName + QString(" as image!");
+        QMessageBox::information(this, tr("error"), txt_info, QMessageBox::StandardButton::Ok);
         return;
     }
     if (scrollArea == LEFT_IMG_WIDGET)
@@ -1466,48 +1475,48 @@ void IIPviewer::loadPgmFile(QString &fileName, int scrollArea, bool reload)
     }
 }
 
-void IIPviewer::loadHeifFile(QString &fileName, int scrollArea, bool reload)
+void IIPviewer::loadHeifFile(const QString &fileName, int scrollArea, bool reload)
 {
     // Load HEIC image using libheif
     heif_context* ctx = heif_context_alloc();
-    if (!ctx)
+    if (ctx != nullptr)
     {
-        QString t = QString("Failed to allocate heif context for ") + fileName;
-        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        const QString t_info = QString("Failed to allocate heif context for ") + fileName;
+        QMessageBox::information(this, tr("error"), t_info, QMessageBox::StandardButton::Ok);
         return;
     }
 
     heif_error error = heif_context_read_from_file(ctx, fileName.toUtf8().constData(), nullptr);
     if (error.code != heif_error_Ok)
     {
-        QString t = QString("Failed to read HEIC file: ") + fileName + QString("\nError: ") + error.message;
-        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        const QString t_info = QString("Failed to read HEIC file: ") + fileName + QString("\nError: ") + error.message;
+        QMessageBox::information(this, tr("error"), t_info, QMessageBox::StandardButton::Ok);
         heif_context_free(ctx);
         return;
     }
 
-    heif_image_handle* handle;
+    heif_image_handle* handle = nullptr; // NOLINT(misc-const-correctness)
     error = heif_context_get_primary_image_handle(ctx, &handle);
     if (error.code != heif_error_Ok)
     {
-        QString t = QString("Failed to get primary image handle from ") + fileName;
-        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        const QString t_info = QString("Failed to get primary image handle from ") + fileName;
+        QMessageBox::information(this, tr("error"), t_info, QMessageBox::StandardButton::Ok);
         heif_context_free(ctx);
         return;
     }
 
-    int width = heif_image_handle_get_width(handle);
-    int height = heif_image_handle_get_height(handle);
+    const int width = heif_image_handle_get_width(handle);
+    const int height = heif_image_handle_get_height(handle);
 
-    int l_bit_depth = heif_image_handle_get_luma_bits_per_pixel(handle);
-    int c_bit_depth = heif_image_handle_get_chroma_bits_per_pixel(handle);
-    heif_colorspace sp;
-    heif_chroma ch;
-    heif_image_handle_get_preferred_decoding_colorspace(handle, &sp, &ch);
-    if (l_bit_depth > 8 || c_bit_depth > 8 || sp != heif_colorspace::heif_colorspace_YCbCr || ch != heif_chroma::heif_chroma_420)
+    const int l_bit_depth = heif_image_handle_get_luma_bits_per_pixel(handle);
+    const int c_bit_depth = heif_image_handle_get_chroma_bits_per_pixel(handle);
+    heif_colorspace csp = heif_colorspace::heif_colorspace_undefined;
+    heif_chroma cch = heif_chroma::heif_chroma_undefined;
+    heif_image_handle_get_preferred_decoding_colorspace(handle, &csp, &cch);
+    if (l_bit_depth > BIT8 || c_bit_depth > BIT8 || csp != heif_colorspace::heif_colorspace_YCbCr || cch != heif_chroma::heif_chroma_420)
     {
-        QString t = QString("Failed to decode HEIC image: ") + fileName + QString("\nError: ") + QString("not 8bit yuv420 image");
-        QMessageBox::information(this, tr("error"), t, QMessageBox::StandardButton::Ok);
+        const QString txt_info = QString("Failed to decode HEIC image: ") + fileName + QString("\nError: ") + QString("not 8bit yuv420 image");
+        QMessageBox::information(this, tr("error"), txt_info, QMessageBox::StandardButton::Ok);
         heif_image_handle_release(handle);
         heif_context_free(ctx);
         return;
@@ -1573,25 +1582,25 @@ void IIPviewer::setImage(QString &imageName, int leftOrRight)
     ui.imageLabel[leftOrRight]->paintEnd = false;
     ui.imageLabel[leftOrRight]->imgName = &imageName;
     ui.imageLabel[leftOrRight]->setPixmap();
-    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, 9>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
+    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, IMG_PREVIEW_ADJ_CURVE_DOTS>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
 }
 
-void IIPviewer::setRawImage(QString &imageName, BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight)
+void IIPviewer::setRawImage(QString &imageName, BayerPatternType bay, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
     ui.imageLabel[leftOrRight]->imgName = &imageName;
-    ui.imageLabel[leftOrRight]->setPixmap(by, order, bitDepth, compact, width, height);
-    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, 9>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
+    ui.imageLabel[leftOrRight]->setPixmap(bay, order, bitDepth, compact, width, height);
+    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, IMG_PREVIEW_ADJ_CURVE_DOTS>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
 }
 
-void IIPviewer::setYuvImage(QString &imageName, YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)
+void IIPviewer::setYuvImage(QString &imageName, YuvType yuv_tp, int bitDepth, int width, int height, int pixSize, int leftOrRight)
 {
     ui.imageLabel[leftOrRight]->paintBegin = false;
     ui.imageLabel[leftOrRight]->paintEnd = false;
     ui.imageLabel[leftOrRight]->imgName = &imageName;
-    ui.imageLabel[leftOrRight]->setPixmap(tp, bitDepth, width, height, pixSize);
-    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, 9>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
+    ui.imageLabel[leftOrRight]->setPixmap(yuv_tp, bitDepth, width, height, pixSize);
+    ui.imageLabel[leftOrRight]->lastCurve = std::array<QPoint, IMG_PREVIEW_ADJ_CURVE_DOTS>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
 }
 
 void IIPviewer::onCloseLeftFileAction()
@@ -1620,10 +1629,10 @@ void IIPviewer::onCloseLeftFileAction()
     ui.end_x_edit0->clear();
     ui.end_y_edit0->clear();
 
-    int scrollWidth = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().width();
-    int scrollHeight = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().height();
-    int scrollBarWidth = ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar()->width();
-    int scrollBarHeight = ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar()->height();
+    const int scrollWidth = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().width();
+    const int scrollHeight = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().height();
+    const int scrollBarWidth = ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar()->width();
+    const int scrollBarHeight = ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar()->height();
     ui.imageLabelContianer[LEFT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
     ui.imageLabelContianer[LEFT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
 
@@ -1657,10 +1666,10 @@ void IIPviewer::onCloseRightFileAction()
     ui.end_x_edit1->clear();
     ui.end_y_edit1->clear();
 
-    int scrollWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().width();
-    int scrollHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().height();
-    int scrollBarWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->width();
-    int scrollBarHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->height();
+    const int scrollWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().width();
+    const int scrollHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().height();
+    const int scrollBarWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->width();
+    const int scrollBarHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->height();
     ui.imageLabelContianer[RIGHT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
     ui.imageLabelContianer[RIGHT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
 
@@ -1753,7 +1762,7 @@ void IIPviewer::togglePlayListDockWgt(bool checked)
     resizeEvent(&event);
 }
 
-void IIPviewer::syncRightPos()
+void IIPviewer::syncRightPos() const
 {
     ui.start_x_edit1->setText(ui.start_x_edit0->text());
     ui.start_y_edit1->setText(ui.start_y_edit0->text());
@@ -1761,7 +1770,7 @@ void IIPviewer::syncRightPos()
     ui.end_y_edit1->setText(ui.end_y_edit0->text());
 }
 
-void IIPviewer::syncLeftPos()
+void IIPviewer::syncLeftPos() const
 {
     ui.start_x_edit0->setText(ui.start_x_edit1->text());
     ui.start_y_edit0->setText(ui.start_y_edit1->text());
@@ -1769,20 +1778,20 @@ void IIPviewer::syncLeftPos()
     ui.end_y_edit0->setText(ui.end_y_edit1->text());
 }
 
-void IIPviewer::flushPaintPosEdit0(QPointF startPt, QPointF endPt)
+void IIPviewer::flushPaintPosEdit0(QPointF startPt, QPointF endPt) const
 {
-    QPoint realStartPt = startPt.toPoint();
-    QPoint realEndPt = endPt.toPoint();
+    const QPoint realStartPt = startPt.toPoint();
+    const QPoint realEndPt = endPt.toPoint();
     ui.start_x_edit0->setText(QString::asprintf("%d", realStartPt.x()));
     ui.start_y_edit0->setText(QString::asprintf("%d", realStartPt.y()));
     ui.end_x_edit0->setText(QString::asprintf("%d", realEndPt.x()));
     ui.end_y_edit0->setText(QString::asprintf("%d", realEndPt.y()));
 }
 
-void IIPviewer::flushPaintPosEdit1(QPointF startPt, QPointF endPt)
+void IIPviewer::flushPaintPosEdit1(QPointF startPt, QPointF endPt) const
 {
-    QPoint realStartPt = startPt.toPoint();
-    QPoint realEndPt = endPt.toPoint();
+    const QPoint realStartPt = startPt.toPoint();
+    const QPoint realEndPt = endPt.toPoint();
     ui.start_x_edit1->setText(QString::asprintf("%d", realStartPt.x()));
     ui.start_y_edit1->setText(QString::asprintf("%d", realStartPt.y()));
     ui.end_x_edit1->setText(QString::asprintf("%d", realEndPt.x()));
@@ -1792,59 +1801,63 @@ void IIPviewer::flushPaintPosEdit1(QPointF startPt, QPointF endPt)
 void IIPviewer::handleInputPaintPos0()
 {
     if (ui.imageLabel[LEFT_IMG_WIDGET]->pixMap == nullptr)
-        return;
-    if (ui.start_x_edit0->text().length() == 0 || ui.start_y_edit0->text().length() == 0 || ui.end_x_edit0->text().length() == 0 || ui.end_y_edit0->text().length() == 0)
-        return;
-    else
     {
-        int maxWidth = ui.imageLabel[LEFT_IMG_WIDGET]->pixMap->width();
-        int maxHeight = ui.imageLabel[LEFT_IMG_WIDGET]->pixMap->height();
-        int start_x = ui.start_x_edit0->text().toInt();
-        start_x = start_x >= maxWidth ? maxWidth : start_x;
-        int start_y = ui.start_y_edit0->text().toInt();
-        start_y = start_y >= maxHeight ? start_x : start_y;
-        int end_x = ui.end_x_edit0->text().toInt();
-        end_x = end_x >= maxWidth ? maxWidth : end_x;
-        int end_y = ui.end_y_edit0->text().toInt();
-        end_y = end_y >= maxHeight ? maxHeight : end_y;
-        float scale_ratio = ui.imageLabel[0]->zoomList[ui.imageLabel[0]->zoomIdx];
-        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint(start_x * scale_ratio, start_y * scale_ratio);
-        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint(end_x * scale_ratio, end_y * scale_ratio);
-        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint(start_x, start_y);
-        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint(end_x, end_y);
-        ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0f;
-        ui.imageLabel[LEFT_IMG_WIDGET]->paintEnd = true;
-        ui.imageLabel[LEFT_IMG_WIDGET]->repaint();
+        return;
     }
+    if (ui.start_x_edit0->text().length() == 0 || ui.start_y_edit0->text().length() == 0 || ui.end_x_edit0->text().length() == 0 || ui.end_y_edit0->text().length() == 0)
+    {
+        return;
+    }
+
+    const int maxWidth = ui.imageLabel[LEFT_IMG_WIDGET]->pixMap->width();
+    const int maxHeight = ui.imageLabel[LEFT_IMG_WIDGET]->pixMap->height();
+    int start_x = ui.start_x_edit0->text().toInt();
+    start_x = start_x >= maxWidth ? maxWidth : start_x;
+    int start_y = ui.start_y_edit0->text().toInt();
+    start_y = start_y >= maxHeight ? start_x : start_y;
+    int end_x = ui.end_x_edit0->text().toInt();
+    end_x = end_x >= maxWidth ? maxWidth : end_x;
+    int end_y = ui.end_y_edit0->text().toInt();
+    end_y = end_y >= maxHeight ? maxHeight : end_y;
+    const float scale_ratio = ui.imageLabel[0]->zoomList[ui.imageLabel[0]->zoomIdx];
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint(int((float)start_x * scale_ratio), int((float)start_y * scale_ratio));
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint(int((float)end_x * scale_ratio), int((float)end_y * scale_ratio));
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint(start_x, start_y);
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint(end_x, end_y);
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0F;
+    ui.imageLabel[LEFT_IMG_WIDGET]->paintEnd = true;
+    ui.imageLabel[LEFT_IMG_WIDGET]->repaint();
 }
 
 void IIPviewer::handleInputPaintPos1()
 {
     if (ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap == nullptr)
-        return;
-    if (ui.start_x_edit1->text().length() == 0 || ui.start_y_edit1->text().length() == 0 || ui.end_x_edit1->text().length() == 0 || ui.end_y_edit1->text().length() == 0)
-        return;
-    else
     {
-        int maxWidth = ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap->width();
-        int maxHeight = ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap->height();
-        int start_x = ui.start_x_edit1->text().toInt();
-        start_x = start_x >= maxWidth ? maxWidth : start_x;
-        int start_y = ui.start_y_edit1->text().toInt();
-        start_y = start_y >= maxHeight ? start_x : start_y;
-        int end_x = ui.end_x_edit1->text().toInt();
-        end_x = end_x >= maxWidth ? maxWidth : end_x;
-        int end_y = ui.end_y_edit1->text().toInt();
-        end_y = end_y >= maxHeight ? maxHeight : end_y;
-        float scale_ratio = ui.imageLabel[1]->zoomList[ui.imageLabel[1]->zoomIdx];
-        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint(start_x * scale_ratio, start_y * scale_ratio);
-        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint(end_x * scale_ratio, end_y * scale_ratio);
-        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint(start_x, start_y);
-        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint(end_x, end_y);
-        ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0f;
-        ui.imageLabel[RIGHT_IMG_WIDGET]->paintEnd = true;
-        ui.imageLabel[RIGHT_IMG_WIDGET]->repaint();
+        return;
     }
+    if (ui.start_x_edit1->text().length() == 0 || ui.start_y_edit1->text().length() == 0 || ui.end_x_edit1->text().length() == 0 || ui.end_y_edit1->text().length() == 0)
+    {
+        return;
+    }
+
+    const int maxWidth = ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap->width();
+    const int maxHeight = ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap->height();
+    int start_x = ui.start_x_edit1->text().toInt();
+    start_x = start_x >= maxWidth ? maxWidth : start_x;
+    int start_y = ui.start_y_edit1->text().toInt();
+    start_y = start_y >= maxHeight ? start_x : start_y;
+    int end_x = ui.end_x_edit1->text().toInt();
+    end_x = end_x >= maxWidth ? maxWidth : end_x;
+    int end_y = ui.end_y_edit1->text().toInt();
+    end_y = end_y >= maxHeight ? maxHeight : end_y;
+    const float scale_ratio = ui.imageLabel[1]->zoomList[ui.imageLabel[1]->zoomIdx];
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint(int((float)start_x * scale_ratio), int((float)start_y * scale_ratio));
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint(int((float)end_x * scale_ratio), int((float)end_y * scale_ratio));
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint(start_x, start_y);
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint(end_x, end_y);
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0F;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->paintEnd = true;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->repaint();
 }
 
 void IIPviewer::plotRgbContourf()
@@ -1871,13 +1884,12 @@ void IIPviewer::plotRgbContourf()
     {
         return;
     }
-    QPoint st0(ui.start_x_edit0->text().toInt(), ui.start_y_edit0->text().toInt());
-    QPoint st1(ui.end_x_edit0->text().toInt(), ui.end_y_edit0->text().toInt());
+    const QPoint st0(ui.start_x_edit0->text().toInt(), ui.start_y_edit0->text().toInt());
+    const QPoint st1(ui.end_x_edit0->text().toInt(), ui.end_y_edit0->text().toInt());
 
     DataVisualDialog *dlg = new DataVisualDialog(this, leftPrepared, ui.imageLabel[LEFT_IMG_WIDGET], st0, st1);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->exec();
-    return;
 }
 
 void IIPviewer::plotRgbHist()
@@ -1887,14 +1899,13 @@ void IIPviewer::plotRgbHist()
 void IIPviewer::selectPenPaintColor()
 {
     QColorDialog dlg(settings.penColor, this);
-    int reply = dlg.exec();
-    if (reply == QColorDialog::DialogCode::Accepted)
+    if (dlg.exec() == QColorDialog::DialogCode::Accepted)
     {
         settings.penColor = dlg.selectedColor();
         ui.imageLabel[LEFT_IMG_WIDGET]->setPaintPenColor(settings.penColor);
         ui.imageLabel[RIGHT_IMG_WIDGET]->setPaintPenColor(settings.penColor);
     }
-    QPixmap penColorBtnIcon(32, 32);
+    QPixmap penColorBtnIcon(32, 32); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     penColorBtnIcon.fill(settings.penColor);
     ui.penColorSetBtn->setIcon(penColorBtnIcon);
 }
@@ -1983,12 +1994,12 @@ void IIPviewer::clearPaint()
     ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint();
     ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint();
     ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint();
-    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0f;
+    ui.imageLabel[LEFT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0F;
     ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[0] = QPoint();
     ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.paintCoordinates[1] = QPoint();
     ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[0] = QPoint();
     ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originPaintCoordinates[1] = QPoint();
-    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0f;
+    ui.imageLabel[RIGHT_IMG_WIDGET]->ptCodInfo.originScaleRatio = 1.0F;
     ui.imageLabel[LEFT_IMG_WIDGET]->repaint();
     ui.imageLabel[RIGHT_IMG_WIDGET]->repaint();
 }
@@ -1996,12 +2007,14 @@ void IIPviewer::clearPaint()
 void IIPviewer::handleRightMouseBtnDrag0(QPointF startPt, QPointF endPt)
 {
     if (!ui.scrollArea[0]->horizontalScrollBar()->isVisible() && !ui.scrollArea[0]->verticalScrollBar()->isVisible())
+    {
         return;
+    }
     masterScrollarea = ui.scrollArea[0];
-    int curHscrollVal = ui.scrollArea[0]->horizontalScrollBar()->value();
-    int delta_x = int(startPt.x() - endPt.x());
-    int curVscrollVal = ui.scrollArea[0]->verticalScrollBar()->value();
-    int delta_y = int(startPt.y() - endPt.y());
+    const int curHscrollVal = ui.scrollArea[0]->horizontalScrollBar()->value();
+    const int delta_x = int(startPt.x() - endPt.x());
+    const int curVscrollVal = ui.scrollArea[0]->verticalScrollBar()->value();
+    const int delta_y = int(startPt.y() - endPt.y());
     ui.scrollArea[0]->horizontalScrollBar()->setValue(curHscrollVal + delta_x);
     ui.scrollArea[0]->verticalScrollBar()->setValue(curVscrollVal + delta_y);
 }
@@ -2009,12 +2022,14 @@ void IIPviewer::handleRightMouseBtnDrag0(QPointF startPt, QPointF endPt)
 void IIPviewer::handleRightMouseBtnDrag1(QPointF startPt, QPointF endPt)
 {
     if (!ui.scrollArea[1]->horizontalScrollBar()->isVisible() && !ui.scrollArea[1]->verticalScrollBar()->isVisible())
+    {
         return;
+    }
     masterScrollarea = ui.scrollArea[1];
-    int curHscrollVal = ui.scrollArea[1]->horizontalScrollBar()->value();
-    int delta_x = int(startPt.x() - endPt.x());
-    int curVscrollVal = ui.scrollArea[1]->verticalScrollBar()->value();
-    int delta_y = int(startPt.y() - endPt.y());
+    const int curHscrollVal = ui.scrollArea[1]->horizontalScrollBar()->value();
+    const int delta_x = int(startPt.x() - endPt.x());
+    const int curVscrollVal = ui.scrollArea[1]->verticalScrollBar()->value();
+    const int delta_y = int(startPt.y() - endPt.y());
     ui.scrollArea[1]->horizontalScrollBar()->setValue(curHscrollVal + delta_x);
     ui.scrollArea[1]->verticalScrollBar()->setValue(curVscrollVal + delta_y);
 }
@@ -2029,9 +2044,13 @@ void IIPviewer::syncScrollArea1_horScBarVal(int value)
     ui.imageLabel[0]->update(ui.imageLabel[0]->zoomTextRect.toRect());
     ui.imageLabel[0]->update(ui.imageLabel[0]->pixValPaintRect.toRect());
     if (ui.imageLabel[1]->pixMap == nullptr)
+    {
         return;
+    }
     if (masterScrollarea == ui.scrollArea[1])
+    {
         return;
+    }
 
     ui.imageLabelContianer[1]->layout()->setContentsMargins(ui.imageLabelContianer[0]->layout()->contentsMargins());
     ui.imageLabelContianer[1]->resize(ui.imageLabelContianer[0]->size());
@@ -2048,9 +2067,13 @@ void IIPviewer::syncScrollArea1_verScBarVal(int value)
     ui.imageLabel[0]->update(ui.imageLabel[0]->zoomTextRect.toRect());
     ui.imageLabel[0]->update(ui.imageLabel[0]->pixValPaintRect.toRect());
     if (ui.imageLabel[1]->pixMap == nullptr)
+    {
         return;
+    }
     if (masterScrollarea == ui.scrollArea[1])
+    {
         return;
+    }
 
     ui.imageLabelContianer[1]->layout()->setContentsMargins(ui.imageLabelContianer[0]->layout()->contentsMargins());
     ui.imageLabelContianer[1]->resize(ui.imageLabelContianer[0]->size());
@@ -2062,9 +2085,13 @@ void IIPviewer::syncScrollArea0_horScBarVal(int value)
     ui.imageLabel[1]->update(ui.imageLabel[1]->zoomTextRect.toRect());
     ui.imageLabel[1]->update(ui.imageLabel[1]->pixValPaintRect.toRect());
     if (ui.imageLabel[0]->pixMap == nullptr)
+    {
         return;
+    }
     if (masterScrollarea == ui.scrollArea[0])
+    {
         return;
+    }
 
     ui.imageLabelContianer[0]->layout()->setContentsMargins(ui.imageLabelContianer[1]->layout()->contentsMargins());
     ui.imageLabelContianer[0]->resize(ui.imageLabelContianer[1]->size());
@@ -2076,9 +2103,13 @@ void IIPviewer::syncScrollArea0_verScBarVal(int value)
     ui.imageLabel[1]->update(ui.imageLabel[1]->zoomTextRect.toRect());
     ui.imageLabel[1]->update(ui.imageLabel[1]->pixValPaintRect.toRect());
     if (ui.imageLabel[0]->pixMap == nullptr)
+    {
         return;
+    }
     if (masterScrollarea == ui.scrollArea[0])
+    {
         return;
+    }
 
     ui.imageLabelContianer[0]->layout()->setContentsMargins(ui.imageLabelContianer[1]->layout()->contentsMargins());
     ui.imageLabelContianer[0]->resize(ui.imageLabelContianer[1]->size());
@@ -2088,24 +2119,32 @@ void IIPviewer::syncScrollArea0_verScBarVal(int value)
 void IIPviewer::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasUrls())
+    {
         event->acceptProposedAction();
+    }
     else
+    {
         event->ignore();
+    }
 }
 
 void IIPviewer::dropEvent(QDropEvent *event)
 {
-    QRect mainWidget_rect = ui.mainWidget->geometry();
+    const QRect mainWidget_rect = ui.mainWidget->geometry();
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QPointF dropPt = event->posF();
+    const QPointF dropPt = event->posF();
 #else
     QPointF dropPt = event->position();
 #endif
     if (dropPt.x() < mainWidget_rect.left() || dropPt.x() > mainWidget_rect.right() || dropPt.y() < mainWidget_rect.top() || dropPt.y() > mainWidget_rect.bottom())
+    {
         return;
+    }
     const QMimeData *mData = event->mimeData();
     if (!mData->hasUrls())
+    {
         return;
+    }
     auto urlList = mData->urls();
     if (urlList.length() == 1)
     {
@@ -2115,7 +2154,9 @@ void IIPviewer::dropEvent(QDropEvent *event)
         {
             auto fileName0 = urlList[0].toLocalFile();
             if (fileName0.isEmpty())
+            {
                 return;
+            }
             loadFile(fileName0, LEFT_IMG_WIDGET); // 这里删除关闭文件监控
             setTitle();
             masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
@@ -2126,14 +2167,16 @@ void IIPviewer::dropEvent(QDropEvent *event)
         {
             auto fileName0 = urlList[0].toLocalFile();
             if (fileName0.isEmpty())
+            {
                 return;
+            }
             loadFile(fileName0, RIGHT_IMG_WIDGET); // 这里删除关闭文件监控
             setTitle();
             masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
             openedFileWatcher.addPath(fileName0); // 添加新文件监控
             openedFileLastModifiedTime[RIGHT_IMG_WIDGET] = QFileInfo(fileName0).lastModified(); // 记录新文件的修改时间
         }
-        QFileInfo info(urlList[0].toLocalFile());
+        const QFileInfo info(urlList[0].toLocalFile());
         settings.workPath = info.absolutePath();
     }
     else
@@ -2160,20 +2203,20 @@ bool IIPviewer::eventFilter(QObject *obj, QEvent *event)
     {
         if (ui.imageLabel[LEFT_IMG_WIDGET]->pixMap == nullptr)
         {
-            int scrollWidth = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().width();
-            int scrollHeight = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().height();
-            int scrollBarWidth = ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar()->width();
-            int scrollBarHeight = ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar()->height();
+            const int scrollWidth = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().width();
+            const int scrollHeight = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().height();
+            const int scrollBarWidth = ui.scrollArea[LEFT_IMG_WIDGET]->verticalScrollBar()->width();
+            const int scrollBarHeight = ui.scrollArea[LEFT_IMG_WIDGET]->horizontalScrollBar()->height();
             ui.imageLabelContianer[LEFT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
             ui.imageLabelContianer[LEFT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
         }
 
         if (ui.imageLabel[RIGHT_IMG_WIDGET]->pixMap == nullptr)
         {
-            int scrollWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().width();
-            int scrollHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().height();
-            int scrollBarWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->width();
-            int scrollBarHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->height();
+            const int scrollWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().width();
+            const int scrollHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->geometry().height();
+            const int scrollBarWidth = ui.scrollArea[RIGHT_IMG_WIDGET]->verticalScrollBar()->width();
+            const int scrollBarHeight = ui.scrollArea[RIGHT_IMG_WIDGET]->horizontalScrollBar()->height();
             ui.imageLabelContianer[RIGHT_IMG_WIDGET]->resize(scrollWidth - scrollBarWidth, scrollHeight - scrollBarHeight);
             ui.imageLabelContianer[RIGHT_IMG_WIDGET]->layout()->setContentsMargins(0, 0, 0, 0);
         }

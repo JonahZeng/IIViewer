@@ -23,7 +23,7 @@ public:
 public:
     IIPOptionDialog() = delete;
     explicit IIPOptionDialog(QWidget *parent);
-    ~IIPOptionDialog();
+    ~IIPOptionDialog() = default;
 
     void set_uv_disp_mode(int mode)
     {

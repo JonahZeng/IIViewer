@@ -7,7 +7,7 @@ class YuvFileInfoDlg final : public QDialog
 public:
     YuvFileInfoDlg() = delete;
     explicit YuvFileInfoDlg(QWidget *parent);
-    ~YuvFileInfoDlg();
+    ~YuvFileInfoDlg() = default;
 
 public:
     Ui::yuvInfoDialog ui;

@@ -17,11 +17,14 @@ Ui::IIPviewerUi::IIPviewerUi() : openFileLeftAction(nullptr), openFileRightActio
     syncRight(nullptr), syncLeft(nullptr), clearPaintBtn(nullptr), start_x_edit0(nullptr), start_y_edit0(nullptr), 
     start_x_edit1(nullptr), start_y_edit1(nullptr), end_x_edit0(nullptr), end_y_edit0(nullptr), end_x_edit1(nullptr), 
     end_y_edit1(nullptr), plot_rgb_contourf_line(nullptr), plot_rgb_hist(nullptr), plot_yuv_contourf_line(nullptr), 
-    plot_yuv_hist(nullptr), plot_hsv_contourf_line(nullptr), plot_hsv_hist(nullptr)
+    plot_yuv_hist(nullptr), plot_hsv_contourf_line(nullptr), plot_hsv_hist(nullptr),
+    toolBar(nullptr), reloadFileLeftAction(nullptr), reloadFileRightAction(nullptr), workAreaSingleModeAction(nullptr), 
+    workAreaDoubleModeAction(nullptr), checkUpdateAction(nullptr), useRoiToolAction(nullptr), useMoveToolAction(nullptr), 
+    sysOptionAction(nullptr), penColorSetBtn(nullptr), penColorSetAction(nullptr), penWidthSbox(nullptr), penWidthAction(nullptr), 
+    scrollAreaCenterFrame(nullptr), imageLabelContianer{nullptr, nullptr}, zoomRatioLabel(nullptr), exchangeAreaPreviewBtn(nullptr), 
+    imageInfoBtn(nullptr), imageDiffInfoBtn(nullptr), fileHistoryTable(nullptr)
 {
 }
-
-Ui::IIPviewerUi::~IIPviewerUi() {}
 
 void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
 {
@@ -39,22 +42,22 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     // QMenu::item:selected{background-color:#654321;}");
     openFileLeftAction = new QAction(QApplication::translate("mainWindow", "Open file in left", nullptr), mainWindow);
     openFileLeftAction->setIcon(QIcon(":/image/src/resource/file-earmark-left.png"));
-    openFileLeftAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
+    openFileLeftAction->setShortcut(QKeySequence(Qt::CTRL, Qt::Key_L));
     openFileRightAction = new QAction(QApplication::translate("mainWindow", "Open file in right", nullptr), mainWindow);
     openFileRightAction->setIcon(QIcon(":/image/src/resource/file-earmark-right.png"));
-    openFileRightAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
+    openFileRightAction->setShortcut(QKeySequence(Qt::CTRL, Qt::Key_R));
     reloadFileLeftAction = new QAction(QApplication::translate("mainWindow", "Reload left image", nullptr), mainWindow);
     reloadFileLeftAction->setIcon(QIcon(":/image/src/resource/reload-left.png"));
     reloadFileRightAction = new QAction(QApplication::translate("mainWindow", "Reload right image", nullptr), mainWindow);
     reloadFileRightAction->setIcon(QIcon(":/image/src/resource/reload-right.png"));
 
     exitAction = new QAction(QApplication::translate("mainWindow", "Exit", nullptr), mainWindow);
-    exitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q));
+    exitAction->setShortcut(QKeySequence(Qt::CTRL, Qt::Key_Q));
     closeLeftAction = new QAction(QApplication::translate("mainWindow", "Close left image", nullptr), mainWindow);
-    closeLeftAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L));
+    closeLeftAction->setShortcut(QKeySequence(Qt::CTRL, Qt::SHIFT, Qt::Key_L));
     closeLeftAction->setIcon(QIcon(":/image/src/resource/file-x.svg"));
     closeRightAction = new QAction(QApplication::translate("mainWindow", "Close right image", nullptr), mainWindow);
-    closeRightAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R));
+    closeRightAction->setShortcut(QKeySequence(Qt::CTRL, Qt::SHIFT, Qt::Key_R));
     closeRightAction->setIcon(QIcon(":/image/src/resource/file-x.svg"));
     fileMenu->addAction(openFileLeftAction);
     fileMenu->addAction(openFileRightAction);
@@ -96,7 +99,7 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     auto themeStrings = QStyleFactory::keys();
     for (auto &theme : themeStrings)
     {
-        auto themePtr = new QAction(theme, mainWindow);
+        auto *themePtr = new QAction(theme, mainWindow);
         themePtr->setCheckable(true);
         if (theme == themeStrings.first())
         {
@@ -154,19 +157,19 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     toolBar->addAction(useRoiToolAction);
     toolBar->addSeparator();
     penColorSetBtn = new QPushButton(toolBar);
-    QPixmap penColorIcon(32, 32);
+    QPixmap penColorIcon(32, 32); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     penColorIcon.fill(QColor(0, 0, 0));
     penColorSetBtn->setIcon(penColorIcon);
     penColorSetBtn->setStyleSheet("QPushButton {border: none;}"
                                   "QPushButton:hover{background-color:#41a7e0} "
                                   "QPushButton:pressed{background-color:#a7a7a7}");
-    penColorSetBtn->setMinimumWidth(64);
+    penColorSetBtn->setMinimumWidth(64); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     penColorSetBtn->setVisible(false);
     penColorSetBtn->setEnabled(true);
     penColorSetAction = toolBar->addWidget(penColorSetBtn);
     
     penWidthSbox = new QSpinBox(toolBar);
-    penWidthSbox->setRange(1, 32);
+    penWidthSbox->setRange(1, 32); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     penWidthSbox->setSingleStep(1);
     penWidthSbox->setStepType(QSpinBox::StepType::DefaultStepType);
     penWidthSbox->setSuffix("px");
@@ -200,20 +203,20 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     zoomRatioLabel->setAlignment(Qt::AlignmentFlag::AlignHCenter);
 
     exchangeAreaPreviewBtn = new QPushButton();
-    exchangeAreaPreviewBtn->setMaximumWidth(20);
+    exchangeAreaPreviewBtn->setMaximumWidth(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left_w20.png"));
     exchangeAreaPreviewBtn->setStyleSheet("QPushButton{border: none}");
-    exchangeAreaPreviewBtn->setIconSize(QSize(30, 16));
+    exchangeAreaPreviewBtn->setIconSize(QSize(30, 16)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
     imageInfoBtn = new QPushButton();
     imageInfoBtn->setIcon(QIcon(":/image/src/resource/info.svg"));
-    imageInfoBtn->setMaximumWidth(20);
+    imageInfoBtn->setMaximumWidth(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     imageInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
     imageInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show image infomation", nullptr));
 
     imageDiffInfoBtn = new QPushButton();
     imageDiffInfoBtn->setIcon(QIcon(":/image/src/resource/compare_diff.svg"));
-    imageDiffInfoBtn->setMaximumWidth(20);
+    imageDiffInfoBtn->setMaximumWidth(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     imageDiffInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
     imageDiffInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show left and right image difference report", nullptr));
 
@@ -259,15 +262,15 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     QVBoxLayout *vlayout = new QVBoxLayout();
     toolBoxContainer->setLayout(vlayout);
     dataAnalyseDockWgt->setWidget(toolBoxContainer);
-    QIntValidator *imageSizeValidator = new QIntValidator(0, 10000, dataAnalyseDockWgt);
+    const QIntValidator *imageSizeValidator = new QIntValidator(0, 10000, dataAnalyseDockWgt); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     QGridLayout *paintPosLayout0 = new QGridLayout();
     QLabel *start_x_text = new QLabel("start x:");
     start_x_edit0 = new QLineEdit();
-    start_x_edit0->setMaximumWidth(55);
+    start_x_edit0->setMaximumWidth(55); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     start_x_edit0->setValidator(imageSizeValidator);
     QLabel *start_y_text = new QLabel("start y:");
     start_y_edit0 = new QLineEdit();
-    start_y_edit0->setMaximumWidth(55);
+    start_y_edit0->setMaximumWidth(55); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     start_y_edit0->setValidator(imageSizeValidator);
     paintPosLayout0->addWidget(start_x_text, 0, 0, 1, 1);
     paintPosLayout0->addWidget(start_x_edit0, 0, 1, 1, 1);
@@ -275,11 +278,11 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     paintPosLayout0->addWidget(start_y_edit0, 1, 1, 1, 1);
     QLabel *end_x_text = new QLabel("end x:");
     end_x_edit0 = new QLineEdit();
-    end_x_edit0->setMaximumWidth(55);
+    end_x_edit0->setMaximumWidth(55); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     end_x_edit0->setValidator(imageSizeValidator);
     QLabel *end_y_text = new QLabel("end y:");
     end_y_edit0 = new QLineEdit();
-    end_y_edit0->setMaximumWidth(55);
+    end_y_edit0->setMaximumWidth(55); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     end_y_edit0->setValidator(imageSizeValidator);
     paintPosLayout0->addWidget(end_x_text, 2, 0, 1, 1);
     paintPosLayout0->addWidget(end_x_edit0, 2, 1, 1, 1);
@@ -304,11 +307,11 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     QGridLayout *paintPosLayout1 = new QGridLayout();
     QLabel *start_x_text1 = new QLabel("start x:");
     start_x_edit1 = new QLineEdit();
-    start_x_edit1->setMaximumWidth(55);
+    start_x_edit1->setMaximumWidth(55); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     start_x_edit1->setValidator(imageSizeValidator);
     QLabel *start_y_text1 = new QLabel("start y:");
     start_y_edit1 = new QLineEdit();
-    start_y_edit1->setMaximumWidth(55);
+    start_y_edit1->setMaximumWidth(55); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     start_y_edit1->setValidator(imageSizeValidator);
     paintPosLayout1->addWidget(start_x_text1, 0, 0, 1, 1);
     paintPosLayout1->addWidget(start_x_edit1, 0, 1, 1, 1);
@@ -316,11 +319,11 @@ void Ui::IIPviewerUi::createDockWidget0(IIPviewer *mainWindow)
     paintPosLayout1->addWidget(start_y_edit1, 1, 1, 1, 1);
     QLabel *end_x_text1 = new QLabel("end x:");
     end_x_edit1 = new QLineEdit();
-    end_x_edit1->setMaximumWidth(55);
+    end_x_edit1->setMaximumWidth(55); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     end_x_edit1->setValidator(imageSizeValidator);
     QLabel *end_y_text1 = new QLabel("end y:");
     end_y_edit1 = new QLineEdit();
-    end_y_edit1->setMaximumWidth(55);
+    end_y_edit1->setMaximumWidth(55); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     end_y_edit1->setValidator(imageSizeValidator);
     paintPosLayout1->addWidget(end_x_text1, 2, 0, 1, 1);
     paintPosLayout1->addWidget(end_x_edit1, 2, 1, 1, 1);
@@ -437,7 +440,7 @@ void Ui::IIPviewerUi::createDockWidget1(IIPviewer *mainWindow)
     // fileHistoryTable->horizontalHeader()->setStretchLastSection(true);
     fileHistoryTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     fileHistoryTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
-    fileHistoryTable->setColumnWidth(1, 70);
+    fileHistoryTable->setColumnWidth(1, 70); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
     fileHistoryTable->verticalHeader()->setVisible(false);
     fileHistoryTable->setAlternatingRowColors(true);

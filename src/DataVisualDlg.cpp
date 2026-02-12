@@ -4,16 +4,19 @@
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using QtDataVisualization::QSurfaceDataArray;
-using QtDataVisualization::QSurfaceDataItem;
+// using QtDataVisualization::QSurfaceDataItem;
 using QtDataVisualization::QSurfaceDataProxy;
 using QtDataVisualization::QSurfaceDataRow;
 using QtDataVisualization::QValue3DAxis;
 #endif
 
-DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *wg, QPoint st0, QPoint st1)
-    : QDialog(parent), selectionGroup()
+constexpr int BIT8 = 8;
+constexpr int BIT16 = 16;
+constexpr int BIT32 = 32;
+
+DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *wgt, QPoint st0, QPoint st1) // NOLINT(readability-function-cognitive-complexity)
+    : QDialog(parent), graph(new Q3DSurface())
 {
-    graph = new Q3DSurface();
     QWidget *container = QWidget::createWindowContainer(graph, this);
 
     graph->setAxisX(new QValue3DAxis);
@@ -63,12 +66,12 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
     horizontalLayout->addWidget(cancelBtn);
     verticalLayout->addLayout(horizontalLayout);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    verticalLayout->setMargin(8);
+    verticalLayout->setMargin(8); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 #else
-    verticalLayout->setContentsMargins(8, 8, 8, 8);
+    verticalLayout->setContentsMargins(8, 8, 8, 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 #endif
     // setLayout(verticalLayout);
-    resize(1024, 720);
+    resize(1024, 720); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     setWindowTitle(tr("Data Visual"));
 
     QSurfaceDataProxy *seriesProxy0 = new QSurfaceDataProxy();
@@ -85,14 +88,14 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
     series2->setDrawMode(QSurface3DSeries::DrawSurfaceAndWireframe);
     series2->setFlatShadingEnabled(true);
 
-    int leftPos = st0.x() < st1.x() ? st0.x() : st1.x();
-    int width = std::abs(st0.x() - st1.x());
-    int topPos = st0.y() < st1.y() ? st0.y() : st1.y();
-    int height = std::abs(st0.y() - st1.y());
-    int bitPerPixel = 8;
+    const int leftPos = st0.x() < st1.x() ? st0.x() : st1.x();
+    const int width = std::abs(st0.x() - st1.x());
+    const int topPos = st0.y() < st1.y() ? st0.y() : st1.y();
+    const int height = std::abs(st0.y() - st1.y());
+    int bitPerPixel = BIT8;
     if (prepared)
     {
-        if (wg->openedImgType == OpenedImageType::NORMAL_IMG)
+        if (wgt->openedImgType == OpenedImageType::NORMAL_IMG)
         {
             QSurfaceDataArray *dataArray0 = new QSurfaceDataArray;
             QSurfaceDataArray *dataArray1 = new QSurfaceDataArray;
@@ -104,10 +107,10 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
                 QSurfaceDataRow *newRow2 = new QSurfaceDataRow(width);
                 for (int j = 0; j < width; j++)
                 {
-                    wg->pixMap->pixelColor((leftPos + j), (i + topPos)).red();
-                    (*newRow0)[j].setPosition(QVector3D(j, wg->pixMap->pixelColor((leftPos + j), (i + topPos)).red(), i));
-                    (*newRow1)[j].setPosition(QVector3D(j, wg->pixMap->pixelColor((leftPos + j), (i + topPos)).green(), i));
-                    (*newRow2)[j].setPosition(QVector3D(j, wg->pixMap->pixelColor((leftPos + j), (i + topPos)).blue(), i));
+                    wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).red();
+                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).red(), (float)i));
+                    (*newRow1)[j].setPosition(QVector3D((float)j, (float)wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).green(), (float)i));
+                    (*newRow2)[j].setPosition(QVector3D((float)j, (float)wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).blue(), (float)i));
                 }
                 dataArray0->append(newRow0);
                 dataArray1->append(newRow1);
@@ -118,9 +121,9 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
             seriesProxy1->resetArray(dataArray1);
             seriesProxy2->resetArray(dataArray2);
 
-            series0->setBaseColor(QColor(255, 0, 0));
-            series1->setBaseColor(QColor(0, 255, 0));
-            series2->setBaseColor(QColor(0, 0, 255));
+            series0->setBaseColor(QColor(255, 0, 0)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+            series1->setBaseColor(QColor(0, 255, 0)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+            series2->setBaseColor(QColor(0, 0, 255)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
             series0->setVisible(true);
             series1->setVisible(true);
@@ -133,11 +136,11 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
             graph->addSeries(series1);
             graph->addSeries(series2);
         }
-        else if (wg->openedImgType == OpenedImageType::PNM_IMG)
+        else if (wgt->openedImgType == OpenedImageType::PNM_IMG)
         {
-            bitPerPixel = wg->pnmDataBit;
-            uchar *buffer = wg->pnmDataPtr;
-            int lineWidth = wg->pixMap->width();
+            bitPerPixel = wgt->pnmDataBit;
+            uchar *buffer = wgt->pnmDataPtr;
+            const int lineWidth = wgt->pixMap->width();
             QSurfaceDataArray *dataArray0 = new QSurfaceDataArray;
             QSurfaceDataArray *dataArray1 = new QSurfaceDataArray;
             QSurfaceDataArray *dataArray2 = new QSurfaceDataArray;
@@ -148,12 +151,12 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
                 QSurfaceDataRow *newRow2 = new QSurfaceDataRow(width);
                 for (int j = 0; j < width; j++)
                 {
-                    int pix_r = bitPerPixel <= 8 ? buffer[(i + topPos) * lineWidth * 3 + (leftPos + j) * 3 + 0] : ((uint16_t *)buffer)[(i + topPos) * lineWidth * 3 + (leftPos + j) * 3 + 0];
-                    int pix_g = bitPerPixel <= 8 ? buffer[(i + topPos) * lineWidth * 3 + (leftPos + j) * 3 + 1] : ((uint16_t *)buffer)[(i + topPos) * lineWidth * 3 + (leftPos + j) * 3 + 1];
-                    int pix_b = bitPerPixel <= 8 ? buffer[(i + topPos) * lineWidth * 3 + (leftPos + j) * 3 + 2] : ((uint16_t *)buffer)[(i + topPos) * lineWidth * 3 + (leftPos + j) * 3 + 2];
-                    (*newRow0)[j].setPosition(QVector3D(j, pix_r, i));
-                    (*newRow1)[j].setPosition(QVector3D(j, pix_g, i));
-                    (*newRow2)[j].setPosition(QVector3D(j, pix_b, i));
+                    const int pix_r = bitPerPixel <= 8 ? buffer[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 0] : ((uint16_t *)buffer)[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 0];
+                    const int pix_g = bitPerPixel <= 8 ? buffer[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 1] : ((uint16_t *)buffer)[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 1];
+                    const int pix_b = bitPerPixel <= 8 ? buffer[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 2] : ((uint16_t *)buffer)[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 2];
+                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)pix_r, (float)i));
+                    (*newRow1)[j].setPosition(QVector3D((float)j, (float)pix_g, (float)i));
+                    (*newRow2)[j].setPosition(QVector3D((float)j, (float)pix_b, (float)i));
                 }
                 dataArray0->append(newRow0);
                 dataArray1->append(newRow1);
@@ -163,9 +166,9 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
             seriesProxy1->resetArray(dataArray1);
             seriesProxy2->resetArray(dataArray2);
 
-            series0->setBaseColor(QColor(255, 0, 0));
-            series1->setBaseColor(QColor(0, 255, 0));
-            series2->setBaseColor(QColor(0, 0, 255));
+            series0->setBaseColor(QColor(255, 0, 0)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+            series1->setBaseColor(QColor(0, 255, 0)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+            series2->setBaseColor(QColor(0, 0, 255)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
             series0->setVisible(true);
             series1->setVisible(true);
             series2->setVisible(true);
@@ -176,25 +179,25 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
             graph->addSeries(series1);
             graph->addSeries(series2);
         }
-        else if(wg->openedImgType == OpenedImageType::PGM_IMG)
+        else if(wgt->openedImgType == OpenedImageType::PGM_IMG)
         {
-            bitPerPixel = wg->pgmDataBit;
-            uchar *buffer = wg->pgmDataPtr;
-            int lineWidth = wg->pixMap->width();
+            bitPerPixel = wgt->pgmDataBit;
+            uchar *buffer = wgt->pgmDataPtr;
+            const int lineWidth = wgt->pixMap->width();
             QSurfaceDataArray *dataArray0 = new QSurfaceDataArray;
             for (int i = 0; i < height; i++)
             {
                 QSurfaceDataRow *newRow0 = new QSurfaceDataRow(width);
                 for (int j = 0; j < width; j++)
                 {
-                    int pix_gray = bitPerPixel <= 8 ? buffer[(i + topPos) * lineWidth + (leftPos + j)] : ((uint16_t *)buffer)[(i + topPos) * lineWidth + (leftPos + j)];
-                    (*newRow0)[j].setPosition(QVector3D(j, pix_gray, i));
+                    const int pix_gray = bitPerPixel <= 8 ? buffer[((i + topPos) * lineWidth) + (leftPos + j)] : ((uint16_t *)buffer)[((i + topPos) * lineWidth) + (leftPos + j)];
+                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)pix_gray, (float)i));
                 }
                 dataArray0->append(newRow0);
             }
             seriesProxy0->resetArray(dataArray0);
 
-            series0->setBaseColor(QColor(100, 100, 100));
+            series0->setBaseColor(QColor(100, 100, 100)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
             series0->setVisible(true);
 
             dispR->setChecked(true);
@@ -204,11 +207,11 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
             dispG->setDisabled(true);
             dispB->setDisabled(true);
         }
-        else if (wg->openedImgType == OpenedImageType::RAW_IMG)
+        else if (wgt->openedImgType == OpenedImageType::RAW_IMG)
         {
-            bitPerPixel = wg->rawDataBit;
-            uchar *buffer = wg->rawDataPtr;
-            int lineWidth = wg->pixMap->width();
+            bitPerPixel = wgt->rawDataBit;
+            uchar *buffer = wgt->rawDataPtr;
+            const int lineWidth = wgt->pixMap->width();
             QSurfaceDataArray *dataArray0 = new QSurfaceDataArray;
             for (int i = 0; i < height; i++)
             {
@@ -216,18 +219,24 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
                 for (int j = 0; j < width; j++)
                 {
                     int pix_val = 0;
-                    if (bitPerPixel <= 8)
-                        pix_val = buffer[(i + topPos) * lineWidth + (leftPos + j)];
-                    else if (bitPerPixel <= 16)
-                        pix_val = ((uint16_t *)buffer)[(i + topPos) * lineWidth + (leftPos + j)];
-                    else if (bitPerPixel <= 32)
-                        pix_val = ((uint32_t *)buffer)[(i + topPos) * lineWidth + (leftPos + j)];
-                    (*newRow0)[j].setPosition(QVector3D(j, pix_val, i));
+                    if (bitPerPixel <= BIT8)
+                    {
+                        pix_val = buffer[((i + topPos) * lineWidth) + (leftPos + j)];
+                    }
+                    else if (bitPerPixel <= BIT16)
+                    {
+                        pix_val = ((uint16_t *)buffer)[((i + topPos) * lineWidth) + (leftPos + j)];
+                    }
+                    else if (bitPerPixel <= BIT32)
+                    {
+                        pix_val = (int32_t)((uint32_t *)buffer)[((i + topPos) * lineWidth) + (leftPos + j)];
+                    }
+                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)pix_val, (float)i));
                 }
                 dataArray0->append(newRow0);
             }
             seriesProxy0->resetArray(dataArray0);
-            series0->setBaseColor(QColor(160, 160, 160));
+            series0->setBaseColor(QColor(160, 160, 160)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
             series0->setVisible(true);
             // series1->setVisible(false);
             // series2->setVisible(false);
@@ -240,9 +249,9 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
             dispG->setDisabled(true);
             dispB->setDisabled(true);
         }
-        else if (wg->openedImgType == OpenedImageType::YUV_IMG)
+        else if (wgt->openedImgType == OpenedImageType::YUV_IMG)
         {
-            bitPerPixel = wg->yuvDataBit;
+            // bitPerPixel = wg->yuvDataBit;
 
             series0->setVisible(true);
             series1->setVisible(true);
@@ -258,9 +267,9 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
     graph->axisY()->setAutoAdjustRange(true);
     graph->axisZ()->setReversed(true);
     graph->axisZ()->setAutoAdjustRange(true);
-    graph->axisX()->setLabelAutoRotation(30);
-    graph->axisY()->setLabelAutoRotation(90);
-    graph->axisZ()->setLabelAutoRotation(30);
+    graph->axisX()->setLabelAutoRotation(30); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    graph->axisY()->setLabelAutoRotation(90); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    graph->axisZ()->setLabelAutoRotation(30); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
     graph->setSelectionMode(Q3DSurface::SelectionNone);
 
@@ -274,16 +283,25 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
             { this->series2->setVisible(checked); });
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    connect(&selectionGroup, &QButtonGroup::idClicked, this, [this](int id)
-            {
-        if (id == 1)
+    connect(&selectionGroup, &QButtonGroup::idClicked, this, [this](int idx)
+    {
+        if (idx == 1)
+        {
             this->graph->setSelectionMode(Q3DSurface::SelectionNone);
-        else if (id == 2)
+        }
+        else if (idx == 2)
+        {
             this->graph->setSelectionMode(Q3DSurface::SelectionItem);
-        else if (id == 3)
+        }
+        else if (idx == 3)
+        {
             this->graph->setSelectionMode(Q3DSurface::SelectionItemAndRow | Q3DSurface::SelectionSlice | Q3DSurface::SelectionMultiSeries);
-        else if (id == 4)
-            this->graph->setSelectionMode(Q3DSurface::SelectionItemAndColumn | Q3DSurface::SelectionSlice | Q3DSurface::SelectionMultiSeries); });
+        }
+        else if (idx == 4)
+        {
+            this->graph->setSelectionMode(Q3DSurface::SelectionItemAndColumn | Q3DSurface::SelectionSlice | Q3DSurface::SelectionMultiSeries);
+        }
+    });
 #else
     connect(&selectionGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
             [=](QAbstractButton *button)

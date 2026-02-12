@@ -12,7 +12,7 @@ public:
     {
     }
 
-    void setImgInfo(QString &filePath, QSize &imgSize, BayerPatternType by, YuvType yt, int bits, bool left);
+    void setImgInfo(QString &filePath, QSize &imgSize, BayerPatternType bay, YuvType yuv_tp, int bits, bool left);
     
 private:
     QLabel *leftLabel;

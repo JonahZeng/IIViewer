@@ -10,7 +10,3 @@ RawFileInfoDlg::RawFileInfoDlg(QWidget* parent)
     //    ui.WidthLineEdit->setValidator(validator);
     //    ui.HeightLineEdit->setValidator(validator);
 }
-
-RawFileInfoDlg::~RawFileInfoDlg()
-{
-}

@@ -12,7 +12,7 @@ class IIPviewer final: public QMainWindow
     Q_OBJECT
 
 public:
-    explicit IIPviewer(QString needOpenFilePath, QWidget *parent = nullptr);
+    explicit IIPviewer(QString& needOpenFilePath, QWidget *parent = nullptr);
     virtual ~IIPviewer();
     void setTitle();
     void closeEvent(QCloseEvent *event) override;
@@ -21,18 +21,18 @@ public:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
-    void loadFile(QString &fileName, int scrollArea);
+    void loadFile(const QString &fileName, int scrollArea);
     void reLoadFile(int scrollArea);
-    void loadYuvFile(QString &fileName, int scrollArea, bool reload=false);
-    void loadRawFile(QString &fileName, int scrollArea, bool reload=false);
-    void loadPnmFile(QString &fileName, int scrollArea, bool reload=false);
-    void loadPgmFile(QString &fileName, int scrollArea, bool reload=false);
-    void loadHeifFile(QString &fileName, int scrollArea, bool reload=false);
+    void loadYuvFile(const QString &fileName, int scrollArea, bool reload=false);
+    void loadRawFile(const QString &fileName, int scrollArea, bool reload=false);
+    void loadPnmFile(const QString &fileName, int scrollArea, bool reload=false);
+    void loadPgmFile(const QString &fileName, int scrollArea, bool reload=false);
+    void loadHeifFile(const QString &fileName, int scrollArea, bool reload=false);
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
-    void setRawImage(QString &image, BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
-    void openGivenFileFromCmdArgv(QString image);
+    void setRawImage(QString &image, BayerPatternType bay, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
+    void openGivenFileFromCmdArgv(QString& image);
     void addFileToHistory(const QString &filePath);
 
 protected:
@@ -52,10 +52,10 @@ public slots:
     void onSysOptionAction(bool check);
     void toggleDataAnalyseDockWgt(bool checked);
     void togglePlayListDockWgt(bool checked);
-    void syncRightPos();
-    void syncLeftPos();
-    void flushPaintPosEdit0(QPointF startPt, QPointF endPt);
-    void flushPaintPosEdit1(QPointF startPt, QPointF endPt);
+    void syncRightPos() const;
+    void syncLeftPos() const;
+    void flushPaintPosEdit0(QPointF startPt, QPointF endPt) const;
+    void flushPaintPosEdit1(QPointF startPt, QPointF endPt) const;
     void handleInputPaintPos0();
     void handleInputPaintPos1();
     void plotRgbContourf();
@@ -92,7 +92,7 @@ public slots:
 signals:
     void updateExchangeBtnStatus();
     void updateZoomLabelStatus();
-    void needOpenFileFromCmdArgv(QString image);
+    void needOpenFileFromCmdArgv(QString& image);
 
 public:
     Ui::IIPviewerUi ui;

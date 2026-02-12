@@ -21,6 +21,7 @@ struct PaintCoordinateInfo {
 };
 
 #define ZOOM_LIST_LENGTH 13
+constexpr int IMG_PREVIEW_ADJ_CURVE_DOTS = 9;
 
 class ImageWidget final : public QWidget
 {
@@ -126,7 +127,7 @@ public:
     OpenedImageType openedImgType;
     AppSettings* appSettings; // app设置信息，会通过顶层IIPviewer(QMainWindow)传递过来，只使用不持有
     QString* imgName; // 保存IIPviewer::openedFile
-    std::array<QPoint, 9> lastCurve;
+    std::array<QPoint, IMG_PREVIEW_ADJ_CURVE_DOTS> lastCurve;
 
 private:
     QImage *pixMapBak;
