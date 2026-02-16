@@ -63,11 +63,6 @@ jobs:
         file $(brew --prefix qt@5)/lib/QtWidgets.framework/Versions/5/QtWidgets
         ls $(brew --prefix qt@5)/lib/cmake/Qt5
 
-    # - name: Install create-dmg
-    #   run: |
-    #     brew install create-dmg
-    #     ls $(brew --prefix create-dmg)/bin
-
     - uses: actions/checkout@v4
       with:
         submodules: recursive
@@ -139,20 +134,25 @@ jobs:
 
     - name: Install
       run: cmake --install ${{github.workspace}}/build
+    
+    - name: Prepare writable Qt frameworks
+      run: |
+        cd ${{github.workspace}}
+        mkdir -p qt_clean
+        cp -R $(brew --prefix qt@5)/lib qt_clean/
+        sudo chflags -R nouchg qt_clean/lib || true
+        sudo xattr -cr qt_clean/lib || true
 
-    # - name: Create DMG package
-    #   working-directory: ${{github.workspace}}/build
-    #   run: |
-    #     mkdir -p IIViewer.app/Contents/MacOS
-    #     mkdir -p IIViewer.app/Contents/Resources
-    #     cp -r install/* IIViewer.app/Contents/MacOS/
-    #     cp ${{github.workspace}}/icon/IIViewer_256.png IIViewer.app/Contents/Resources/icon.icns
-    #     $(brew --prefix create-dmg)/bin/create-dmg \
-    #     --volname "IIViewer Installer" \
-    #     --window-pos 200 120 \
-    #     --window-size 600 400 \
-    #     --icon-size 100 \
-    #     --app-drop-link 500 200 \
-    #     IIViewer.dmg \
-    #     IIViewer.app
+    - name: MacDeployQt
+      run: |
+        cd ${{github.workspace}}/bin/${{env.BUILD_TYPE}}
+        $(brew --prefix qt@5)/bin/macdeployqt ./IIViewer.app -libpath=${{github.workspace}}/qt_clean/lib
 
+    - name: Fix permissions & sign
+      run: |
+        cd ${{github.workspace}}/bin/${{env.BUILD_TYPE}}
+        sudo chmod -R u+w IIViewer.app
+        sudo chmod -R a-w IIViewer.app/Contents/Frameworks
+        sudo xattr -cr IIViewer.app || true
+        sudo codesign --deep --force -s - IIViewer.app
+        sudo codesign --verify --deep --strict IIViewer.app

@@ -2,7 +2,7 @@
 #include <QColorDialog>
 
 
-IIPOptionDialog::IIPOptionDialog(QWidget *parent): QDialog(parent), ui(), pix_val_bg_color_index(PaintPixValBgColor::GRAY)
+IIPOptionDialog::IIPOptionDialog(QWidget *parent): QDialog(parent), pix_val_bg_color_index(PaintPixValBgColor::GRAY), ui()
 {
     ui.setupUi(this);
     ui.paint_pix_val_bg_color_comboBox->setItemIcon(PaintPixValBgColor::NONE, QIcon()); 

@@ -10,19 +10,24 @@
 #include <QStyleFactory>
 #include "IIPviewer.h"
 
-Ui::IIPviewerUi::IIPviewerUi() : openFileLeftAction(nullptr), openFileRightAction(nullptr), exitAction(nullptr), 
+Ui::IIPviewerUi::IIPviewerUi() : toolBar(nullptr), openFileLeftAction(nullptr), openFileRightAction(nullptr),
+    reloadFileLeftAction(nullptr), reloadFileRightAction(nullptr),
+    exitAction(nullptr),
     closeLeftAction(nullptr), closeRightAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), // aboutQtAction(nullptr), 
-    aboutThisAction(nullptr), mainWidget(nullptr), scrollArea{nullptr, nullptr}, imageLabel{nullptr, nullptr}, 
-    dataAnalyseDockWgt(nullptr), playListDockWgt(nullptr), paintOk0(nullptr), paintOk1(nullptr), 
-    syncRight(nullptr), syncLeft(nullptr), clearPaintBtn(nullptr), start_x_edit0(nullptr), start_y_edit0(nullptr), 
-    start_x_edit1(nullptr), start_y_edit1(nullptr), end_x_edit0(nullptr), end_y_edit0(nullptr), end_x_edit1(nullptr), 
-    end_y_edit1(nullptr), plot_rgb_contourf_line(nullptr), plot_rgb_hist(nullptr), plot_yuv_contourf_line(nullptr), 
-    plot_yuv_hist(nullptr), plot_hsv_contourf_line(nullptr), plot_hsv_hist(nullptr),
-    toolBar(nullptr), reloadFileLeftAction(nullptr), reloadFileRightAction(nullptr), workAreaSingleModeAction(nullptr), 
-    workAreaDoubleModeAction(nullptr), checkUpdateAction(nullptr), useRoiToolAction(nullptr), useMoveToolAction(nullptr), 
-    sysOptionAction(nullptr), penColorSetBtn(nullptr), penColorSetAction(nullptr), penWidthSbox(nullptr), penWidthAction(nullptr), 
-    scrollAreaCenterFrame(nullptr), imageLabelContianer{nullptr, nullptr}, zoomRatioLabel(nullptr), exchangeAreaPreviewBtn(nullptr), 
-    imageInfoBtn(nullptr), imageDiffInfoBtn(nullptr), fileHistoryTable(nullptr)
+    workAreaSingleModeAction(nullptr), workAreaDoubleModeAction(nullptr),
+    aboutThisAction(nullptr), checkUpdateAction(nullptr), useRoiToolAction(nullptr), useMoveToolAction(nullptr),
+    sysOptionAction(nullptr), penColorSetBtn(nullptr), penColorSetAction(nullptr), penWidthSbox(nullptr), penWidthAction(nullptr),
+    mainWidget(nullptr),
+    scrollArea{nullptr, nullptr}, scrollAreaCenterFrame(nullptr), imageLabelContianer{nullptr, nullptr}, imageLabel{nullptr, nullptr},
+    zoomRatioLabel(nullptr), exchangeAreaPreviewBtn(nullptr),
+    imageInfoBtn(nullptr), imageDiffInfoBtn(nullptr),
+    dataAnalyseDockWgt(nullptr), playListDockWgt(nullptr), paintOk0(nullptr), paintOk1(nullptr),
+    syncRight(nullptr), syncLeft(nullptr), clearPaintBtn(nullptr), start_x_edit0(nullptr), start_y_edit0(nullptr),
+    start_x_edit1(nullptr), start_y_edit1(nullptr), end_x_edit0(nullptr), end_y_edit0(nullptr), end_x_edit1(nullptr),
+    end_y_edit1(nullptr),
+    plot_rgb_contourf_line(nullptr), plot_rgb_hist(nullptr), plot_yuv_contourf_line(nullptr),
+    plot_yuv_hist(nullptr), plot_hsv_contourf_line(nullptr),
+    plot_hsv_hist(nullptr), fileHistoryTable(nullptr)
 {
 }
 

@@ -32,7 +32,7 @@ constexpr int LEFT_IMG_WIDGET = 0;
 constexpr int RIGHT_IMG_WIDGET = 1;
 constexpr int BIT8 = 8;
 constexpr int BIT16 = 16;
-constexpr int BIT24 = 24;
+// constexpr int BIT24 = 24;
 constexpr int BIT32 = 32;
 
 IIPviewer::IIPviewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readability-function-cognitive-complexity)
