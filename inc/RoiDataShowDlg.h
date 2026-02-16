@@ -9,7 +9,7 @@ class RoiDataShowDlg final : public QDialog
 public:
     RoiDataShowDlg() = delete;
     explicit RoiDataShowDlg(QWidget *parent);
-    ~RoiDataShowDlg();
+    ~RoiDataShowDlg() = default;
     void setRoiExportText(const QString&);
 
 public slots:

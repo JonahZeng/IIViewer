@@ -14,7 +14,7 @@ void ImgDiffReportDlg::initUI()
     vlayout->addWidget(diffInfoEdit, 1);
 
     setLayout(vlayout);
-    resize(768, 320);
+    resize(768, 320); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     setWindowTitle(tr("img difference report"));
 }
 

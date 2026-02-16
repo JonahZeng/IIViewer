@@ -16,18 +16,15 @@
 #include <QGraphicsSceneEvent>
 
 
-CurveAdjustChart::CurveAdjustChart(quint16 srcImgBits) : QChart(), m_currentSpSeries(nullptr), m_currentScaSeries(nullptr)
+CurveAdjustChart::CurveAdjustChart(quint16 srcImgBits) : m_currentSpSeries(nullptr), m_currentScaSeries(nullptr),
+    m_selectedPointIdx(-1), m_dragging(false), m_srcImgBits(srcImgBits)
 {
-    m_selectedPointIdx = -1;
-    m_dragging = false;
-    m_srcImgBits = srcImgBits;
-
     initUI();
 }
 
 void CurveAdjustChart::initUI()
 {
-    quint32 x_max = (1u << m_srcImgBits) - 1;
+    const quint32 x_max = (1U << m_srcImgBits) - 1U;
     // 创建坐标轴
     QValueAxis* m_axisX = new QValueAxis();
     QValueAxis* m_axisY = new QValueAxis();
@@ -58,24 +55,19 @@ void CurveAdjustChart::initUI()
     connect(m_currentScaSeries, &QScatterSeries::pressed, this, &CurveAdjustChart::pointSelected);
 }
 
-CurveAdjustChart::~CurveAdjustChart()
-{
-
-}
-
 void CurveAdjustChart::pointSelected(QPointF pst)
 {
-    int k = 0;
-    for(QPointF& pt: m_currentScaSeries->points())
+    int k_cnt = 0;
+    for(const QPointF& p_t: m_currentScaSeries->points())
     {
-        if(pt == pst)
+        if(p_t == pst)
         {
-            m_selectedPointIdx = k;
+            m_selectedPointIdx = k_cnt;
             m_dragging = true;
             grabMouse();
             break;
         }
-        k += 1;
+        k_cnt += 1;
     }
 }
 
@@ -128,10 +120,6 @@ CurveAdjustDialog::CurveAdjustDialog(QImage *disp_image, void* src_img, OpenedIm
     calculateSplineLutFromCurve();
 }
 
-CurveAdjustDialog::~CurveAdjustDialog()
-{
-}
-
 void CurveAdjustDialog::initUI()
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
@@ -170,7 +158,7 @@ void CurveAdjustDialog::initUI()
 
 void CurveAdjustDialog::updateChartFromCurve()
 {
-    QColor curveColor = Qt::GlobalColor::black;
+    const QColor curveColor = Qt::GlobalColor::black;
 
     m_chart->m_currentSpSeries->clear();
     m_chart->m_currentScaSeries->clear();

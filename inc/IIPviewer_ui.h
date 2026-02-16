@@ -21,7 +21,7 @@ namespace Ui
     {
     public:
         IIPviewerUi();
-        ~IIPviewerUi();
+        ~IIPviewerUi() = default;
         void setupUi(IIPviewer *mainWindow);
 
     public:

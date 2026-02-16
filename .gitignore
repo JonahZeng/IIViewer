@@ -79,3 +79,4 @@ CMakeSettings.json
 build/
 thirdparty/libde265
 thirdparty/libheif
+.cache

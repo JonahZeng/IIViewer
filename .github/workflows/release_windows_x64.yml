@@ -123,7 +123,7 @@ jobs:
       run: choco install nsis -y
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}\build -S ${{github.workspace}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\build\install
+      run: cmake -B ${{github.workspace}}\build -S ${{github.workspace}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\build\install -DCI_MODE=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}\build --config Release

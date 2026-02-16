@@ -8,7 +8,7 @@ class RawFileInfoDlg final : public QDialog
 public:
     RawFileInfoDlg() = delete;
     explicit RawFileInfoDlg(QWidget *parent);
-    ~RawFileInfoDlg();
+    ~RawFileInfoDlg() = default;
 
 public:
     Ui::RawFileInfoDialog ui;

@@ -5,85 +5,79 @@
 #include <QJsonDocument>
 #include <QStyleFactory>
 
-AppSettings::AppSettings()
+AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE), 
+    yuv_bitDepth(8), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    yuv_width(0),
+    yuv_height(0),
+    rawByType(BayerPatternType::RGGB),
+    raw_bitDepth(8), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    raw_width(0),
+    raw_height(0),
+    rawByteOrder(ByteOrderType::RAW_LITTLE_ENDIAN),
+    raw_compact(false),
+    uv_value_disp_mode(0), // 0:0=gray 1: half-max=gray 
+    pix_val_bg_index(IIPOptionDialog::PaintPixValBgColor::RED),
+    pix_val_cus_bg_color(QColor(0, 0, 0)),
+    workAreaDoubleImgMode(false),
+    windowMaximized(false)
 {
     workPath = QDir::homePath();
-    yuvType = YuvType::YUV444_INTERLEAVE;
-    yuv_bitDepth = 8;
-    yuv_width = 0;
-    yuv_height = 0;
-    rawByType = BayerPatternType::RGGB;
-    raw_bitDepth = 8;
-    raw_width = 0;
-    raw_height = 0;
-    rawByteOrder = ByteOrderType::RAW_LITTLE_ENDIAN;
-    uv_value_disp_mode = 0; // 0:0=gray 1: half-max=gray 
     theme = QStyleFactory::keys().first();
-    windowGeometry = QRect(0, 0, 800, 600);
-}
-
-AppSettings::~AppSettings()
-{
+    windowGeometry = QRect(0, 0, 800, 600);  // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }
 
 bool AppSettings::loadSettingsFromFile()
 {
-    QString appName = QCoreApplication::applicationName();
-    QString appConfigDir = QString(".") + appName;
+    const QString appName = QCoreApplication::applicationName();
+    const QString appConfigDir = QString(".") + appName;
     const QChar sep = QDir::separator();
 
-    QDir directory(QDir::homePath());
+    const QDir directory(QDir::homePath());
     if (!directory.exists(appConfigDir))
     {
         directory.mkpath(appConfigDir);
     }
-    QString targetJsonPath = directory.filePath(appConfigDir + sep + appName + ".json");
-    QFileInfo info(targetJsonPath);
+    const QString targetJsonPath = directory.filePath(appConfigDir + sep + appName + ".json");
+    const QFileInfo info(targetJsonPath);
     if (info.exists() && info.isFile())
     {
-        QFile jf(targetJsonPath);
-        if (jf.open(QIODevice::ReadOnly | QIODevice::Text))
+        QFile json_file(targetJsonPath);
+        if (json_file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            auto context = jf.readAll();
+            auto context = json_file.readAll();
             read(QJsonDocument::fromJson(context).object());
-            jf.close();
+            json_file.close();
             return true;
         }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
         return false;
     }
+    return false;
 }
 
 void AppSettings::dumpSettingsToFile()
 {
-    QString appName = QCoreApplication::applicationName();
-    QString appConfigDir = QString(".") + appName;
+    const QString appName = QCoreApplication::applicationName();
+    const QString appConfigDir = QString(".") + appName;
     const QChar sep = QDir::separator();
 
-    QDir directory(QDir::homePath());
+    const QDir directory(QDir::homePath());
     if (!directory.exists(appConfigDir))
     {
         directory.mkpath(appConfigDir);
     }
-    QString targetJsonPath = directory.filePath(appConfigDir + sep + appName + ".json");
+    const QString targetJsonPath = directory.filePath(appConfigDir + sep + appName + ".json");
 
-    QFile jf(targetJsonPath);
-    if (jf.open(QIODevice::WriteOnly | QIODevice::Text))
+    QFile json_f(targetJsonPath);
+    if (json_f.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         QJsonObject targetObj;
         write(targetObj);
-        jf.write(QJsonDocument(targetObj).toJson());
-        jf.close();
+        json_f.write(QJsonDocument(targetObj).toJson());
+        json_f.close();
     }
 }
 
-void AppSettings::read(const QJsonObject& json)
+void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-cognitive-complexity)
 {
     if (json.contains("workPath"))
     {
