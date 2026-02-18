@@ -133,14 +133,14 @@ jobs:
         cd ${{github.workspace}}
         # 确保脚本有执行权限
         chmod +x scripts/create_dmg.sh
-        # 从tag获取版本号（去掉v前缀）
-        VERSION="${GITHUB_REF#refs/tags/v}"
-        echo "版本号: $VERSION"
-        # 如果版本号为空，使用默认值
-        if [ -z "$VERSION" ]; then
-          VERSION="0.1.0"
-          echo "使用默认版本号: $VERSION"
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+          VERSION="pr-${GITHUB_HEAD_REF}-${GITHUB_SHA::7}"
+        else
+          VERSION="dev-${GITHUB_SHA::7}"
         fi
+        echo "VERSION=$VERSION"
         # 创建DMG
         sudo ./scripts/create_dmg.sh bin/${{env.BUILD_TYPE}}/IIViewer.app "$VERSION" dist
         # 列出生成的文件
