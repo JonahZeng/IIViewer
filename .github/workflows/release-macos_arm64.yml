@@ -1,0 +1,181 @@
+name: Release Macos arm64
+
+on:
+  push:
+    tags:
+      - 'v*'  # 匹配v开头的tag
+permissions:
+  contents: write   # 关键：允许创建/更新 Release
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Install Homebrew
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    - name: Install Qt5 (ARM64)
+      run: |
+        brew install qt@5
+        echo 'export PATH="$(brew --prefix qt@5)/bin:$PATH"' >> $GITHUB_ENV
+        echo 'export LDFLAGS="-L$(brew --prefix qt@5)/lib"' >> $GITHUB_ENV
+        echo 'export CPPFLAGS="-I$(brew --prefix qt@5)/include"' >> $GITHUB_ENV
+        echo 'export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"' >> $GITHUB_ENV
+        echo 'export Qt5_DIR="$(brew --prefix qt@5)/lib/cmake/Qt5"' >> $GITHUB_ENV
+
+    - name: Verify Qt Installation
+      run: |
+        file $(brew --prefix qt@5)/lib/QtWidgets.framework/Versions/5/QtWidgets
+        ls $(brew --prefix qt@5)/lib/cmake/Qt5
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Build libde265
+      run: |
+        cd ${{github.workspace}}
+        wget https://github.com/strukturag/libde265/releases/download/v1.0.16/libde265-1.0.16.tar.gz
+        tar -zxf libde265-1.0.16.tar.gz
+        cd libde265-1.0.16
+        mkdir build
+        cd build
+        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libde265/apple
+        cmake --build . -j 4
+        cmake --install .
+    - name: Build libheif
+      run: |
+        cd ${{github.workspace}}
+        wget https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz
+        tar -zxf libheif-1.21.2.tar.gz
+        cd libheif-1.21.2
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libheif/apple \
+          -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -DLIBDE265_STATIC_BUILD" \
+          -DWITH_LIBDE265=ON \
+          -DWITH_X265=OFF \
+          -DWITH_KVAZAAR=OFF \
+          -DWITH_UVG266=OFF \
+          -DWITH_VVDEC=OFF \
+          -DWITH_VVENC=OFF \
+          -DWITH_X264=OFF \
+          -DWITH_OpenH264_ENCODER=OFF \
+          -DWITH_OpenH264_DECODER=OFF \
+          -DWITH_DAV1D=OFF \
+          -DWITH_AOM_ENCODER=OFF \
+          -DWITH_AOM_DECODER=OFF \
+          -DWITH_SvtEnc=OFF \
+          -DWITH_RAV1E=OFF \
+          -DWITH_JPEG_ENCODER=OFF \
+          -DWITH_JPEG_DECODER=OFF \
+          -DWITH_OpenJPEG_ENCODER=OFF \
+          -DWITH_OpenJPEG_DECODER=OFF \
+          -DWITH_FFMPEG_DECODER=OFF \
+          -DWITH_OPENJPH_ENCODER=OFF \
+          -DWITH_OPENJPH_DECODER=OFF \
+          -DWITH_UNCOMPRESSED_CODEC=OFF \
+          -DWITH_WEBCODECS=OFF \
+          -DWITH_LIBSHARPYUV=OFF \
+          -DWITH_EXAMPLES=OFF \
+          -DWITH_EXAMPLE_HEIF_THUMB=OFF \
+          -DWITH_EXAMPLE_HEIF_VIEW=OFF \
+          -DWITH_GDK_PIXBUF=OFF \
+          -DBUILD_DOCUMENTATION=OFF \
+          -DBUILD_TESTING=OFF \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/apple/include" \
+          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/apple/lib/libde265.a"
+        cmake --build . -j 4
+        cmake --install .
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5)
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build
+
+    - name: Install
+      run: cmake --install ${{github.workspace}}/build
+    
+    - name: Prepare writable Qt frameworks
+      run: |
+        cd ${{github.workspace}}
+        mkdir -p qt_clean
+        cp -R $(brew --prefix qt@5)/lib qt_clean/
+        sudo chflags -R nouchg qt_clean/lib || true
+        sudo xattr -cr qt_clean/lib || true
+
+    - name: MacDeployQt
+      run: |
+        cd ${{github.workspace}}/bin/${{env.BUILD_TYPE}}
+        $(brew --prefix qt@5)/bin/macdeployqt ./IIViewer.app -libpath=${{github.workspace}}/qt_clean/lib
+
+    - name: Fix permissions & sign
+      run: |
+        cd ${{github.workspace}}/bin/${{env.BUILD_TYPE}}
+        sudo chmod -R u+w IIViewer.app
+        sudo chmod -R a-w IIViewer.app/Contents/Frameworks
+        sudo xattr -cr IIViewer.app || true
+        sudo codesign --deep --force -s - IIViewer.app
+        sudo codesign --verify --deep --strict IIViewer.app
+
+    - name: Create DMG package
+      run: |
+        cd ${{github.workspace}}
+        # 确保脚本有执行权限
+        chmod +x scripts/create_dmg.sh
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+          VERSION="pr-${GITHUB_HEAD_REF}-${GITHUB_SHA::7}"
+        else
+          VERSION="dev-${GITHUB_SHA::7}"
+        fi
+        echo "VERSION=$VERSION"
+        # 创建DMG
+        sudo ./scripts/create_dmg.sh bin/${{env.BUILD_TYPE}}/IIViewer.app "$VERSION" dist
+        # 列出生成的文件
+        ls -lh dist/
+
+    # - name: Create PKG package (optional)
+    #   run: |
+    #     cd ${{github.workspace}}
+    #     # 确保脚本有执行权限
+    #     chmod +x scripts/create_pkg.sh
+    #     # 从tag获取版本号（去掉v前缀）
+    #     VERSION="${GITHUB_REF#refs/tags/v}"
+    #     echo "版本号: $VERSION"
+    #     # 如果版本号为空，使用默认值
+    #     if [ -z "$VERSION" ]; then
+    #       VERSION="0.6.3"
+    #       echo "使用默认版本号: $VERSION"
+    #     fi
+    #     # 创建PKG
+    #     ./scripts/create_pkg.sh bin/${{env.BUILD_TYPE}}/IIViewer.app "$VERSION" dist
+    #     # 列出生成的文件
+    #     ls -lh dist/
+
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.dmg
+          # dist/*.pkg
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
+
