@@ -156,3 +156,21 @@ jobs:
         sudo xattr -cr IIViewer.app || true
         sudo codesign --deep --force -s - IIViewer.app
         sudo codesign --verify --deep --strict IIViewer.app
+
+    - name: Create DMG package
+      run: |
+        cd ${{github.workspace}}
+        # 确保脚本有执行权限
+        chmod +x scripts/create_dmg.sh
+        # 从tag获取版本号（去掉v前缀）
+        VERSION="${GITHUB_REF#refs/tags/v}"
+        echo "版本号: $VERSION"
+        # 如果版本号为空，使用默认值
+        if [ -z "$VERSION" ]; then
+          VERSION="0.1.0"
+          echo "使用默认版本号: $VERSION"
+        fi
+        # 创建DMG
+        ./scripts/create_dmg.sh bin/${{env.BUILD_TYPE}}/IIViewer.app "$VERSION" dist
+        # 列出生成的文件
+        ls -lh dist/
