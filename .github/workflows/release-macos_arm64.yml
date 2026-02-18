@@ -142,7 +142,7 @@ jobs:
           echo "使用默认版本号: $VERSION"
         fi
         # 创建DMG
-        ./scripts/create_dmg.sh bin/${{env.BUILD_TYPE}}/IIViewer.app "$VERSION" dist
+        sudo ./scripts/create_dmg.sh bin/${{env.BUILD_TYPE}}/IIViewer.app "$VERSION" dist
         # 列出生成的文件
         ls -lh dist/
 
