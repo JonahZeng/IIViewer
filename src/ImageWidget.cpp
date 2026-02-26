@@ -1987,12 +1987,15 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
 
         int width = heif_image_handle_get_width(handle);
         int height = heif_image_handle_get_height(handle);
+        heif_colorspace csp = heif_colorspace::heif_colorspace_undefined;
+        heif_chroma cch = heif_chroma::heif_chroma_undefined;
+        heif_image_handle_get_preferred_decoding_colorspace(handle, &csp, &cch);
         releaseBuffer();
 
         // Decode HEIC image to RGB format
         heif_image *img;
         heif_decoding_options *options = heif_decoding_options_alloc();
-        error = heif_decode_image(handle, &img, heif_colorspace_YCbCr, heif_chroma_420, options);
+        error = heif_decode_image(handle, &img, csp, cch, options);
         heif_decoding_options_free(options);
         if (error.code != heif_error_Ok)
         {
@@ -2026,8 +2029,21 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
         unsigned char *bufferShow = pixMap->bits();
         unsigned char *bufferShowBak = normalDataPixMap->bits();
 
-        convertYUV2RGB888(data_y, data_cb, data_cr, bufferShow, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV420, bytesperline / 3);
-        convertYUV2RGB888(data_y, data_cb, data_cr, bufferShowBak, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV420, bytesperline / 3);
+        if(cch == heif_chroma::heif_chroma_420)
+        {
+            convertYUV2RGB888(data_y, data_cb, data_cr, bufferShow, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV420, bytesperline / 3);
+            convertYUV2RGB888(data_y, data_cb, data_cr, bufferShowBak, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV420, bytesperline / 3);
+        }
+        else if(cch == heif_chroma::heif_chroma_422)
+        {
+            convertYUV2RGB888(data_y, data_cb, data_cr, bufferShow, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV422, bytesperline / 3);
+            convertYUV2RGB888(data_y, data_cb, data_cr, bufferShowBak, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV422, bytesperline / 3);
+        }
+        else if(cch == heif_chroma::heif_chroma_444)
+        {
+            convertYUV2RGB888(data_y, data_cb, data_cr, bufferShow, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV444, bytesperline / 3);
+            convertYUV2RGB888(data_y, data_cb, data_cr, bufferShowBak, 8, stride_y, stride_cb, stride_cr, width, height, YuvRatioType::UV444, bytesperline / 3);
+        }
         // Copy HEIC data to QImage buffer
         /* for (int i = 0; i < height; i++)
         {

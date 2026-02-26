@@ -1513,9 +1513,10 @@ void IIPviewer::loadHeifFile(const QString &fileName, int scrollArea, bool reloa
     heif_colorspace csp = heif_colorspace::heif_colorspace_undefined;
     heif_chroma cch = heif_chroma::heif_chroma_undefined;
     heif_image_handle_get_preferred_decoding_colorspace(handle, &csp, &cch);
-    if (l_bit_depth > BIT8 || c_bit_depth > BIT8 || csp != heif_colorspace::heif_colorspace_YCbCr || cch != heif_chroma::heif_chroma_420)
+    if (l_bit_depth > BIT8 || c_bit_depth > BIT8 || csp != heif_colorspace::heif_colorspace_YCbCr || \
+        (cch != heif_chroma::heif_chroma_420 && cch != heif_chroma::heif_chroma_422 && cch != heif_chroma::heif_chroma_444))
     {
-        const QString txt_info = QString("Failed to decode HEIC image: ") + fileName + QString("\nError: ") + QString("not 8bit yuv420 image");
+        const QString txt_info = QString("Failed to decode HEIC image: ") + fileName + QString("\nError: ") + QString("not 8bit yuv image");
         QMessageBox::information(this, tr("error"), txt_info, QMessageBox::StandardButton::Ok);
         heif_image_handle_release(handle);
         heif_context_free(ctx);

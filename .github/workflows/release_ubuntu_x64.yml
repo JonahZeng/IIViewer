@@ -126,7 +126,15 @@ jobs:
     - name: generate appimage package
       working-directory: ${{github.workspace}}
       run: |
-        export VERSION="${GITHUB_REF_NAME}"
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+          VERSION="pr-${GITHUB_HEAD_REF}-${GITHUB_SHA::7}"
+        else
+          VERSION="dev-${GITHUB_SHA::7}"
+        fi
+        echo "VERSION=$VERSION"
+        export VERSION="${VERSION}"
         cp ./icon/default.png ./bin/${{env.BUILD_TYPE}}/ &&
         cp ./icon/default.desktop ./bin/${{env.BUILD_TYPE}}/ &&
         wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage && 
