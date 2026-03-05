@@ -124,7 +124,18 @@ jobs:
 
     - name: Install WIX Toolset via choco
       run: choco install wixtoolset -y
-
+    
+    - name: Add WiX to PATH dynamically
+      shell: pwsh
+      run: |
+        $wix = Get-ChildItem "C:\Program Files (x86)" -Directory | Where-Object { $_.Name -like "WiX Toolset*" }
+        if ($wix) {
+          $bin = Join-Path $wix.FullName "bin"
+          echo "Found WiX at $bin"
+          echo "$bin" >> $env:GITHUB_PATH
+        } else {
+          Write-Error "WiX Toolset not found!"
+        }
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}\build -S ${{github.workspace}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\build\install -DCI_MODE=ON
 
