@@ -16,7 +16,7 @@ APP_PATH="$1"
 VERSION="$2"
 OUTPUT_DIR="$3"
 APP_NAME="IIViewer"
-PKG_NAME="${APP_NAME}-${VERSION}.pkg"
+PKG_NAME="${APP_NAME}-${VERSION}-macos-aarch64.pkg"
 PKG_PATH="${OUTPUT_DIR}/${PKG_NAME}"
 
 # 检查输入文件

@@ -723,7 +723,7 @@ void IIPviewer::onOpenFileAction()
     settings.workPath = info.absolutePath();
     if (sender() == static_cast<QObject *>(ui.openFileLeftAction) || sender() == static_cast<QObject*>(ui.imageLabel[LEFT_IMG_WIDGET]))
     {
-        onCloseLeftFileAction(); // 这里删除关闭文件监控
+        // onCloseLeftFileAction(); // 这里删除关闭文件监控
         loadFile(fileName, LEFT_IMG_WIDGET);
         masterScrollarea = ui.scrollArea[LEFT_IMG_WIDGET];
         openedFileWatcher.addPath(fileName); // 添加新文件监控
@@ -731,7 +731,7 @@ void IIPviewer::onOpenFileAction()
     }
     else if (sender() == static_cast<QObject *>(ui.openFileRightAction) || sender() == static_cast<QObject*>(ui.imageLabel[RIGHT_IMG_WIDGET]))
     {
-        onCloseRightFileAction();
+        // onCloseRightFileAction();
         loadFile(fileName, RIGHT_IMG_WIDGET);
         masterScrollarea = ui.scrollArea[RIGHT_IMG_WIDGET];
         openedFileWatcher.addPath(fileName); // 添加新文件监控
@@ -921,7 +921,6 @@ void IIPviewer::loadFile(const QString &fileName, int scrollArea) // NOLINT(read
 
         if (scrollArea == LEFT_IMG_WIDGET)
         {
-            onCloseLeftFileAction();
             if (!openedFile[1].isEmpty())
             {
                 if (reader.size() != originSize[1])
@@ -930,6 +929,7 @@ void IIPviewer::loadFile(const QString &fileName, int scrollArea) // NOLINT(read
                     return;
                 }
             }
+            onCloseLeftFileAction();
             openedFile[0] = fileName;
             originSize[0] = reader.size();
             setImage(openedFile[0], LEFT_IMG_WIDGET); // 使用openedFile，因为imagewidget会存储它的指针
@@ -939,7 +939,6 @@ void IIPviewer::loadFile(const QString &fileName, int scrollArea) // NOLINT(read
         }
         else if (scrollArea == RIGHT_IMG_WIDGET)
         {
-            onCloseRightFileAction();
             if (openedFile[0].length() > 0)
             {
                 if (reader.size() != originSize[0])
@@ -948,6 +947,7 @@ void IIPviewer::loadFile(const QString &fileName, int scrollArea) // NOLINT(read
                     return;
                 }
             }
+            onCloseRightFileAction();
             openedFile[1] = fileName;
             originSize[1] = reader.size();
             // ui.imageLabelContianer[1]->resize(originSize[1]);
@@ -1093,10 +1093,6 @@ void IIPviewer::loadYuvFile(const QString &fileName, int scrollArea, bool reload
     }
     if (scrollArea == LEFT_IMG_WIDGET)
     {
-        if(!reload)
-        {
-            onCloseLeftFileAction();
-        }
         if (!openedFile[1].isEmpty())
         {
             if (QSize(width, height) != originSize[1])
@@ -1104,6 +1100,10 @@ void IIPviewer::loadYuvFile(const QString &fileName, int scrollArea, bool reload
                 QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
+        }
+        if(!reload)
+        {
+            onCloseLeftFileAction();
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
@@ -1115,10 +1115,6 @@ void IIPviewer::loadYuvFile(const QString &fileName, int scrollArea, bool reload
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
-        if(!reload)
-        {
-            onCloseRightFileAction();
-        }
         if (!openedFile[0].isEmpty())
         {
             if (QSize(width, height) != originSize[0])
@@ -1126,6 +1122,10 @@ void IIPviewer::loadYuvFile(const QString &fileName, int scrollArea, bool reload
                 QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
+        }
+        if(!reload)
+        {
+            onCloseRightFileAction();
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
@@ -1321,10 +1321,6 @@ void IIPviewer::loadRawFile(const QString &fileName, int scrollArea, bool reload
     }
     if (scrollArea == LEFT_IMG_WIDGET)
     {
-        if(!reload)
-        {
-            onCloseLeftFileAction();
-        }
         if (!openedFile[1].isEmpty())
         {
             if (QSize(width, height) != originSize[1])
@@ -1332,6 +1328,10 @@ void IIPviewer::loadRawFile(const QString &fileName, int scrollArea, bool reload
                 QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
+        }
+        if(!reload)
+        {
+            onCloseLeftFileAction();
         }
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
@@ -1343,10 +1343,6 @@ void IIPviewer::loadRawFile(const QString &fileName, int scrollArea, bool reload
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
-        if(!reload)
-        {
-            onCloseRightFileAction();
-        }
         if (!openedFile[0].isEmpty())
         {
             if (QSize(width, height) != originSize[0])
@@ -1354,6 +1350,10 @@ void IIPviewer::loadRawFile(const QString &fileName, int scrollArea, bool reload
                 QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
+        }
+        if(!reload)
+        {
+            onCloseRightFileAction();
         }
         openedFile[1] = fileName;
         originSize[1] = QSize(width, height);
@@ -1376,10 +1376,6 @@ void IIPviewer::loadPnmFile(const QString &fileName, int scrollArea, bool reload
     }
     if (scrollArea == LEFT_IMG_WIDGET)
     {
-        if(!reload)
-        {
-            onCloseLeftFileAction();
-        }
         if (!openedFile[1].isEmpty())
         {
             if (reader.size() != originSize[1])
@@ -1387,6 +1383,10 @@ void IIPviewer::loadPnmFile(const QString &fileName, int scrollArea, bool reload
                 QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
+        }
+        if(!reload)
+        {
+            onCloseLeftFileAction();
         }
         openedFile[0] = fileName;
         originSize[0] = reader.size();
@@ -1398,10 +1398,6 @@ void IIPviewer::loadPnmFile(const QString &fileName, int scrollArea, bool reload
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
-        if(!reload)
-        {
-            onCloseRightFileAction();
-        }
         if (openedFile[0].length() > 0)
         {
             if (reader.size() != originSize[0])
@@ -1409,6 +1405,10 @@ void IIPviewer::loadPnmFile(const QString &fileName, int scrollArea, bool reload
                 QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
+        }
+        if(!reload)
+        {
+            onCloseRightFileAction();
         }
         openedFile[1] = fileName;
         originSize[1] = reader.size();
@@ -1431,10 +1431,6 @@ void IIPviewer::loadPgmFile(const QString &fileName, int scrollArea, bool reload
     }
     if (scrollArea == LEFT_IMG_WIDGET)
     {
-        if(!reload)
-        {
-            onCloseLeftFileAction();
-        }
         if (!openedFile[1].isEmpty())
         {
             if (reader.size() != originSize[1])
@@ -1442,6 +1438,10 @@ void IIPviewer::loadPgmFile(const QString &fileName, int scrollArea, bool reload
                 QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
+        }
+        if(!reload)
+        {
+            onCloseLeftFileAction();
         }
         openedFile[0] = fileName;
         originSize[0] = reader.size();
@@ -1453,10 +1453,6 @@ void IIPviewer::loadPgmFile(const QString &fileName, int scrollArea, bool reload
     }
     else if (scrollArea == RIGHT_IMG_WIDGET)
     {
-        if(!reload)
-        {
-            onCloseRightFileAction();
-        }
         if (openedFile[0].length() > 0)
         {
             if (reader.size() != originSize[0])
@@ -1464,6 +1460,10 @@ void IIPviewer::loadPgmFile(const QString &fileName, int scrollArea, bool reload
                 QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
                 return;
             }
+        }
+        if(!reload)
+        {
+            onCloseRightFileAction();
         }
         openedFile[1] = fileName;
         originSize[1] = reader.size();
@@ -1508,14 +1508,42 @@ void IIPviewer::loadHeifFile(const QString &fileName, int scrollArea, bool reloa
     const int width = heif_image_handle_get_width(handle);
     const int height = heif_image_handle_get_height(handle);
 
+    if (scrollArea == LEFT_IMG_WIDGET)
+    {
+        if (!openedFile[1].isEmpty())
+        {
+            if (QSize(width, height) != originSize[1])
+            {
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
+                heif_image_handle_release(handle);
+                heif_context_free(ctx);
+                return;
+            }
+        }
+    }
+    else if(scrollArea == RIGHT_IMG_WIDGET)
+    {
+        if (openedFile[0].length() > 0)
+        {
+            if (QSize(width, height) != originSize[0])
+            {
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
+                heif_image_handle_release(handle);
+                heif_context_free(ctx);
+                return;
+            }
+        }
+    }
+
     const int l_bit_depth = heif_image_handle_get_luma_bits_per_pixel(handle);
     const int c_bit_depth = heif_image_handle_get_chroma_bits_per_pixel(handle);
     heif_colorspace csp = heif_colorspace::heif_colorspace_undefined;
     heif_chroma cch = heif_chroma::heif_chroma_undefined;
     heif_image_handle_get_preferred_decoding_colorspace(handle, &csp, &cch);
-    if (l_bit_depth > BIT8 || c_bit_depth > BIT8 || csp != heif_colorspace::heif_colorspace_YCbCr || cch != heif_chroma::heif_chroma_420)
+    if (l_bit_depth > BIT8 || c_bit_depth > BIT8 || csp != heif_colorspace::heif_colorspace_YCbCr || \
+        (cch != heif_chroma::heif_chroma_420 && cch != heif_chroma::heif_chroma_422 && cch != heif_chroma::heif_chroma_444))
     {
-        const QString txt_info = QString("Failed to decode HEIC image: ") + fileName + QString("\nError: ") + QString("not 8bit yuv420 image");
+        const QString txt_info = QString("Failed to decode HEIC image: ") + fileName + QString("\nError: ") + QString("not 8bit yuv image");
         QMessageBox::information(this, tr("error"), txt_info, QMessageBox::StandardButton::Ok);
         heif_image_handle_release(handle);
         heif_context_free(ctx);
@@ -1528,22 +1556,13 @@ void IIPviewer::loadHeifFile(const QString &fileName, int scrollArea, bool reloa
         {
             onCloseLeftFileAction();
         }
-        if (!openedFile[1].isEmpty())
-        {
-            if (QSize(width, height) != originSize[1])
-            {
-                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
-                heif_image_handle_release(handle);
-                heif_context_free(ctx);
-                return;
-            }
-        }
         heif_image_handle_release(handle);
         heif_context_free(ctx);
         openedFile[0] = fileName;
         originSize[0] = QSize(width, height);
         setImage(openedFile[0], LEFT_IMG_WIDGET);
-        if(!reload) { 
+        if(!reload)
+        { 
             loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
             addFileToHistory(fileName);
         }
@@ -1553,16 +1572,6 @@ void IIPviewer::loadHeifFile(const QString &fileName, int scrollArea, bool reloa
         if(!reload)
         {
             onCloseRightFileAction();
-        }
-        if (openedFile[0].length() > 0)
-        {
-            if (QSize(width, height) != originSize[0])
-            {
-                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
-                heif_image_handle_release(handle);
-                heif_context_free(ctx);
-                return;
-            }
         }
         heif_image_handle_release(handle);
         heif_context_free(ctx);

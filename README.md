@@ -24,7 +24,7 @@ this repo is designed for open and view ISP intermediate image. we support these
 - mipi-raw(10/12/14 bit)
 - rgbir-raw(8/10/12/14/16/18/20/22/24 bit)
 - yuv(8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)
-- heif(.heic 8bit yuv420)
+- heif(.heic 8bit yuv420/422/444)
 
 ## Usage
 download it from [release page](https://github.com/JonahZeng/IIViewer/releases)(we provide precompiled x64 exe and deb file), start this app on your PC, you can see this if no unexpect error occurred:

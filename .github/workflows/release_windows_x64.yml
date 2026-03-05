@@ -122,6 +122,9 @@ jobs:
     - name: Install NSIS via choco
       run: choco install nsis -y
 
+    - name: Install WIX Toolset via choco
+      run: choco install wixtoolset -y
+
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}\build -S ${{github.workspace}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}\build\install -DCI_MODE=ON
 
@@ -150,12 +153,16 @@ jobs:
     - name: generate zip package
       working-directory: ${{github.workspace}}\build
       run: cpack -C Release -G ZIP
+    - name: generate msi package
+      working-directory: ${{github.workspace}}\build
+      run: cpack -C Release -G WIX
 
     - name: Package artifacts
       run: |
         mkdir -p release
         cp ${{github.workspace}}/build/*.exe release/
         cp ${{github.workspace}}/build/*.zip release/
+        cp ${{github.workspace}}/build/*.msi release/
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -163,6 +170,7 @@ jobs:
         files: |
           release/*.exe
           release/*.zip
+          release/*.msi
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
