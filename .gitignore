@@ -80,3 +80,4 @@ build/
 thirdparty/libde265
 thirdparty/libheif
 .cache
+.opencode

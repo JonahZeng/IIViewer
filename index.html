@@ -4,259 +4,648 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IIViewer - 图像信号处理开发者工具</title>
+    <link rel="icon" type="image/png" href="./icon/64.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+            --shadow-hover: 0 20px 50px -15px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
             min-height: 100vh;
         }
+
+        /* Header */
         header {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: #fff;
             text-align: center;
-            padding: 2rem 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 3rem 1.5rem;
             position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header .tagline {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            margin-bottom: 1.5rem;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .badges img {
+            height: 24px;
+            transition: transform 0.3s;
+        }
+
+        .badges img:hover {
+            transform: scale(1.05);
+        }
+
+        .language-switch {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+
+        .language-switch a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .language-switch a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* CTA Buttons */
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
-        .hero {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .hero img {
-            width: 80px;
-            height: 80px;
-        }
-        .badges {
-            margin: 1rem 0;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .badges img {
-            height: 24px;
-        }
-        .language-switch {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
+
+        /* Section */
         section {
-            margin-bottom: 3rem;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2.5rem;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
+
+        section:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
         h2 {
-            color: #333;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-            font-size: 2rem;
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        .formats {
+
+        h2 i {
+            color: var(--primary);
+        }
+
+        /* Features */
+        .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
-        .format-category {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .feature-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
         }
-        .format-category h3 {
-            margin-top: 0;
-            color: #495057;
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+        }
+
+        .feature-card h3 {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
         }
+
+        .feature-card h3 i {
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Formats */
+        .formats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .format-category {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.25rem;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .format-category h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .format-category h3 i {
+            color: var(--primary);
+        }
+
         .format-list {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
         }
+
         .format-item {
-            background: #fff;
-            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            padding: 0.4rem 0.9rem;
             border-radius: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: transform 0.2s;
         }
-        .platform-section {
-            text-align: center;
+
+        .format-item:hover {
+            transform: scale(1.05);
         }
+
+        /* Platforms */
         .platforms {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
         }
+
         .platform {
-            background: #fff;
-            padding: 1rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: 200px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 2rem 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
         }
+
+        .platform:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px -10px rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+        }
+
         .platform i {
-            font-size: 2rem;
-            color: #667eea;
-            margin-bottom: 0.5rem;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+
+        .platform h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .platform p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Screenshots */
         .screenshots {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
         }
+
         .screenshot {
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 20px -5px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+            background: #fff;
         }
+
+        .screenshot:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.25);
+        }
+
         .screenshot img {
             width: 100%;
             height: auto;
-            transition: transform 0.3s;
+            display: block;
         }
-        .screenshot img:hover {
-            transform: scale(1.05);
-        }
-        .build-section {
-            background: #f8f9fa;
+
+        .screenshot p {
             padding: 1rem;
-            border-radius: 8px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-weight: 500;
+            background: #f8fafc;
         }
-        .sponsor, .author {
+
+        /* Build Section */
+        .build-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .build-tab {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+        }
+
+        .build-tab.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .build-tab:hover {
+            border-color: var(--primary);
+        }
+
+        .build-panel {
+            display: none;
+        }
+
+        .build-panel.active {
+            display: block;
+        }
+
+        .code-block {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .code-block code {
+            color: #e2e8f0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre;
+            line-height: 1.5;
+        }
+
+        /* Sponsor & Author */
+        .sponsor-author {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
             text-align: center;
         }
-        .sponsor img, .author img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .contact-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
         }
+
+        .contact-card h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .contact-card h3 i {
+            color: var(--primary);
+        }
+
+        .contact-card img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header .tagline {
+                font-size: 1rem;
+            }
+
             .container {
                 padding: 1rem;
             }
+
             section {
-                padding: 1rem;
+                padding: 1.5rem;
             }
-            .platforms {
-                flex-direction: column;
-                align-items: center;
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .language-switch {
+                position: static;
+                margin-top: 1rem;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>IIViewer</h1>
-        <p><strong>专为图像信号处理开发者设计的实用工具</strong></p>
-        <div class="hero">
-            <img src="./icon/64.png" alt="IIViewer icon">
-        </div>
-        <div class="badges">
-            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-windows-platform.yml/badge.svg?branch=main" alt="Windows Build">
-            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-ubuntu-platform.yml/badge.svg?branch=main" alt="Ubuntu Build">
-            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-macos-platform.yml/badge.svg?branch=main" alt="MacOS Build">
-        </div>
         <div class="language-switch">
-            <a href="index-en.html" style="color: #fff; text-decoration: none; font-size: 1rem;">English</a>
+            <a href="index-en.html"><i class="fas fa-globe"></i> English</a>
+        </div>
+        <div class="header-content">
+            <img src="./icon/IIViewer_128.png" alt="IIViewer" class="logo">
+            <h1>IIViewer</h1>
+            <p class="tagline">专为图像信号处理开发者设计的实用工具</p>
+            <div class="badges">
+                <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-windows-platform.yml/badge.svg?branch=main" alt="Windows Build">
+                <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-ubuntu-platform.yml/badge.svg?branch=main" alt="Ubuntu Build">
+                <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-macos-platform.yml/badge.svg?branch=main" alt="MacOS Build">
+            </div>
+            <div class="cta-buttons">
+                <a href="https://github.com/JonahZeng/IIViewer/releases" class="btn btn-primary">
+                    <i class="fas fa-download"></i> 立即下载
+                </a>
+                <a href="https://github.com/JonahZeng/IIViewer" class="btn btn-secondary">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+            </div>
         </div>
     </header>
 
     <div class="container">
-        <section id="about">
-            <h2>关于</h2>
-            <p>这个仓库专为打开和查看 ISP 中间图像而设计。我们支持多种图像格式，按类别分类如下：</p>
+        <!-- Features -->
+        <section id="features">
+            <h2><i class="fas fa-star"></i> 核心特性</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3><i class="fas fa-image"></i> 广泛格式支持</h3>
+                    <p>支持 RAW、MIPI-RAW、RGBIR-RAW、YUV、HEIF 等多种 ISP 中间图像格式，覆盖 8-24 bit 位深。</p>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-search-plus"></i> 像素级检查</h3>
+                    <p>放大至 96X 查看每个像素的真实值，完美分析 ISP 管道输出结果。</p>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-chart-bar"></i> 数据可视化</h3>
+                    <p>内置数据可视化工具，分析图像统计信息和像素数据分布。</p>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-balance-scale"></i> 图像对比</h3>
+                    <p>并排对比两张图像，支持差异报告和分析工具。</p>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-bezier-curve"></i> 曲线调整</h3>
+                    <p>交互式曲线调整，预览色调映射和色彩校正效果。</p>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-globe"></i> 跨平台支持</h3>
+                    <p>支持 Windows、Linux、macOS 多平台，原生支持多种架构。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Formats -->
+        <section id="formats">
+            <h2><i class="fas fa-file-image"></i> 支持的格式</h2>
             <div class="formats">
                 <div class="format-category">
                     <h3><i class="fas fa-image"></i> 常见图像格式</h3>
                     <div class="format-list">
-                        <div class="format-item"><i class="fas fa-file-image"></i> jpg</div>
-                        <div class="format-item"><i class="fas fa-file-image"></i> bmp</div>
-                        <div class="format-item"><i class="fas fa-file-image"></i> png</div>
-                        <div class="format-item"><i class="fas fa-file-image"></i> tiff</div>
+                        <span class="format-item">JPG</span>
+                        <span class="format-item">BMP</span>
+                        <span class="format-item">PNG</span>
+                        <span class="format-item">TIFF</span>
                     </div>
                 </div>
                 <div class="format-category">
-                    <h3><i class="fas fa-palette"></i> 灰度/彩色图像</h3>
+                    <h3><i class="fas fa-adjust"></i> 灰度/彩色图像</h3>
                     <div class="format-list">
-                        <div class="format-item"><i class="fas fa-adjust"></i> pgm (8/10/12/14/16 bit)</div>
-                        <div class="format-item"><i class="fas fa-adjust"></i> pnm (8/10/12/14/16 bit)</div>
+                        <span class="format-item">PGM 8-16bit</span>
+                        <span class="format-item">PNM 8-16bit</span>
                     </div>
                 </div>
                 <div class="format-category">
                     <h3><i class="fas fa-camera"></i> RAW 格式</h3>
                     <div class="format-list">
-                        <div class="format-item"><i class="fas fa-camera-retro"></i> raw (8/10/12/14/16/18/20/22/24 bit)</div>
-                        <div class="format-item"><i class="fas fa-camera-retro"></i> mipi-raw (10/12/14 bit)</div>
-                        <div class="format-item"><i class="fas fa-camera-retro"></i> rgbir-raw (8/10/12/14/16/18/20/22/24 bit)</div>
+                        <span class="format-item">RAW 8-24bit</span>
+                        <span class="format-item">MIPI-RAW</span>
+                        <span class="format-item">RGBIR-RAW</span>
                     </div>
                 </div>
                 <div class="format-category">
                     <h3><i class="fas fa-video"></i> YUV 格式</h3>
                     <div class="format-list">
-                        <div class="format-item"><i class="fas fa-film"></i> yuv (8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)</div>
+                        <span class="format-item">YUV444</span>
+                        <span class="format-item">YUV422</span>
+                        <span class="format-item">YUV420</span>
+                        <span class="format-item">NV12/NV21</span>
                     </div>
                 </div>
                 <div class="format-category">
                     <h3><i class="fas fa-mobile-alt"></i> HEIF 格式</h3>
                     <div class="format-list">
-                        <div class="format-item"><i class="fas fa-file-image"></i> heif (.heic 8bit yuv420/422/444)</div>
+                        <span class="format-item">HEIC 8bit</span>
+                        <span class="format-item">YUV420/422/444</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="cross-platform" class="platform-section">
-            <h2>跨平台支持</h2>
-            <p>IIViewer 支持多种操作系统，提供原生体验：</p>
+        <!-- Platforms -->
+        <section id="platforms">
+            <h2><i class="fas fa-desktop"></i> 跨平台支持</h2>
             <div class="platforms">
                 <div class="platform">
                     <i class="fab fa-windows"></i>
                     <h3>Windows</h3>
-                    <p>原生 Windows 应用，支持 x64 架构</p>
+                    <p>Windows 10/11<br>AMD64 架构<br>MSVC & MinGW64</p>
                 </div>
                 <div class="platform">
                     <i class="fab fa-linux"></i>
-                    <h3>Ubuntu</h3>
-                    <p>DEB 包安装，完美适配 Linux 环境</p>
+                    <h3>Linux</h3>
+                    <p>Ubuntu 22.04+<br>AMD64 & ARM64<br>DEB & AppImage</p>
                 </div>
                 <div class="platform">
                     <i class="fab fa-apple"></i>
                     <h3>macOS</h3>
-                    <p>原生 macOS 应用，支持最新版本</p>
+                    <p>Apple Silicon<br>ARM64<br>DMG & PKG</p>
                 </div>
             </div>
         </section>
 
-        <section id="usage">
-            <h2>使用方法</h2>
-            <p>从 <a href="https://github.com/JonahZeng/IIViewer/releases">发布页面</a> 下载（我们提供预编译的 x64 exe 和 deb 文件），在您的 PC 上启动此应用，如果没有意外错误，您会看到：</p>
+        <!-- Screenshots -->
+        <section id="screenshots">
+            <h2><i class="fas fa-desktop"></i> 界面预览</h2>
             <div class="screenshots">
                 <div class="screenshot">
                     <img src="./doc/image/main-ui.png" alt="主界面">
-                    <p>主界面</p>
+                    <p>Windows 主界面</p>
                 </div>
                 <div class="screenshot">
                     <img src="./doc/image/ubuntu-zh.png" alt="Ubuntu 中文界面">
@@ -267,34 +656,97 @@
                     <p>macOS 中文界面</p>
                 </div>
             </div>
-            <p>按照提示，将任何支持格式的图像拖到虚线矩形中，它将显示图像内容。当您通过滚动鼠标滚轮放大到 96X 时，您将看到每个像素的真实值。</p>
         </section>
 
-        <section id="build">
-            <h2>从源代码构建</h2>
-            <div class="build-section">
-                <h3>Windows (AMD64)</h3>
-                <h4>准备</h4>
-                <ol>
-                    <li>安装 cmake (>=3.20)</li>
-                    <li>安装 MSVC 或 MinGW64（应支持 C++17 至少）</li>
-                    <li>构建并安装 OpenSSL，从官方 <a href="https://github.com/openssl/openssl">仓库</a> 和 <a href="https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md">构建指南</a>，成功后将其安装目录复制到此 git 仓库的 <strong>thirdparty</strong> 目录。</li>
-                    <li>构建 libde265（请参考 README.md 中的详细步骤）</li>
-                    <li>构建 libheif（请参考 README.md 中的详细步骤）</li>
-                </ol>
-                <p>有关详细构建步骤，请查看 <a href="https://github.com/JonahZeng/IIViewer/blob/main/README.md">完整 README.md</a>。</p>
+        <!-- Usage -->
+        <section id="usage">
+            <h2><i class="fas fa-play-circle"></i> 使用方法</h2>
+            <p style="margin-bottom: 1rem;">从 <a href="https://github.com/JonahZeng/IIViewer/releases" style="color: var(--primary); font-weight: 600;">发布页面</a> 下载适合您系统的版本，启动应用后将图像拖放到窗口中即可查看。</p>
+            <div style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--primary);">
+                <p style="margin: 0;"><strong><i class="fas fa-lightbulb" style="color: var(--primary);"></i> 提示：</strong>当您通过鼠标滚轮放大到 96X 时，可以看到每个像素的真实值，非常适合 ISP 开发调试。</p>
             </div>
         </section>
 
-        <section id="sponsor" class="sponsor">
-            <h2>赞助</h2>
-            <img src="./doc/image/sponsor.png" alt="赞助信息">
+        <!-- Build -->
+        <section id="build">
+            <h2><i class="fas fa-code"></i> 从源代码构建</h2>
+            <div class="build-tabs">
+                <button class="build-tab active" onclick="showBuild('windows')">Windows</button>
+                <button class="build-tab" onclick="showBuild('linux')">Linux</button>
+                <button class="build-tab" onclick="showBuild('macos')">macOS</button>
+            </div>
+            <div id="windows" class="build-panel active">
+                <p><strong>前置条件：</strong>CMake (>=3.20)、MSVC 或 MinGW64 (C++17)、Qt5.15+、OpenSSL、libheif</p>
+                <div class="code-block">
+                    <code>git clone https://github.com/JonahZeng/IIViewer.git
+cd IIViewer
+mkdir build && cd build
+cmake .. -DCMAKE_PREFIX_PATH=YOUR_QT_INSTALL_DIR
+cmake --build . --config Release</code>
+                </div>
+            </div>
+            <div id="linux" class="build-panel">
+                <p><strong>前置条件：</strong>在 Ubuntu 22.04 上安装依赖：</p>
+                <div class="code-block">
+                    <code>sudo apt install build-essential libssl-dev qtbase5-dev \
+    libqt5datavisualization5-dev qtbase5-dev-tools \
+    libqt5charts5-dev qttools5-dev-tools qttools5-dev
+
+git clone https://github.com/JonahZeng/IIViewer.git
+cd IIViewer
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . -j 4</code>
+                </div>
+            </div>
+            <div id="macos" class="build-panel">
+                <p><strong>前置条件：</strong>使用 Homebrew 安装 Qt5：</p>
+                <div class="code-block">
+                    <code>brew install qt@5
+
+git clone https://github.com/JonahZeng/IIViewer.git
+cd IIViewer
+cmake -B ./build -S . -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@5
+cmake --build . -j 4</code>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">详细构建说明请查看 <a href="https://github.com/JonahZeng/IIViewer/blob/main/README.md" style="color: var(--primary);">完整 README.md</a></p>
         </section>
 
-        <section id="author" class="author">
-            <h2>作者</h2>
-            <img src="./doc/image/author-wechat.png" alt="作者微信">
+        <!-- Sponsor & Author -->
+        <section id="contact">
+            <h2><i class="fas fa-heart"></i> 支持与联系</h2>
+            <div class="sponsor-author">
+                <div class="contact-card">
+                    <h3><i class="fas fa-coffee"></i> 赞助支持</h3>
+                    <img src="./doc/image/sponsor.png" alt="微信赞赏">
+                </div>
+                <div class="contact-card">
+                    <h3><i class="fab fa-weixin"></i> 联系作者</h3>
+                    <img src="./doc/image/author-wechat.png" alt="作者微信">
+                </div>
+            </div>
         </section>
     </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="https://github.com/JonahZeng/IIViewer"><i class="fab fa-github"></i> GitHub</a>
+            <a href="https://github.com/JonahZeng/IIViewer/releases"><i class="fas fa-download"></i> 下载</a>
+            <a href="https://github.com/JonahZeng/IIViewer/issues"><i class="fas fa-bug"></i> 问题反馈</a>
+            <a href="https://github.com/JonahZeng/IIViewer/blob/main/LICENSE.txt"><i class="fas fa-file-contract"></i> 许可证</a>
+        </div>
+        <p>&copy; 2024 IIViewer. 基于 MIT 许可证开源发布。</p>
+    </footer>
+
+    <script>
+        function showBuild(platform) {
+            document.querySelectorAll('.build-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.build-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(platform).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
 </body>
 </html>
