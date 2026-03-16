@@ -33,6 +33,8 @@ download it from [release page](https://github.com/JonahZeng/IIViewer/releases)(
 
 ![ubuntu-zh-ui](./doc/image/ubuntu-zh.png)
 
+![macos-zh-ui](./doc/image/macos-zh.png)
+
 as its tips, drag any supported format image to dash rectangle，it will display the image context. when you zoom in to 96X by scroll your mouse wheel, you will see every pixel's real value.
 that's all.
 

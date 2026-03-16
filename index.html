@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIViewer - 图像信号处理开发者工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            text-align: center;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hero img {
+            width: 80px;
+            height: 80px;
+        }
+        .badges {
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .badges img {
+            height: 24px;
+        }
+        .language-switch {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        .formats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        .format-category {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .format-category h3 {
+            margin-top: 0;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .format-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .format-item {
+            background: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .platform-section {
+            text-align: center;
+        }
+        .platforms {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .platform {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 200px;
+        }
+        .platform i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        .screenshots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .screenshot {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .screenshot img {
+            width: 100%;
+            height: auto;
+            transition: transform 0.3s;
+        }
+        .screenshot img:hover {
+            transform: scale(1.05);
+        }
+        .build-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .sponsor, .author {
+            text-align: center;
+        }
+        .sponsor img, .author img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            section {
+                padding: 1rem;
+            }
+            .platforms {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IIViewer</h1>
+        <p><strong>专为图像信号处理开发者设计的实用工具</strong></p>
+        <div class="hero">
+            <img src="./icon/64.png" alt="IIViewer icon">
+        </div>
+        <div class="badges">
+            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-windows-platform.yml/badge.svg?branch=main" alt="Windows Build">
+            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-ubuntu-platform.yml/badge.svg?branch=main" alt="Ubuntu Build">
+            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-macos-platform.yml/badge.svg?branch=main" alt="MacOS Build">
+        </div>
+        <div class="language-switch">
+            <a href="index-en.html" style="color: #fff; text-decoration: none; font-size: 1rem;">English</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="about">
+            <h2>关于</h2>
+            <p>这个仓库专为打开和查看 ISP 中间图像而设计。我们支持多种图像格式，按类别分类如下：</p>
+            <div class="formats">
+                <div class="format-category">
+                    <h3><i class="fas fa-image"></i> 常见图像格式</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-file-image"></i> jpg</div>
+                        <div class="format-item"><i class="fas fa-file-image"></i> bmp</div>
+                        <div class="format-item"><i class="fas fa-file-image"></i> png</div>
+                        <div class="format-item"><i class="fas fa-file-image"></i> tiff</div>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3><i class="fas fa-palette"></i> 灰度/彩色图像</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-adjust"></i> pgm (8/10/12/14/16 bit)</div>
+                        <div class="format-item"><i class="fas fa-adjust"></i> pnm (8/10/12/14/16 bit)</div>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3><i class="fas fa-camera"></i> RAW 格式</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-camera-retro"></i> raw (8/10/12/14/16/18/20/22/24 bit)</div>
+                        <div class="format-item"><i class="fas fa-camera-retro"></i> mipi-raw (10/12/14 bit)</div>
+                        <div class="format-item"><i class="fas fa-camera-retro"></i> rgbir-raw (8/10/12/14/16/18/20/22/24 bit)</div>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3><i class="fas fa-video"></i> YUV 格式</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-film"></i> yuv (8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)</div>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3><i class="fas fa-mobile-alt"></i> HEIF 格式</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-file-image"></i> heif (.heic 8bit yuv420/422/444)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cross-platform" class="platform-section">
+            <h2>跨平台支持</h2>
+            <p>IIViewer 支持多种操作系统，提供原生体验：</p>
+            <div class="platforms">
+                <div class="platform">
+                    <i class="fab fa-windows"></i>
+                    <h3>Windows</h3>
+                    <p>原生 Windows 应用，支持 x64 架构</p>
+                </div>
+                <div class="platform">
+                    <i class="fab fa-linux"></i>
+                    <h3>Ubuntu</h3>
+                    <p>DEB 包安装，完美适配 Linux 环境</p>
+                </div>
+                <div class="platform">
+                    <i class="fab fa-apple"></i>
+                    <h3>macOS</h3>
+                    <p>原生 macOS 应用，支持最新版本</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="usage">
+            <h2>使用方法</h2>
+            <p>从 <a href="https://github.com/JonahZeng/IIViewer/releases">发布页面</a> 下载（我们提供预编译的 x64 exe 和 deb 文件），在您的 PC 上启动此应用，如果没有意外错误，您会看到：</p>
+            <div class="screenshots">
+                <div class="screenshot">
+                    <img src="./doc/image/main-ui.png" alt="主界面">
+                    <p>主界面</p>
+                </div>
+                <div class="screenshot">
+                    <img src="./doc/image/ubuntu-zh.png" alt="Ubuntu 中文界面">
+                    <p>Ubuntu 中文界面</p>
+                </div>
+                <div class="screenshot">
+                    <img src="./doc/image/macos-zh.png" alt="macOS 中文界面">
+                    <p>macOS 中文界面</p>
+                </div>
+            </div>
+            <p>按照提示，将任何支持格式的图像拖到虚线矩形中，它将显示图像内容。当您通过滚动鼠标滚轮放大到 96X 时，您将看到每个像素的真实值。</p>
+        </section>
+
+        <section id="build">
+            <h2>从源代码构建</h2>
+            <div class="build-section">
+                <h3>Windows (AMD64)</h3>
+                <h4>准备</h4>
+                <ol>
+                    <li>安装 cmake (>=3.20)</li>
+                    <li>安装 MSVC 或 MinGW64（应支持 C++17 至少）</li>
+                    <li>构建并安装 OpenSSL，从官方 <a href="https://github.com/openssl/openssl">仓库</a> 和 <a href="https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md">构建指南</a>，成功后将其安装目录复制到此 git 仓库的 <strong>thirdparty</strong> 目录。</li>
+                    <li>构建 libde265（请参考 README.md 中的详细步骤）</li>
+                    <li>构建 libheif（请参考 README.md 中的详细步骤）</li>
+                </ol>
+                <p>有关详细构建步骤，请查看 <a href="https://github.com/JonahZeng/IIViewer/blob/main/README.md">完整 README.md</a>。</p>
+            </div>
+        </section>
+
+        <section id="sponsor" class="sponsor">
+            <h2>赞助</h2>
+            <img src="./doc/image/sponsor.png" alt="赞助信息">
+        </section>
+
+        <section id="author" class="author">
+            <h2>作者</h2>
+            <img src="./doc/image/author-wechat.png" alt="作者微信">
+        </section>
+    </div>
+</body>
+</html>

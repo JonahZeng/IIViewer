@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIViewer - A thoughtful tool designed for image signal process developers</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            text-align: center;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hero img {
+            width: 80px;
+            height: 80px;
+        }
+        .badges {
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .badges img {
+            height: 24px;
+        }
+        .language-switch {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        .formats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        .format-category {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .format-category h3 {
+            margin-top: 0;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .format-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .format-item {
+            background: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .platform-section {
+            text-align: center;
+        }
+        .platforms {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .platform {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 200px;
+        }
+        .platform i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        .screenshots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .screenshot {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .screenshot img {
+            width: 100%;
+            height: auto;
+            transition: transform 0.3s;
+        }
+        .screenshot img:hover {
+            transform: scale(1.05);
+        }
+        .build-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .sponsor, .author {
+            text-align: center;
+        }
+        .sponsor img, .author img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            section {
+                padding: 1rem;
+            }
+            .platforms {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IIViewer</h1>
+        <p><strong>A thoughtful tool designed for image signal process developers</strong></p>
+        <div class="hero">
+            <img src="./icon/64.png" alt="IIViewer icon">
+        </div>
+        <div class="badges">
+            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-windows-platform.yml/badge.svg?branch=main" alt="Windows Build">
+            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-ubuntu-platform.yml/badge.svg?branch=main" alt="Ubuntu Build">
+            <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-macos-platform.yml/badge.svg?branch=main" alt="MacOS Build">
+        </div>
+        <div class="language-switch">
+            <a href="index.html" style="color: #fff; text-decoration: none; font-size: 1rem;">中文</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="about">
+            <h2>About</h2>
+            <p>This repository is designed for opening and viewing ISP intermediate images. We support various image formats, categorized as follows:</p>
+            <div class="formats">
+                <div class="format-category">
+                    <h3><i class="fas fa-image"></i> Common Image Formats</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-file-image"></i> jpg</div>
+                        <div class="format-item"><i class="fas fa-file-image"></i> bmp</div>
+                        <div class="format-item"><i class="fas fa-file-image"></i> png</div>
+                        <div class="format-item"><i class="fas fa-file-image"></i> tiff</div>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3><i class="fas fa-palette"></i> Grayscale/Color Images</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-adjust"></i> pgm (8/10/12/14/16 bit)</div>
+                        <div class="format-item"><i class="fas fa-adjust"></i> pnm (8/10/12/14/16 bit)</div>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3><i class="fas fa-camera"></i> RAW Formats</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-camera-retro"></i> raw (8/10/12/14/16/18/20/22/24 bit)</div>
+                        <div class="format-item"><i class="fas fa-camera-retro"></i> mipi-raw (10/12/14 bit)</div>
+                        <div class="format-item"><i class="fas fa-camera-retro"></i> rgbir-raw (8/10/12/14/16/18/20/22/24 bit)</div>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3><i class="fas fa-video"></i> YUV Formats</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-film"></i> yuv (8/10/12 444-interleave4 444-plannar 422-UYVY 422-YUYV 420-NV12 420-NV21 420P-YU12 420P-YV12 400)</div>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3><i class="fas fa-mobile-alt"></i> HEIF Formats</h3>
+                    <div class="format-list">
+                        <div class="format-item"><i class="fas fa-file-image"></i> heif (.heic 8bit yuv420/422/444)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cross-platform" class="platform-section">
+            <h2>Cross-platform Support</h2>
+            <p>IIViewer supports multiple operating systems, providing native experiences:</p>
+            <div class="platforms">
+                <div class="platform">
+                    <i class="fab fa-windows"></i>
+                    <h3>Windows</h3>
+                    <p>Native Windows application, supporting x64 architecture</p>
+                </div>
+                <div class="platform">
+                    <i class="fab fa-linux"></i>
+                    <h3>Ubuntu</h3>
+                    <p>DEB package installation, perfectly adapted to Linux environment</p>
+                </div>
+                <div class="platform">
+                    <i class="fab fa-apple"></i>
+                    <h3>macOS</h3>
+                    <p>Native macOS application, supporting the latest versions</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="usage">
+            <h2>Usage</h2>
+            <p>Download from the <a href="https://github.com/JonahZeng/IIViewer/releases">release page</a> (we provide precompiled x64 exe and deb files), start the app on your PC, and if no unexpected errors occur, you will see:</p>
+            <div class="screenshots">
+                <div class="screenshot">
+                    <img src="./doc/image/main-ui.png" alt="Main UI">
+                    <p>Main UI</p>
+                </div>
+                <div class="screenshot">
+                    <img src="./doc/image/ubuntu-zh.png" alt="Ubuntu Chinese UI">
+                    <p>Ubuntu Chinese UI</p>
+                </div>
+                <div class="screenshot">
+                    <img src="./doc/image/macos-zh.png" alt="macOS Chinese UI">
+                    <p>macOS Chinese UI</p>
+                </div>
+            </div>
+            <p>As per the tips, drag any supported format image to the dashed rectangle, it will display the image content. When you zoom in to 96X by scrolling your mouse wheel, you will see the real value of each pixel.</p>
+        </section>
+
+        <section id="build">
+            <h2>Build from Source Code</h2>
+            <div class="build-section">
+                <h3>Windows (AMD64)</h3>
+                <h4>Preparation</h4>
+                <ol>
+                    <li>Install cmake (>=3.20)</li>
+                    <li>Install MSVC or MinGW64 (should support C++17 at least)</li>
+                    <li>Build and install OpenSSL, from the official <a href="https://github.com/openssl/openssl">repository</a> and <a href="https://github.com/openssl/openssl/blob/master/NOTES-WINDOWS.md">build guide</a>, once successful, copy its install directory to the <strong>thirdparty</strong> directory of this git repository.</li>
+                    <li>Build libde265 (refer to detailed steps in README.md)</li>
+                    <li>Build libheif (refer to detailed steps in README.md)</li>
+                </ol>
+                <p>For detailed build steps, please check the full <a href="https://github.com/JonahZeng/IIViewer/blob/main/README.md">README.md</a>.</p>
+            </div>
+        </section>
+
+        <section id="sponsor" class="sponsor">
+            <h2>Sponsor</h2>
+            <img src="./doc/image/sponsor.png" alt="Sponsor Information">
+        </section>
+
+        <section id="author" class="author">
+            <h2>Author</h2>
+            <img src="./doc/image/author-wechat.png" alt="Author WeChat">
+        </section>
+    </div>
+</body>
+</html>
