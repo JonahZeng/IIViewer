@@ -29,7 +29,7 @@ this repo is designed for open and view ISP intermediate image. we support these
 ## Usage
 download it from [release page](https://github.com/JonahZeng/IIViewer/releases)(we provide precompiled x64 exe and deb file), start this app on your PC, you can see this if no unexpect error occurred:
 
-![main-ui](./doc/image/main-ui.png)
+![windows-main-ui](./doc/image/main-ui.png)
 
 ![ubuntu-zh-ui](./doc/image/ubuntu-zh.png)
 
