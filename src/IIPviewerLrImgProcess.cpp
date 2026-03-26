@@ -812,8 +812,6 @@ void IIPviewer::scrollToPixelPos(const QPoint& pixelPos)
         {
             ui.imageLabel[idx]->zoomIn(targetZoomIdx);
         }
-        ui.imageLabelContianer[idx]->layout()->setContentsMargins(0, 0, 0, 0);
-        ui.imageLabelContianer[idx]->resize(ui.imageLabel[idx]->size());
     }
     ui.zoomRatioLabel->setText(ui.imageLabel[0]->zoomListLabel[targetZoomIdx]);
 
@@ -825,9 +823,29 @@ void IIPviewer::scrollToPixelPos(const QPoint& pixelPos)
     {
         const int viewportWidth = ui.scrollArea[idx]->viewport()->width();
         const int viewportHeight = ui.scrollArea[idx]->viewport()->height();
-        const int hVal = qBound(ui.scrollArea[idx]->horizontalScrollBar()->minimum(), targetX - viewportWidth / 2,
+        const int centerX = viewportWidth / 2;
+        const int centerY = viewportHeight / 2;
+        const QSize imageSize = ui.imageLabel[idx]->size();
+
+        const int marginLeft = centerX > targetX ? centerX - targetX : 0;
+        const int marginTop = centerY > targetY ? centerY - targetY : 0;
+
+        const int desiredHVal = targetX + marginLeft - centerX;
+        const int desiredVVal = targetY + marginTop - centerY;
+
+        const int marginRight = desiredHVal + viewportWidth > imageSize.width() + marginLeft
+                                    ? desiredHVal + viewportWidth - imageSize.width() - marginLeft
+                                    : 0;
+        const int marginBottom = desiredVVal + viewportHeight > imageSize.height() + marginTop
+                                     ? desiredVVal + viewportHeight - imageSize.height() - marginTop
+                                     : 0;
+
+        ui.imageLabelContianer[idx]->layout()->setContentsMargins(marginLeft, marginTop, marginRight, marginBottom);
+        ui.imageLabelContianer[idx]->resize(imageSize + QSize(marginLeft + marginRight, marginTop + marginBottom));
+
+        const int hVal = qBound(ui.scrollArea[idx]->horizontalScrollBar()->minimum(), desiredHVal,
                                 ui.scrollArea[idx]->horizontalScrollBar()->maximum());
-        const int vVal = qBound(ui.scrollArea[idx]->verticalScrollBar()->minimum(), targetY - viewportHeight / 2,
+        const int vVal = qBound(ui.scrollArea[idx]->verticalScrollBar()->minimum(), desiredVVal,
                                 ui.scrollArea[idx]->verticalScrollBar()->maximum());
         ui.scrollArea[idx]->horizontalScrollBar()->setValue(hVal);
         ui.scrollArea[idx]->verticalScrollBar()->setValue(vVal);
