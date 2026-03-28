@@ -98,7 +98,7 @@ jobs:
         cmake --install .
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5)
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5) -DCI_MODE=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
