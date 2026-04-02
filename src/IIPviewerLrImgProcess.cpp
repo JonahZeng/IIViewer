@@ -285,6 +285,7 @@ static ImgDiffResult compareYuvImage(const unsigned char* left, const unsigned c
         }
         if (pixVmaxDiff > maxDiff)
         {
+            maxDiff = pixVmaxDiff;
             maxPos = maxVdiffPos;
         }
         return maxPos;
@@ -337,6 +338,7 @@ static ImgDiffResult compareYuvImage(const unsigned char* left, const unsigned c
                 {
                     pixYminDiff = pixYdiff;
                 }
+                pixYdiffSum += pixYdiff;
             }
         }
         int pixCnt = height * width;
@@ -625,7 +627,7 @@ static ImgDiffResult compareYuvImage(const unsigned char* left, const unsigned c
                 pixVdiffSum += pixVdiff;
             }
         }
-        tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixUmaxDiff).arg(pixUminDiff).arg(pixUdiffSum / (qreal)pixCnt).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
+        tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)pixCnt).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         return {tmp, getMaxDiffPos()};
     }
     else if(yuvTp == YuvType::YUV444_PLANAR) // YYY..UUU..VVV
