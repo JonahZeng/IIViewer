@@ -75,8 +75,6 @@ namespace Ui
         QPushButton *plot_rgb_hist;
         QPushButton *plot_yuv_contourf_line;
         QPushButton *plot_yuv_hist;
-        QPushButton *plot_hsv_contourf_line;
-        QPushButton *plot_hsv_hist;
         QTableWidget *fileHistoryTable;
 
     private:

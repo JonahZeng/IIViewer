@@ -34,6 +34,7 @@ private:
     void setRawImage(QString &image, BayerPatternType bay, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
     void openGivenFileFromCmdArgv(QString& image);
     void addFileToHistory(const QString &filePath);
+    void scrollToPixelPos(const QPoint& pixelPos);
 
 protected:
     void showEvent(QShowEvent *event) override;

@@ -3,6 +3,12 @@
 #include "ImgDiffReportDlg.h"
 #include <QMessageBox>
 
+struct ImgDiffResult
+{
+    QString report;
+    QPoint maxDiffPos;
+};
+
 void IIPviewer::updateExchangeBtn()
 {
     if (ui.imageLabel[0]->openedImgType != UNKNOW_IMG && ui.imageLabel[1]->openedImgType != UNKNOW_IMG)
@@ -95,7 +101,7 @@ void IIPviewer::showImageInfo()
     dlg.exec();
 }
 
-static QString compareNormalImage(const QImage* left, const QImage* right)
+static ImgDiffResult compareNormalImage(const QImage* left, const QImage* right)
 {
     Q_ASSERT(left->size() == right->size());
     QSize imgSize = left->size();
@@ -135,10 +141,10 @@ static QString compareNormalImage(const QImage* left, const QImage* right)
     }
     int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
-    return tmp;
+    return {tmp, maxDiffPos};
 }
 
-static QString comparePgmImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
+static ImgDiffResult comparePgmImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
 {
     const int width = imgSize.width();
     quint64 pixDiffSum = 0;
@@ -169,10 +175,10 @@ static QString comparePgmImage(const unsigned char* left, const unsigned char* r
     }
     int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
-    return tmp;
+    return {tmp, maxDiffPos};
 }
 
-static QString comparePnmImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
+static ImgDiffResult comparePnmImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
 {
     const int width = imgSize.width();
     quint64 pixDiffSum = 0;
@@ -209,10 +215,10 @@ static QString comparePnmImage(const unsigned char* left, const unsigned char* r
     }
     int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
-    return tmp;
+    return {tmp, maxDiffPos};
 }
 
-static QString compareRawImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
+static ImgDiffResult compareRawImage(const unsigned char* left, const unsigned char* right, const int bits, const QSize imgSize)
 {
     const int width = imgSize.width();
     quint64 pixDiffSum = 0;
@@ -243,10 +249,10 @@ static QString compareRawImage(const unsigned char* left, const unsigned char* r
     }
     int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
-    return tmp;
+    return {tmp, maxDiffPos};
 }
 
-static QString compareYuvImage(const unsigned char* left, const unsigned char* right, const int bits, YuvType yuvTp, const QSize imgSize)
+static ImgDiffResult compareYuvImage(const unsigned char* left, const unsigned char* right, const int bits, YuvType yuvTp, const QSize imgSize)
 {
     const int width = imgSize.width();
     const int height = imgSize.height();
@@ -267,6 +273,23 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
     quint32 pixVmaxDiff = 0;
     quint32 pixVminDiff = (1u << bits) - 1;
     QPoint maxVdiffPos(-1, -1);
+
+    auto getMaxDiffPos = [&]()
+    {
+        quint32 maxDiff = pixYmaxDiff;
+        QPoint maxPos = maxYdiffPos;
+        if (pixUmaxDiff > maxDiff)
+        {
+            maxDiff = pixUmaxDiff;
+            maxPos = maxUdiffPos;
+        }
+        if (pixVmaxDiff > maxDiff)
+        {
+            maxDiff = pixVmaxDiff;
+            maxPos = maxVdiffPos;
+        }
+        return maxPos;
+    };
 
     if (yuvTp == YuvType::YUV400)
     {
@@ -293,7 +316,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
         }
         int pixCnt = height * width;
         QString tmp = QString("Y max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixYmaxDiff).arg(pixYminDiff).arg(pixYdiffSum / (qreal)pixCnt).arg(maxYdiffPos.y()).arg(maxYdiffPos.x());
-        return tmp;
+        return {tmp, getMaxDiffPos()};
     }
     else if(yuvTp == YuvType::YUV420_NV12 || yuvTp == YuvType::YUV420_NV21) // YYY...UVUV and YYY...VUVU
     {
@@ -315,6 +338,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
                 {
                     pixYminDiff = pixYdiff;
                 }
+                pixYdiffSum += pixYdiff;
             }
         }
         int pixCnt = height * width;
@@ -373,7 +397,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
             tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         else
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
-        return tmp;
+        return {tmp, getMaxDiffPos()};
     }
     else if(yuvTp == YuvType::YUV420P_YU12 || yuvTp == YuvType::YUV420P_YV12) // YYY...UU..VV and YYY...VV..UU
     {
@@ -456,7 +480,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
             tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
         else
             tmp += QString("U max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 4)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
-        return tmp;
+        return {tmp, getMaxDiffPos()};
     }
     else if(yuvTp == YuvType::YUV422_UYVY || yuvTp == YuvType::YUV422_YUYV) // UYVY and YUYV
     {
@@ -533,7 +557,7 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
         }
         tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)(pixCnt / 2)).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
 
-        return tmp;
+        return {tmp, getMaxDiffPos()};
     }
     else if(yuvTp == YuvType::YUV444_INTERLEAVE) // YUVYUV
     {
@@ -603,8 +627,8 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
                 pixVdiffSum += pixVdiff;
             }
         }
-        tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixUmaxDiff).arg(pixUminDiff).arg(pixUdiffSum / (qreal)pixCnt).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
-        return tmp;
+        tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)pixCnt).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
+        return {tmp, getMaxDiffPos()};
     }
     else if(yuvTp == YuvType::YUV444_PLANAR) // YYY..UUU..VVV
     {
@@ -681,12 +705,12 @@ static QString compareYuvImage(const unsigned char* left, const unsigned char* r
             }
         }
         tmp += QString("V max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixVmaxDiff).arg(pixVminDiff).arg(pixVdiffSum / (qreal)pixCnt).arg(maxVdiffPos.y()).arg(maxVdiffPos.x());
-        return tmp;
+        return {tmp, getMaxDiffPos()};
     }
     else
     {
         QString tmp("error yuv format\n");
-        return tmp;
+        return {tmp, QPoint(-1, -1)};
     }
 }
 
@@ -708,10 +732,14 @@ void IIPviewer::showImageDiffReport()
         return;
     }
 
-    QString diffInfo = QString("%1 <------> %2\n").arg(openedFile[0]).arg(openedFile[1]);
+    ImgDiffResult diffResult;
+    diffResult.report = QString("%1 <------> %2\n").arg(openedFile[0]).arg(openedFile[1]);
+    diffResult.maxDiffPos = QPoint(-1, -1);
     if(ui.imageLabel[0]->openedImgType == OpenedImageType::NORMAL_IMG)
     {
-        diffInfo += compareNormalImage(ui.imageLabel[0]->pixMap, ui.imageLabel[1]->pixMap);
+        const ImgDiffResult result = compareNormalImage(ui.imageLabel[0]->pixMap, ui.imageLabel[1]->pixMap);
+        diffResult.report += result.report;
+        diffResult.maxDiffPos = result.maxDiffPos;
     }
     else if(ui.imageLabel[0]->openedImgType == OpenedImageType::PGM_IMG)
     {
@@ -720,7 +748,9 @@ void IIPviewer::showImageDiffReport()
             QMessageBox::critical(this, tr("error"), tr("left image bit width not equal to right side!"), QMessageBox::StandardButton::Close);
             return;
         }
-        diffInfo += comparePgmImage(ui.imageLabel[0]->pgmDataPtr, ui.imageLabel[1]->pgmDataPtr, ui.imageLabel[0]->pgmDataBit, originSize[0]);
+        const ImgDiffResult result = comparePgmImage(ui.imageLabel[0]->pgmDataPtr, ui.imageLabel[1]->pgmDataPtr, ui.imageLabel[0]->pgmDataBit, originSize[0]);
+        diffResult.report += result.report;
+        diffResult.maxDiffPos = result.maxDiffPos;
     }
     else if(ui.imageLabel[0]->openedImgType == OpenedImageType::PNM_IMG)
     {
@@ -729,7 +759,9 @@ void IIPviewer::showImageDiffReport()
             QMessageBox::critical(this, tr("error"), tr("left image bit width not equal to right side!"), QMessageBox::StandardButton::Close);
             return;
         }
-        diffInfo += comparePnmImage(ui.imageLabel[0]->pnmDataPtr, ui.imageLabel[1]->pnmDataPtr, ui.imageLabel[0]->pnmDataBit, originSize[0]);
+        const ImgDiffResult result = comparePnmImage(ui.imageLabel[0]->pnmDataPtr, ui.imageLabel[1]->pnmDataPtr, ui.imageLabel[0]->pnmDataBit, originSize[0]);
+        diffResult.report += result.report;
+        diffResult.maxDiffPos = result.maxDiffPos;
     }
     else if(ui.imageLabel[0]->openedImgType == OpenedImageType::RAW_IMG)
     {
@@ -738,7 +770,9 @@ void IIPviewer::showImageDiffReport()
             QMessageBox::critical(this, tr("error"), tr("left image bit width not equal to right side!"), QMessageBox::StandardButton::Close);
             return;
         }
-        diffInfo += compareRawImage(ui.imageLabel[0]->rawDataPtr, ui.imageLabel[1]->rawDataPtr, ui.imageLabel[0]->rawDataBit, originSize[0]);
+        const ImgDiffResult result = compareRawImage(ui.imageLabel[0]->rawDataPtr, ui.imageLabel[1]->rawDataPtr, ui.imageLabel[0]->rawDataBit, originSize[0]);
+        diffResult.report += result.report;
+        diffResult.maxDiffPos = result.maxDiffPos;
     }
     else if(ui.imageLabel[0]->openedImgType == OpenedImageType::YUV_IMG)
     {
@@ -752,11 +786,70 @@ void IIPviewer::showImageDiffReport()
             QMessageBox::critical(this, tr("error"), tr("left image yuv type not equal to right side!"), QMessageBox::StandardButton::Close);
             return;
         }
-        diffInfo += compareYuvImage(ui.imageLabel[0]->yuvDataPtr, ui.imageLabel[1]->yuvDataPtr, ui.imageLabel[0]->yuvDataBit, ui.imageLabel[0]->yuvType, originSize[0]);
+        const ImgDiffResult result = compareYuvImage(ui.imageLabel[0]->yuvDataPtr, ui.imageLabel[1]->yuvDataPtr, ui.imageLabel[0]->yuvDataBit, ui.imageLabel[0]->yuvType, originSize[0]);
+        diffResult.report += result.report;
+        diffResult.maxDiffPos = result.maxDiffPos;
     }
 
     ImgDiffReportDlg dlg(this);
     
-    dlg.setReportInfo(diffInfo);
-    dlg.exec();
+    dlg.setReportInfo(diffResult.report);
+    if (dlg.exec() == ImgDiffReportDlg::GOTO_MAX_DIFF_RESULT)
+    {
+        scrollToPixelPos(diffResult.maxDiffPos);
+    }
+}
+
+void IIPviewer::scrollToPixelPos(const QPoint& pixelPos)
+{
+    if (pixelPos.x() < 0 || pixelPos.y() < 0)
+    {
+        return;
+    }
+
+    constexpr int targetZoomIdx = ZOOM_LIST_LENGTH - 1;
+    for (int idx = 0; idx < 2; ++idx)
+    {
+        if (ui.imageLabel[idx]->zoomIdx != targetZoomIdx)
+        {
+            ui.imageLabel[idx]->zoomIn(targetZoomIdx);
+        }
+    }
+    ui.zoomRatioLabel->setText(ui.imageLabel[0]->zoomListLabel[targetZoomIdx]);
+
+    const float scaleRatio = ui.imageLabel[0]->zoomList[ui.imageLabel[0]->zoomIdx];
+    const int targetX = int(pixelPos.x() * scaleRatio);
+    const int targetY = int(pixelPos.y() * scaleRatio);
+
+    for (int idx = 0; idx < 2; ++idx)
+    {
+        const int viewportWidth = ui.scrollArea[idx]->viewport()->width();
+        const int viewportHeight = ui.scrollArea[idx]->viewport()->height();
+        const int centerX = viewportWidth / 2;
+        const int centerY = viewportHeight / 2;
+        const QSize imageSize = ui.imageLabel[idx]->size();
+
+        const int marginLeft = centerX > targetX ? centerX - targetX : 0;
+        const int marginTop = centerY > targetY ? centerY - targetY : 0;
+
+        const int desiredHVal = targetX + marginLeft - centerX;
+        const int desiredVVal = targetY + marginTop - centerY;
+
+        const int marginRight = desiredHVal + viewportWidth > imageSize.width() + marginLeft
+                                    ? desiredHVal + viewportWidth - imageSize.width() - marginLeft
+                                    : 0;
+        const int marginBottom = desiredVVal + viewportHeight > imageSize.height() + marginTop
+                                     ? desiredVVal + viewportHeight - imageSize.height() - marginTop
+                                     : 0;
+
+        ui.imageLabelContianer[idx]->layout()->setContentsMargins(marginLeft, marginTop, marginRight, marginBottom);
+        ui.imageLabelContianer[idx]->resize(imageSize + QSize(marginLeft + marginRight, marginTop + marginBottom));
+
+        const int hVal = qBound(ui.scrollArea[idx]->horizontalScrollBar()->minimum(), desiredHVal,
+                                ui.scrollArea[idx]->horizontalScrollBar()->maximum());
+        const int vVal = qBound(ui.scrollArea[idx]->verticalScrollBar()->minimum(), desiredVVal,
+                                ui.scrollArea[idx]->verticalScrollBar()->maximum());
+        ui.scrollArea[idx]->horizontalScrollBar()->setValue(hVal);
+        ui.scrollArea[idx]->verticalScrollBar()->setValue(vVal);
+    }
 }
