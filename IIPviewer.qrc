@@ -23,6 +23,10 @@
         <file>src/resource/single_rect.svg</file>
         <file>src/resource/double_rect.svg</file>
         <file>src/resource/compare_diff.svg</file>
+        <file>src/resource/titlebar-minimize.svg</file>
+        <file>src/resource/titlebar-maximize.svg</file>
+        <file>src/resource/titlebar-restore.svg</file>
+        <file>src/resource/titlebar-close.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/IIViewer.icns</file>

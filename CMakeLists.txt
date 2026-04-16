@@ -149,6 +149,8 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/IIPOptionDialog.cpp
         ${CMAKE_SOURCE_DIR}/src/IIPviewer_ui.cpp
         ${CMAKE_SOURCE_DIR}/inc/IIPviewer_ui.h
+        ${CMAKE_SOURCE_DIR}/src/TitleBar.cpp
+        ${CMAKE_SOURCE_DIR}/inc/TitleBar.h
         ${CMAKE_SOURCE_DIR}/src/YuvFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.ui
@@ -216,6 +218,9 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::DataVisualization Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Charts)
 target_link_libraries(${PROJECT_NAME} PRIVATE heif)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE dwmapi)
+endif()
 if(APPLE)
     target_include_directories(${PROJECT_NAME} PRIVATE ${EXTRA_QT_INCLUDE_DIRS})
 endif()

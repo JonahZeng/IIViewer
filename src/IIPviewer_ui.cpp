@@ -10,7 +10,7 @@
 #include <QStyleFactory>
 #include "IIPviewer.h"
 
-Ui::IIPviewerUi::IIPviewerUi() : toolBar(nullptr), openFileLeftAction(nullptr), openFileRightAction(nullptr),
+Ui::IIPviewerUi::IIPviewerUi() : titleBar(nullptr), toolBar(nullptr), openFileLeftAction(nullptr), openFileRightAction(nullptr),
     reloadFileLeftAction(nullptr), reloadFileRightAction(nullptr),
     exitAction(nullptr),
     closeLeftAction(nullptr), closeRightAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), // aboutQtAction(nullptr), 
@@ -35,10 +35,22 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     if(mainWindow->objectName().isEmpty()){
         mainWindow->setObjectName(QString::fromUtf8("mainWindow"));
     }
-    QMenuBar *mbar = mainWindow->menuBar();
+    QMenuBar *mbar = nullptr;
+#ifdef Q_OS_WINDOWS
+    mbar = new QMenuBar(mainWindow);
+    titleBar = new TitleBar(mainWindow);
+    titleBar->setMenuBar(mbar);
+    mainWindow->setMenuWidget(titleBar);
+#else
+    mbar = mainWindow->menuBar();
+#endif
     QMenu *fileMenu = mbar->addMenu(QApplication::translate("mainWindow", "&File", nullptr));
     toolBar = new QToolBar(mainWindow);
     toolBar->setAllowedAreas(Qt::ToolBarArea::TopToolBarArea);
+    toolBar->setMovable(false);
+    toolBar->setFloatable(false);
+    toolBar->setStyleSheet("QToolBar { border: none; border-top: 1px solid palette(midlight); border-bottom: 1px solid palette(midlight); background: palette(window); spacing: 2px; }"
+                           "QToolBar::separator { width: 1px; margin: 4px 6px; background: palette(mid); }");
     mainWindow->addToolBar(Qt::ToolBarArea::TopToolBarArea, toolBar);
     // mbar->setStyleSheet("QMenuBar{background:rgb(128,128,128)}
     // QMenuBar::item:selected{background:rgb(128,128,128)}
@@ -191,17 +203,17 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     scrollAreaLayout->setContentsMargins(0, 0, 0, 0);
     mainWidget->setLayout(scrollAreaLayout);
 
-    scrollArea[0] = new QScrollArea();
-    imageLabelContianer[0] = new QWidget();
-    scrollArea[0]->setWidget(imageLabelContianer[0]);
-    scrollArea[0]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    scrollArea[0]->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scrollArea[0]->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scrollArea[0]->setFrameShape(QFrame::NoFrame);
+    scrollArea.at(0) = new QScrollArea();
+    imageLabelContianer.at(0) = new QWidget();
+    scrollArea.at(0)->setWidget(imageLabelContianer.at(0));
+    scrollArea.at(0)->setAlignment(Qt::AlignmentFlag::AlignHCenter | Qt::AlignmentFlag::AlignVCenter);
+    scrollArea.at(0)->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+    scrollArea.at(0)->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+    scrollArea.at(0)->setFrameShape(QFrame::Shape::NoFrame);
 
-    QVBoxLayout *imgLabelContianerLayout0 = new QVBoxLayout(imageLabelContianer[0]);
-    imageLabel[0] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[0]);
-    imgLabelContianerLayout0->addWidget(imageLabel[0]);
+    QVBoxLayout *imgLabelContianerLayout0 = new QVBoxLayout(imageLabelContianer.at(0));
+    imageLabel.at(0) = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea.at(0));
+    imgLabelContianerLayout0->addWidget(imageLabel.at(0));
     
     zoomRatioLabel = new QLabel("1x");
     zoomRatioLabel->setAlignment(Qt::AlignmentFlag::AlignHCenter);
@@ -235,20 +247,20 @@ void Ui::IIPviewerUi::setupUi(IIPviewer *mainWindow)
     centerLayout->addStretch(1);
     centerLayout->setContentsMargins(0, 0, 0, 0);
 
-    scrollArea[1] = new QScrollArea();
-    imageLabelContianer[1] = new QWidget();
-    scrollArea[1]->setWidget(imageLabelContianer[1]);
-    scrollArea[1]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    scrollArea[1]->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scrollArea[1]->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scrollArea[1]->setFrameShape(QFrame::NoFrame);
-    QVBoxLayout *imgLabelContianerLayout1 = new QVBoxLayout(imageLabelContianer[1]);
-    imageLabel[1] = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea[1]);
-    imgLabelContianerLayout1->addWidget(imageLabel[1]);
+    scrollArea.at(1) = new QScrollArea();
+    imageLabelContianer.at(1) = new QWidget();
+    scrollArea.at(1)->setWidget(imageLabelContianer.at(1));
+    scrollArea.at(1)->setAlignment(Qt::AlignmentFlag::AlignHCenter | Qt::AlignmentFlag::AlignVCenter);
+    scrollArea.at(1)->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+    scrollArea.at(1)->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+    scrollArea.at(1)->setFrameShape(QFrame::Shape::NoFrame);
+    QVBoxLayout *imgLabelContianerLayout1 = new QVBoxLayout(imageLabelContianer.at(1));
+    imageLabel.at(1) = new ImageWidget(mainWindow->settings.penColor, 2, scrollArea.at(1));
+    imgLabelContianerLayout1->addWidget(imageLabel.at(1));
     
-    scrollAreaLayout->addWidget(scrollArea[0], 1);
+    scrollAreaLayout->addWidget(scrollArea.at(0), 1);
     scrollAreaLayout->addWidget(scrollAreaCenterFrame, 0);
-    scrollAreaLayout->addWidget(scrollArea[1], 1);
+    scrollAreaLayout->addWidget(scrollArea.at(1), 1);
 
     createDockWidget0(mainWindow);
 

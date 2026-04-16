@@ -13,16 +13,26 @@
 #include <QImageReader>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QMenuBar>
 #include <QScreen>
 #include <QScrollBar>
 #include <QStandardPaths>
 #include <QStyleFactory>
+#include <QWindow>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QToolTip>
 #include <QVersionNumber>
+#ifdef Q_OS_WINDOWS
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <dwmapi.h>
+#include <windows.h>
+#include <windowsx.h>
+#endif
 #if (defined _MSC_VER) && (defined HAVE_VISIBILITY)
 #undef HAVE_VISIBILITY
 #endif
@@ -34,6 +44,45 @@ constexpr int BIT8 = 8;
 constexpr int BIT16 = 16;
 // constexpr int BIT24 = 24;
 constexpr int BIT32 = 32;
+#ifdef Q_OS_WINDOWS
+#ifndef DWMWA_BORDER_COLOR
+#define DWMWA_BORDER_COLOR 34
+#endif
+
+#ifndef DWMWA_COLOR_NONE
+#define DWMWA_COLOR_NONE 0xFFFFFFFE
+#endif
+
+int frameBorderWidth(HWND hwnd)
+{
+    const UINT dpi = GetDpiForWindow(hwnd);
+    return GetSystemMetricsForDpi(SM_CXSIZEFRAME, dpi) + GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
+}
+
+int frameBorderHeight(HWND hwnd)
+{
+    const UINT dpi = GetDpiForWindow(hwnd);
+    return GetSystemMetricsForDpi(SM_CYSIZEFRAME, dpi) + GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
+}
+
+void updateNativeShadow(HWND hwnd, bool maximized)
+{
+    BOOL compositionEnabled = FALSE;
+    if (FAILED(DwmIsCompositionEnabled(&compositionEnabled)) || !compositionEnabled)
+    {
+        return;
+    }
+
+    const DWMNCRENDERINGPOLICY renderingPolicy = DWMNCRP_ENABLED;
+    DwmSetWindowAttribute(hwnd, DWMWA_NCRENDERING_POLICY, &renderingPolicy, sizeof(renderingPolicy));
+
+    const COLORREF borderColor = maximized ? RGB(0, 0, 0) : DWMWA_COLOR_NONE;
+    DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &borderColor, sizeof(borderColor));
+
+    const MARGINS shadowMargins = maximized ? MARGINS{0, 0, 0, 0} : MARGINS{1, 1, 1, 1};
+    DwmExtendFrameIntoClientArea(hwnd, &shadowMargins);
+}
+#endif
 
 IIPviewer::IIPviewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readability-function-cognitive-complexity)
     : QMainWindow(parent),
@@ -44,6 +93,9 @@ IIPviewer::IIPviewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(reada
     lastFileWatcherNotifyPath{QString(), QString()},
     lastFileWatcherNotifyIsWaitProcess{false, false}
 {
+#ifdef Q_OS_WINDOWS
+    setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+#endif
     if (settings.loadSettingsFromFile())
     {
         workPath = settings.workPath;
@@ -213,8 +265,12 @@ IIPviewer::IIPviewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(reada
             return;
         }
         const qreal scale = screen->logicalDotsPerInch() / 96.0; // 96 DPI 为基准 
-        constexpr int base = 24; // 你希望在 100% 下的大小 
-        ui.toolBar->setIconSize(QSize(int((qreal)base * scale), int((qreal)base * scale)));
+        constexpr int baseToolBarHeight = 34;
+        ui.toolBar->setFixedHeight(int((qreal)baseToolBarHeight * scale));
+        if (ui.titleBar != nullptr)
+        {
+            ui.titleBar->updateScale(scale);
+        }
     });
 
 
@@ -230,6 +286,16 @@ IIPviewer::IIPviewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(reada
     ui.imageInfoBtn->setEnabled(false);
     ui.imageDiffInfoBtn->setEnabled(false);
     setWindowIcon(QIcon(":/image/src/resource/aboutlog.png"));
+    if (ui.titleBar != nullptr)
+    {
+        const QScreen *screen = window()->windowHandle() != nullptr ? window()->windowHandle()->screen() : nullptr;
+        const qreal scale = screen != nullptr ? screen->logicalDotsPerInch() / 96.0 : 1.0;
+        constexpr int baseToolBarHeight = 34;
+        ui.toolBar->setFixedHeight(int((qreal)baseToolBarHeight * scale));
+        ui.titleBar->updateScale(scale);
+        ui.titleBar->setWindowIconPixmap(windowIcon());
+        ui.titleBar->updateMaximizeButton(isMaximized());
+    }
 
     if(settings.workAreaDoubleImgMode)
     {
@@ -248,8 +314,179 @@ IIPviewer::IIPviewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(reada
     }
 }
 
+void IIPviewer::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::WindowStateChange && ui.titleBar != nullptr)
+    {
+        ui.titleBar->updateMaximizeButton(isMaximized());
+    }
+
+#ifdef Q_OS_WINDOWS
+    if (event->type() == QEvent::WindowStateChange)
+    {
+        updateNativeShadow(reinterpret_cast<HWND>(winId()), isMaximized());
+    }
+#endif
+
+    QMainWindow::changeEvent(event);
+}
+
+#ifdef Q_OS_WINDOWS
+bool IIPviewer::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+    Q_UNUSED(eventType);
+    auto *msg = static_cast<MSG *>(message);
+
+    if (msg == nullptr)
+    {
+        return false;
+    }
+
+    if (msg->message == WM_NCCALCSIZE)
+    {
+        if (msg->wParam != 0)
+        {
+            auto *params = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
+            if (IsZoomed(msg->hwnd))
+            {
+                const int borderWidth = frameBorderWidth(msg->hwnd);
+                const int borderHeight = frameBorderHeight(msg->hwnd);
+                params->rgrc[0].left += borderWidth;
+                params->rgrc[0].top += borderHeight;
+                params->rgrc[0].right -= borderWidth;
+                params->rgrc[0].bottom -= borderHeight;
+            }
+            *result = 0;
+            return true;
+        }
+    }
+
+    if (msg->message == WM_GETMINMAXINFO)
+    {
+        auto *minMaxInfo = reinterpret_cast<MINMAXINFO *>(msg->lParam);
+        const HMONITOR monitor = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
+        if (monitor != nullptr)
+        {
+            MONITORINFO monitorInfo{};
+            monitorInfo.cbSize = sizeof(MONITORINFO);
+            GetMonitorInfo(monitor, &monitorInfo);
+            const RECT workArea = monitorInfo.rcWork;
+            const RECT monitorArea = monitorInfo.rcMonitor;
+            const int borderWidth = frameBorderWidth(msg->hwnd);
+            const int borderHeight = frameBorderHeight(msg->hwnd);
+
+            minMaxInfo->ptMaxPosition.x = workArea.left - monitorArea.left - borderWidth;
+            minMaxInfo->ptMaxPosition.y = workArea.top - monitorArea.top - borderHeight;
+            minMaxInfo->ptMaxSize.x = workArea.right - workArea.left + borderWidth * 2;
+            minMaxInfo->ptMaxSize.y = workArea.bottom - workArea.top + borderHeight * 2;
+            minMaxInfo->ptMaxTrackSize = minMaxInfo->ptMaxSize;
+            *result = 0;
+            return true;
+        }
+    }
+
+    if (msg->message == WM_NCHITTEST)
+    {
+        const LONG xPos = GET_X_LPARAM(msg->lParam);
+        const LONG yPos = GET_Y_LPARAM(msg->lParam);
+        RECT windowRect{};
+        GetWindowRect(msg->hwnd, &windowRect);
+
+        const int resizeBorderWidth = frameBorderWidth(msg->hwnd);
+        const int resizeBorderHeight = frameBorderHeight(msg->hwnd);
+
+        const bool onLeft = xPos >= windowRect.left && xPos < windowRect.left + resizeBorderWidth;
+        const bool onRight = xPos < windowRect.right && xPos >= windowRect.right - resizeBorderWidth;
+        const bool onTop = yPos >= windowRect.top && yPos < windowRect.top + resizeBorderHeight;
+        const bool onBottom = yPos < windowRect.bottom && yPos >= windowRect.bottom - resizeBorderHeight;
+
+        if (!isMaximized())
+        {
+            if (onTop && onLeft)
+            {
+                *result = HTTOPLEFT;
+                return true;
+            }
+            if (onTop && onRight)
+            {
+                *result = HTTOPRIGHT;
+                return true;
+            }
+            if (onBottom && onLeft)
+            {
+                *result = HTBOTTOMLEFT;
+                return true;
+            }
+            if (onBottom && onRight)
+            {
+                *result = HTBOTTOMRIGHT;
+                return true;
+            }
+            if (onLeft)
+            {
+                *result = HTLEFT;
+                return true;
+            }
+            if (onRight)
+            {
+                *result = HTRIGHT;
+                return true;
+            }
+            if (onTop)
+            {
+                *result = HTTOP;
+                return true;
+            }
+            if (onBottom)
+            {
+                *result = HTBOTTOM;
+                return true;
+            }
+        }
+
+        if (ui.titleBar == nullptr)
+        {
+            return QMainWindow::nativeEvent(eventType, message, result);
+        }
+
+        const QPoint globalPos(xPos, yPos);
+        const QPoint titleBarPos = ui.titleBar->mapFromGlobal(globalPos);
+        if (ui.titleBar->rect().contains(titleBarPos))
+        {
+            QWidget *hitWidget = ui.titleBar->childAt(titleBarPos);
+            const bool hitInteractiveWidget = hitWidget != nullptr &&
+                (qobject_cast<QPushButton *>(hitWidget) != nullptr ||
+                 qobject_cast<QMenuBar *>(hitWidget) != nullptr);
+            if (!hitInteractiveWidget)
+            {
+                *result = HTCAPTION;
+                return true;
+            }
+        }
+    }
+
+    return QMainWindow::nativeEvent(eventType, message, result);
+}
+#endif
+
 void IIPviewer::showEvent(QShowEvent *event)
 {
+#ifdef Q_OS_WINDOWS
+    static bool nativeFrameInitialized = false;
+    if (!nativeFrameInitialized)
+    {
+        const HWND hwnd = reinterpret_cast<HWND>(winId());
+        const LONG_PTR style = GetWindowLongPtr(hwnd, GWL_STYLE);
+        const LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+        SetWindowLongPtr(hwnd, GWL_STYLE, style | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU);
+        SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_APPWINDOW);
+        SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        nativeFrameInitialized = true;
+    }
+    updateNativeShadow(reinterpret_cast<HWND>(winId()), isMaximized());
+#endif
+
     if (ui.imageLabel[LEFT_IMG_WIDGET]->pixMap == nullptr)
     {
         const int scrollWidth = ui.scrollArea[LEFT_IMG_WIDGET]->geometry().width();
@@ -548,6 +785,8 @@ void IIPviewer::closeEvent(QCloseEvent *event)
 
 void IIPviewer::setTitle()
 {
+#ifdef Q_OS_WINDOWS
+#else
     QString openedFile0_t(openedFile[0]);
     QString openedFile1_t(openedFile[1]);
     if (openedFile[0].length() > 50) // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -570,6 +809,7 @@ void IIPviewer::setTitle()
     {
         setWindowTitle(openedFile0_t + "<--->" + openedFile1_t + " - IIViewer");
     }
+#endif
 }
 
 void IIPviewer::addFileToHistory(const QString &filePath)
