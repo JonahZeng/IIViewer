@@ -3,6 +3,7 @@
 class IIPviewer;
 
 #include "ImageWidget.h"
+#include "TitleBar.h"
 #include <QAction>
 #include <QComboBox>
 #include <QDockWidget>
@@ -25,6 +26,7 @@ namespace Ui
         void setupUi(IIPviewer *mainWindow);
 
     public:
+        TitleBar *titleBar;
         QToolBar *toolBar;
         QAction *openFileLeftAction;
         QAction *openFileRightAction;
