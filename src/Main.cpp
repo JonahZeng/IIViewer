@@ -1,4 +1,4 @@
-#include "IIPviewer.h"
+#include "IIViewer.h"
 #include <QApplication>
 #include <QMessageBox>
 // #include <QDebug>
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    IIPviewer win{needOpenFilePath};
+    IIViewer win{needOpenFilePath};
     win.show();
     return QApplication::exec();
 }

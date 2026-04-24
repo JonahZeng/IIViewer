@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.6.5 LANGUAGES CXX)
+project(IIViewer VERSION 0.6.6 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -132,23 +132,23 @@ configure_file (config.h.in ${CMAKE_SOURCE_DIR}/inc/config.h)
 
 set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/Main.cpp
-        ${CMAKE_SOURCE_DIR}/src/IIPviewer.cpp
-        ${CMAKE_SOURCE_DIR}/src/IIPviewerLrImgProcess.cpp
-        ${CMAKE_SOURCE_DIR}/inc/IIPviewer.h
+        ${CMAKE_SOURCE_DIR}/src/IIViewer.cpp
+        ${CMAKE_SOURCE_DIR}/src/IIViewerLrImgProcess.cpp
+        ${CMAKE_SOURCE_DIR}/inc/IIViewer.h
         ${CMAKE_SOURCE_DIR}/src/AboutDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/AboutDlg.h
-        ${CMAKE_SOURCE_DIR}/src/IIPviewer.rc
+        ${CMAKE_SOURCE_DIR}/src/IIViewer.rc
         ${CMAKE_SOURCE_DIR}/src/ImageWidget.cpp
         ${CMAKE_SOURCE_DIR}/src/ImageWidgetRoiShowText.cpp
         ${CMAKE_SOURCE_DIR}/inc/ImageWidget.h
         ${CMAKE_SOURCE_DIR}/src/RawFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/RawFileInfoDlg.ui
-        ${CMAKE_SOURCE_DIR}/inc/IIPOptionDialog.h
-        ${CMAKE_SOURCE_DIR}/inc/IIPOptionDialog.ui
-        ${CMAKE_SOURCE_DIR}/src/IIPOptionDialog.cpp
-        ${CMAKE_SOURCE_DIR}/src/IIPviewer_ui.cpp
-        ${CMAKE_SOURCE_DIR}/inc/IIPviewer_ui.h
+        ${CMAKE_SOURCE_DIR}/inc/IIVOptionDialog.h
+        ${CMAKE_SOURCE_DIR}/inc/IIVOptionDialog.ui
+        ${CMAKE_SOURCE_DIR}/src/IIVOptionDialog.cpp
+        ${CMAKE_SOURCE_DIR}/src/IIViewer_ui.cpp
+        ${CMAKE_SOURCE_DIR}/inc/IIViewer_ui.h
         ${CMAKE_SOURCE_DIR}/src/TitleBar.cpp
         ${CMAKE_SOURCE_DIR}/inc/TitleBar.h
         ${CMAKE_SOURCE_DIR}/src/YuvFileInfoDlg.cpp
@@ -179,7 +179,7 @@ set(TRANSLATIONS
 qt5_add_translation(QM_FILES ${TRANSLATIONS})
 
 set(RESOURCES
-    IIPviewer.qrc
+    IIViewer.qrc
 )
 
 qt5_add_resources(RESOURCE_FILES ${RESOURCES})
@@ -197,7 +197,7 @@ else()
     if(WIN32)
         add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${RESOURCE_FILES} ${QM_FILES})
         if(MSVC)
-            target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/fsanitize=address>)
+            # target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/fsanitize=address>)
             target_compile_options(${PROJECT_NAME} PRIVATE /W4)
             target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>)
         else()

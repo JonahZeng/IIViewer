@@ -1,6 +1,6 @@
 #pragma once
 #include "common_type.h"
-#include "IIPOptionDialog.h"
+#include "IIVOptionDialog.h"
 #include <QJsonObject>
 #include <QString>
 #include <QColor>
@@ -23,7 +23,7 @@ public:
     bool raw_compact;
     QString theme;
     int uv_value_disp_mode;
-    IIPOptionDialog::PaintPixValBgColor pix_val_bg_index;
+    IIVOptionDialog::PaintPixValBgColor pix_val_bg_index;
     QColor pix_val_cus_bg_color;
     bool workAreaDoubleImgMode;
     QRect windowGeometry;

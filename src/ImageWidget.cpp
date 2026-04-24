@@ -152,43 +152,43 @@ void ImageWidget::setPainterColorShape(QPainter &painter)
 {
     switch (appSettings->pix_val_bg_index)
     {
-    case IIPOptionDialog::PaintPixValBgColor::CUSTOM:
+    case IIVOptionDialog::PaintPixValBgColor::CUSTOM:
         painter.setPen(appSettings->pix_val_cus_bg_color);
         painter.setBrush(appSettings->pix_val_cus_bg_color);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::WHITE:
+    case IIVOptionDialog::PaintPixValBgColor::WHITE:
         painter.setPen(Qt::white);
         painter.setBrush(Qt::white);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::GRAY:
+    case IIVOptionDialog::PaintPixValBgColor::GRAY:
         painter.setPen(Qt::gray);
         painter.setBrush(Qt::gray);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::BLACK:
+    case IIVOptionDialog::PaintPixValBgColor::BLACK:
         painter.setPen(Qt::black);
         painter.setBrush(Qt::black);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::RED:
+    case IIVOptionDialog::PaintPixValBgColor::RED:
         painter.setPen(Qt::red);
         painter.setBrush(Qt::red);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::YELLOW:
+    case IIVOptionDialog::PaintPixValBgColor::YELLOW:
         painter.setPen(Qt::yellow);
         painter.setBrush(Qt::yellow);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::GREEN:
+    case IIVOptionDialog::PaintPixValBgColor::GREEN:
         painter.setPen(Qt::green);
         painter.setBrush(Qt::green);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::CYAN:
+    case IIVOptionDialog::PaintPixValBgColor::CYAN:
         painter.setPen(Qt::cyan);
         painter.setBrush(Qt::cyan);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::BLUE:
+    case IIVOptionDialog::PaintPixValBgColor::BLUE:
         painter.setPen(Qt::blue);
         painter.setBrush(Qt::blue);
         break;
-    case IIPOptionDialog::PaintPixValBgColor::MAGENTA:
+    case IIVOptionDialog::PaintPixValBgColor::MAGENTA:
         painter.setPen(Qt::magenta);
         painter.setBrush(Qt::magenta);
         break;
@@ -202,7 +202,7 @@ void ImageWidget::paintBitMapPixVal(QPoint &viewTopLeftPix, QPainter &painter, i
     int start_x = viewTopLeftPix.x();
     int start_y = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -249,7 +249,7 @@ void ImageWidget::paintRawPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -330,7 +330,7 @@ void ImageWidget::paintPnmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -453,7 +453,7 @@ void ImageWidget::paintPgmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -499,7 +499,7 @@ void ImageWidget::paintYuv444InterleavePixVal(QPoint &viewTopLeftPix, QPainter &
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -594,7 +594,7 @@ void ImageWidget::paintYuv444PlanarPixVal(QPoint &viewTopLeftPix, QPainter &pain
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -689,7 +689,7 @@ void ImageWidget::paintYuv422UYVYPixVal(QPoint &viewTopLeftPix, QPainter &painte
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -812,7 +812,7 @@ void ImageWidget::paintYuv422YUYVPixVal(QPoint &viewTopLeftPix, QPainter &painte
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -937,7 +937,7 @@ void ImageWidget::paintYuv420NV12PixVal(QPoint &viewTopLeftPix, QPainter &painte
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -1038,7 +1038,7 @@ void ImageWidget::paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painte
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -1139,7 +1139,7 @@ void ImageWidget::paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &paint
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -1234,7 +1234,7 @@ void ImageWidget::paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &paint
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
@@ -1329,7 +1329,7 @@ void ImageWidget::paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, i
     int xStart = viewTopLeftPix.x();
     int yStart = viewTopLeftPix.y();
 
-    if(appSettings->pix_val_bg_index != IIPOptionDialog::PaintPixValBgColor::NONE)
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
     {
         setPainterColorShape(painter);
         for (int h = 0; h < viewPixHeight; h++)
