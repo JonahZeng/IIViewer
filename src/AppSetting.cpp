@@ -16,7 +16,7 @@ AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE),
     rawByteOrder(ByteOrderType::RAW_LITTLE_ENDIAN),
     raw_compact(false),
     uv_value_disp_mode(0), // 0:0=gray 1: half-max=gray 
-    pix_val_bg_index(IIPOptionDialog::PaintPixValBgColor::RED),
+    pix_val_bg_index(IIVOptionDialog::PaintPixValBgColor::RED),
     pix_val_cus_bg_color(QColor(0, 0, 0)),
     workAreaDoubleImgMode(false),
     windowMaximized(false)
@@ -133,7 +133,7 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
     }
     if (json.contains("pix_val_bg_index"))
     {
-        pix_val_bg_index = (IIPOptionDialog::PaintPixValBgColor)json["pix_val_bg_index"].toInt();
+        pix_val_bg_index = (IIVOptionDialog::PaintPixValBgColor)json["pix_val_bg_index"].toInt();
     }
     if (json.contains("pix_val_cus_bg_color"))
     {

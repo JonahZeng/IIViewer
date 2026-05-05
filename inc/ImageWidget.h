@@ -2,7 +2,7 @@
 #include "RawFileInfoDlg.h"
 #include "YuvFileInfoDlg.h"
 #include "common_type.h"
-#include "IIPOptionDialog.h"
+#include "IIVOptionDialog.h"
 #include "AppSetting.h"
 #include <QColor>
 #include <QEvent>
@@ -125,8 +125,8 @@ public:
     ByteOrderType rawByteOrderType;
     YuvType yuvType;
     OpenedImageType openedImgType;
-    AppSettings* appSettings; // app设置信息，会通过顶层IIPviewer(QMainWindow)传递过来，只使用不持有
-    QString* imgName; // 保存IIPviewer::openedFile
+    AppSettings* appSettings; // app设置信息，会通过顶层IIViewer(QMainWindow)传递过来，只使用不持有
+    QString* imgName; // 保存IIViewer::openedFile
     std::array<QPoint, IMG_PREVIEW_ADJ_CURVE_DOTS> lastCurve;
 
 private:

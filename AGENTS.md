@@ -81,21 +81,21 @@ Enabled checks include: bugprone-*, performance-*, readability-*, modernize-*, c
 - Translation files: `translations/`
 
 ### Naming Conventions
-- **Classes**: PascalCase (e.g., `IIPviewer`, `ImageWidget`, `AppSettings`)
+- **Classes**: PascalCase (e.g., `IIViewer`, `ImageWidget`, `AppSettings`)
 - **Functions/Methods**: camelCase (e.g., `loadFile`, `setPixmap`, `zoomIn`)
 - **Variables**: camelCase for locals, snake_case with prefix for members is NOT used - just camelCase
 - **Constants**: UPPER_SNAKE_CASE for macros, camelCase for constexpr
 - **Enums**: PascalCase for enum names and values (e.g., `YuvType::YUV420_NV12`)
 
 ### Include Order
-1. Project-specific headers (quoted): `"IIPviewer.h"`
+1. Project-specific headers (quoted): `"IIViewer.h"`
 2. Qt headers (angled): `<QMainWindow>`, `<QImage>`
 3. Standard library (angled): `<array>`, `<memory>`
 
 Example:
 ```cpp
 #include "config.h"
-#include "IIPviewer.h"
+#include "IIViewer.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <array>
@@ -104,10 +104,10 @@ Example:
 ### Header Guards
 Use `#ifndef`/`#define`/`#endif` style OR `#pragma once`:
 ```cpp
-#ifndef IIPVIEWER_H
-#define IIPVIEWER_H
+#ifndef IIVIEWER_H
+#define IIVIEWER_H
 // ... content
-#endif // IIPVIEWER_H
+#endif // IIVIEWER_H
 ```
 OR
 ```cpp
@@ -218,7 +218,7 @@ Use Qt's platform macros:
 - HEIF: .heic 8bit YUV 420/422/444
 
 ### Key Classes
-- `IIPviewer`: Main window class, handles UI and file operations
+- `IIViewer`: Main window class, handles UI and file operations
 - `ImageWidget`: Custom widget for image display with zoom/ROI support
 - `AppSettings`: Application settings persistence
 - `RawFileInfoDlg`, `YuvFileInfoDlg`: Dialogs for format configuration

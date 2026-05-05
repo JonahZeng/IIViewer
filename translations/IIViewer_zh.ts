@@ -115,94 +115,94 @@
     </message>
 </context>
 <context>
-    <name>IIPOptionDialog</name>
+    <name>IIVOptionDialog</name>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="14"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="14"/>
         <source>Option</source>
         <translation>选项</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="35"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="35"/>
         <source>yuv</source>
         <translation>yuv</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="41"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="41"/>
         <source>display UV pixel value mode:</source>
         <translation>显示UV像素值模式:</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="49"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="49"/>
         <source>substract half max value, 0 present gray</source>
         <translation>减去值域一半，0代表纯灰</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="54"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="54"/>
         <source>keep the value, half max value present gray</source>
         <translation>保留原像素值，值域的一半表示纯灰</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="63"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="63"/>
         <source>general</source>
         <translation>通用</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="69"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="69"/>
         <source>paint pixl value bg color:</source>
         <translation>绘制像素值背景颜色:</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="77"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="77"/>
         <source>none</source>
         <translation>无</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="82"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="82"/>
         <source>white</source>
         <translation>白色</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="87"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="87"/>
         <source>gray</source>
         <translation>灰色</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="92"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="92"/>
         <source>black</source>
         <translation>黑色</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="97"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="97"/>
         <source>red</source>
         <translation>红色</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="102"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="102"/>
         <source>yellow</source>
         <translation>黄色</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="107"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="107"/>
         <source>green</source>
         <translation>绿色</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="112"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="112"/>
         <source>cyan</source>
         <translation>青色</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="117"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="117"/>
         <source>blue</source>
         <translation>蓝色</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="122"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="122"/>
         <source>magenta</source>
         <translation>洋红</translation>
     </message>
     <message>
-        <location filename="../inc/IIPOptionDialog.ui" line="127"/>
+        <location filename="../inc/IIVOptionDialog.ui" line="127"/>
         <source>custom...</source>
         <translation>自定义...</translation>
     </message>
@@ -212,173 +212,173 @@
     </message>
 </context>
 <context>
-    <name>IIPviewer</name>
+    <name>IIViewer</name>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="421"/>
+        <location filename="../src/IIViewer.cpp" line="712"/>
         <source>find new version</source>
         <translation>发现新版本</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="425"/>
+        <location filename="../src/IIViewer.cpp" line="716"/>
         <source>no new version</source>
         <translation>没有更新的版本</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="425"/>
+        <location filename="../src/IIViewer.cpp" line="716"/>
         <source>You are using the latest version</source>
         <translation>已经是最新版本</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="428"/>
+        <location filename="../src/IIViewer.cpp" line="719"/>
         <source>network error</source>
         <translation>网络错误</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="455"/>
-        <location filename="../src/IIPviewer.cpp" line="480"/>
+        <location filename="../src/IIViewer.cpp" line="746"/>
+        <location filename="../src/IIViewer.cpp" line="771"/>
         <source>file changed</source>
         <translation>文件被外部修改</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="455"/>
-        <location filename="../src/IIPviewer.cpp" line="480"/>
+        <location filename="../src/IIViewer.cpp" line="746"/>
+        <location filename="../src/IIViewer.cpp" line="771"/>
         <source> has been changed, reload it?</source>
         <translation> 被外部修改，是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="498"/>
+        <location filename="../src/IIViewer.cpp" line="789"/>
         <source>Confirm</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="498"/>
+        <location filename="../src/IIViewer.cpp" line="789"/>
         <source>Are you sure to quit?</source>
         <translation>确定退出？</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="714"/>
+        <location filename="../src/IIViewer.cpp" line="1008"/>
         <source>open images</source>
         <translation>打开图像文件</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="839"/>
-        <location filename="../src/IIPviewer.cpp" line="918"/>
-        <location filename="../src/IIPviewer.cpp" line="1017"/>
-        <location filename="../src/IIPviewer.cpp" line="1091"/>
-        <location filename="../src/IIPviewer.cpp" line="1313"/>
-        <location filename="../src/IIPviewer.cpp" line="1319"/>
-        <location filename="../src/IIPviewer.cpp" line="1374"/>
-        <location filename="../src/IIPviewer.cpp" line="1429"/>
-        <location filename="../src/IIPviewer.cpp" line="1485"/>
-        <location filename="../src/IIPviewer.cpp" line="1493"/>
-        <location filename="../src/IIPviewer.cpp" line="1503"/>
-        <location filename="../src/IIPviewer.cpp" line="1547"/>
-        <location filename="../src/IIPviewer.cpp" line="2193"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="719"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="724"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="729"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="746"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="757"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="768"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="779"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="784"/>
+        <location filename="../src/IIViewer.cpp" line="1133"/>
+        <location filename="../src/IIViewer.cpp" line="1212"/>
+        <location filename="../src/IIViewer.cpp" line="1311"/>
+        <location filename="../src/IIViewer.cpp" line="1385"/>
+        <location filename="../src/IIViewer.cpp" line="1607"/>
+        <location filename="../src/IIViewer.cpp" line="1613"/>
+        <location filename="../src/IIViewer.cpp" line="1668"/>
+        <location filename="../src/IIViewer.cpp" line="1723"/>
+        <location filename="../src/IIViewer.cpp" line="1779"/>
+        <location filename="../src/IIViewer.cpp" line="1787"/>
+        <location filename="../src/IIViewer.cpp" line="1797"/>
+        <location filename="../src/IIViewer.cpp" line="1841"/>
+        <location filename="../src/IIViewer.cpp" line="2487"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="721"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="726"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="731"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="748"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="759"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="770"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="781"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="786"/>
         <source>error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="849"/>
-        <location filename="../src/IIPviewer.cpp" line="865"/>
-        <location filename="../src/IIPviewer.cpp" line="928"/>
-        <location filename="../src/IIPviewer.cpp" line="946"/>
-        <location filename="../src/IIPviewer.cpp" line="1100"/>
-        <location filename="../src/IIPviewer.cpp" line="1122"/>
-        <location filename="../src/IIPviewer.cpp" line="1328"/>
-        <location filename="../src/IIPviewer.cpp" line="1350"/>
-        <location filename="../src/IIPviewer.cpp" line="1383"/>
-        <location filename="../src/IIPviewer.cpp" line="1405"/>
-        <location filename="../src/IIPviewer.cpp" line="1438"/>
-        <location filename="../src/IIPviewer.cpp" line="1460"/>
-        <location filename="../src/IIPviewer.cpp" line="1517"/>
-        <location filename="../src/IIPviewer.cpp" line="1530"/>
+        <location filename="../src/IIViewer.cpp" line="1143"/>
+        <location filename="../src/IIViewer.cpp" line="1159"/>
+        <location filename="../src/IIViewer.cpp" line="1222"/>
+        <location filename="../src/IIViewer.cpp" line="1240"/>
+        <location filename="../src/IIViewer.cpp" line="1394"/>
+        <location filename="../src/IIViewer.cpp" line="1416"/>
+        <location filename="../src/IIViewer.cpp" line="1622"/>
+        <location filename="../src/IIViewer.cpp" line="1644"/>
+        <location filename="../src/IIViewer.cpp" line="1677"/>
+        <location filename="../src/IIViewer.cpp" line="1699"/>
+        <location filename="../src/IIViewer.cpp" line="1732"/>
+        <location filename="../src/IIViewer.cpp" line="1754"/>
+        <location filename="../src/IIViewer.cpp" line="1811"/>
+        <location filename="../src/IIViewer.cpp" line="1824"/>
         <source>warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="849"/>
-        <location filename="../src/IIPviewer.cpp" line="865"/>
-        <location filename="../src/IIPviewer.cpp" line="928"/>
-        <location filename="../src/IIPviewer.cpp" line="946"/>
-        <location filename="../src/IIPviewer.cpp" line="1100"/>
-        <location filename="../src/IIPviewer.cpp" line="1122"/>
-        <location filename="../src/IIPviewer.cpp" line="1328"/>
-        <location filename="../src/IIPviewer.cpp" line="1350"/>
-        <location filename="../src/IIPviewer.cpp" line="1383"/>
-        <location filename="../src/IIPviewer.cpp" line="1405"/>
-        <location filename="../src/IIPviewer.cpp" line="1438"/>
-        <location filename="../src/IIPviewer.cpp" line="1460"/>
-        <location filename="../src/IIPviewer.cpp" line="1517"/>
-        <location filename="../src/IIPviewer.cpp" line="1530"/>
+        <location filename="../src/IIViewer.cpp" line="1143"/>
+        <location filename="../src/IIViewer.cpp" line="1159"/>
+        <location filename="../src/IIViewer.cpp" line="1222"/>
+        <location filename="../src/IIViewer.cpp" line="1240"/>
+        <location filename="../src/IIViewer.cpp" line="1394"/>
+        <location filename="../src/IIViewer.cpp" line="1416"/>
+        <location filename="../src/IIViewer.cpp" line="1622"/>
+        <location filename="../src/IIViewer.cpp" line="1644"/>
+        <location filename="../src/IIViewer.cpp" line="1677"/>
+        <location filename="../src/IIViewer.cpp" line="1699"/>
+        <location filename="../src/IIViewer.cpp" line="1732"/>
+        <location filename="../src/IIViewer.cpp" line="1754"/>
+        <location filename="../src/IIViewer.cpp" line="1811"/>
+        <location filename="../src/IIViewer.cpp" line="1824"/>
         <source>image0 size != image1 size</source>
         <translation>图像0的尺寸！=图像1的尺寸</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="899"/>
-        <location filename="../src/IIPviewer.cpp" line="982"/>
+        <location filename="../src/IIViewer.cpp" line="1193"/>
+        <location filename="../src/IIViewer.cpp" line="1276"/>
         <source>not support</source>
         <translation>不支持</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="899"/>
-        <location filename="../src/IIPviewer.cpp" line="982"/>
+        <location filename="../src/IIViewer.cpp" line="1193"/>
+        <location filename="../src/IIViewer.cpp" line="1276"/>
         <source>this format file not support yet!</source>
         <translation>该格式文件尚未支持！</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="1017"/>
+        <location filename="../src/IIViewer.cpp" line="1311"/>
         <source>yuv bits &gt; 16</source>
         <translation>yuv位深 &gt; 16</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="1091"/>
+        <location filename="../src/IIViewer.cpp" line="1385"/>
         <source>yuv file size &lt; your require</source>
         <translation>yuv文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="1313"/>
-        <location filename="../src/IIPviewer.cpp" line="1319"/>
+        <location filename="../src/IIViewer.cpp" line="1607"/>
+        <location filename="../src/IIViewer.cpp" line="1613"/>
         <source>raw file size &lt; your input</source>
         <translation>raw文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="2193"/>
+        <location filename="../src/IIViewer.cpp" line="2487"/>
         <source>At most 1 image!</source>
         <translation>最多打开一个图像！</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="719"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="721"/>
         <source>no image exist on left or right side!</source>
         <translation>左右两侧未同时打开文件!</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="724"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="726"/>
         <source>left image type not same as right side!</source>
         <translation>左右两侧图像类型不一致!</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="729"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="731"/>
         <source>left image size not equal to right side!</source>
         <translation>左右两侧图像尺寸不一致!</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="746"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="757"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="768"/>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="779"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="748"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="759"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="770"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="781"/>
         <source>left image bit width not equal to right side!</source>
         <translation>左右两侧图像位深不一致!</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewerLrImgProcess.cpp" line="784"/>
+        <location filename="../src/IIViewerLrImgProcess.cpp" line="786"/>
         <source>left image yuv type not equal to right side!</source>
         <translation>左右两侧图像yuv类型不一致!</translation>
     </message>
@@ -690,211 +690,209 @@
 <context>
     <name>mainWindow</name>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="40"/>
+        <location filename="../src/IIViewer_ui.cpp" line="47"/>
         <source>&amp;File</source>
         <translation>文件(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="48"/>
+        <location filename="../src/IIViewer_ui.cpp" line="59"/>
         <source>Open file in left</source>
         <translation>在左侧打开文件</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="51"/>
+        <location filename="../src/IIViewer_ui.cpp" line="62"/>
         <source>Open file in right</source>
         <translation>在右侧打开文件</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="54"/>
+        <location filename="../src/IIViewer_ui.cpp" line="65"/>
         <source>Reload left image</source>
         <translation>重新加载左侧图像</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="56"/>
+        <location filename="../src/IIViewer_ui.cpp" line="67"/>
         <source>Reload right image</source>
         <translation>重新加载右侧图像</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="59"/>
+        <location filename="../src/IIViewer_ui.cpp" line="70"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="61"/>
+        <location filename="../src/IIViewer_ui.cpp" line="72"/>
         <source>Close left image</source>
         <translation>关闭左侧图像</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="64"/>
+        <location filename="../src/IIViewer_ui.cpp" line="75"/>
         <source>Close right image</source>
         <translation>关闭右侧图像</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="76"/>
+        <location filename="../src/IIViewer_ui.cpp" line="87"/>
         <source>&amp;View</source>
         <translation>视图(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="77"/>
+        <location filename="../src/IIViewer_ui.cpp" line="88"/>
         <source>panal</source>
         <translation>面板</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="82"/>
+        <location filename="../src/IIViewer_ui.cpp" line="93"/>
         <source>data analyse</source>
         <translation>数据分析</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="83"/>
-        <location filename="../src/IIPviewer_ui.cpp" line="424"/>
+        <location filename="../src/IIViewer_ui.cpp" line="94"/>
+        <location filename="../src/IIViewer_ui.cpp" line="458"/>
         <source>play list</source>
         <translation>播放列表</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="78"/>
+        <location filename="../src/IIViewer_ui.cpp" line="89"/>
         <source>img mode</source>
         <translation>查阅模式</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="91"/>
+        <location filename="../src/IIViewer_ui.cpp" line="102"/>
         <source>normal mode</source>
         <translation>常规</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="95"/>
+        <location filename="../src/IIViewer_ui.cpp" line="106"/>
         <source>compare mode</source>
         <translation>比较</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="102"/>
+        <location filename="../src/IIViewer_ui.cpp" line="113"/>
         <source>theme</source>
         <translation>主题</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="122"/>
+        <location filename="../src/IIViewer_ui.cpp" line="133"/>
         <source>&amp;Setting</source>
         <translation>设置(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="123"/>
+        <location filename="../src/IIViewer_ui.cpp" line="134"/>
         <source>mouse for</source>
         <translation>鼠标作用</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="124"/>
+        <location filename="../src/IIViewer_ui.cpp" line="135"/>
         <source>pen</source>
         <translation>绘制</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="128"/>
+        <location filename="../src/IIViewer_ui.cpp" line="139"/>
         <source>move</source>
         <translation>拖动</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="136"/>
+        <location filename="../src/IIViewer_ui.cpp" line="147"/>
         <source>options</source>
         <translation>选项</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="142"/>
+        <location filename="../src/IIViewer_ui.cpp" line="153"/>
         <source>&amp;Help</source>
         <translation>帮助(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="143"/>
+        <location filename="../src/IIViewer_ui.cpp" line="154"/>
         <source>About | Feedback</source>
         <translation>关于 | 反馈</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="146"/>
+        <location filename="../src/IIViewer_ui.cpp" line="157"/>
         <source>Check update</source>
         <translation>检查升级</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="220"/>
+        <location filename="../src/IIViewer_ui.cpp" line="231"/>
         <source>show image infomation</source>
         <translation>显示图像基础信息</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="226"/>
+        <location filename="../src/IIViewer_ui.cpp" line="237"/>
         <source>show left and right image difference report</source>
         <translation>显示左右两个图像差异信息</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="262"/>
+        <location filename="../src/IIViewer_ui.cpp" line="274"/>
         <source>data analysis</source>
         <translation>数据分析</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="296"/>
-        <location filename="../src/IIPviewer_ui.cpp" line="338"/>
+        <location filename="../src/IIViewer_ui.cpp" line="315"/>
+        <location filename="../src/IIViewer_ui.cpp" line="373"/>
         <source>ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="302"/>
+        <location filename="../src/IIViewer_ui.cpp" line="326"/>
         <source>sync coordinate to right</source>
         <translation>同步坐标到右侧</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="304"/>
+        <location filename="../src/IIViewer_ui.cpp" line="330"/>
         <source>sync coordinate to left</source>
         <translation>同步坐标到左侧</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="305"/>
+        <location filename="../src/IIViewer_ui.cpp" line="334"/>
         <source>clear</source>
         <translation>清除选区</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="355"/>
+        <location filename="../src/IIViewer_ui.cpp" line="393"/>
         <source>rgb contour/line</source>
         <translation>rgb数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="356"/>
+        <location filename="../src/IIViewer_ui.cpp" line="394"/>
         <source>rgb hist</source>
         <translation>rgb直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="357"/>
+        <location filename="../src/IIViewer_ui.cpp" line="395"/>
         <source>yuv contour/line</source>
         <translation>yuv数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="358"/>
+        <location filename="../src/IIViewer_ui.cpp" line="396"/>
         <source>yuv hist</source>
         <translation>yuv直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="359"/>
         <source>hsv contour/line</source>
-        <translation>hsv数据折线</translation>
+        <translation type="vanished">hsv数据折线</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="360"/>
         <source>hsv hist</source>
-        <translation>hsv直方图</translation>
+        <translation type="vanished">hsv直方图</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="441"/>
+        <location filename="../src/IIViewer_ui.cpp" line="479"/>
         <source>File Name</source>
         <translation>文件名</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer_ui.cpp" line="441"/>
+        <location filename="../src/IIViewer_ui.cpp" line="479"/>
         <source>Operation</source>
         <translation>操作</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="610"/>
-        <location filename="../src/IIPviewer.cpp" line="665"/>
+        <location filename="../src/IIViewer.cpp" line="904"/>
+        <location filename="../src/IIViewer.cpp" line="959"/>
         <source>Open in left</source>
         <translation>在左侧打开</translation>
     </message>
     <message>
-        <location filename="../src/IIPviewer.cpp" line="626"/>
-        <location filename="../src/IIPviewer.cpp" line="682"/>
+        <location filename="../src/IIViewer.cpp" line="920"/>
+        <location filename="../src/IIViewer.cpp" line="976"/>
         <source>Open in right</source>
         <translation>在右侧打开</translation>
     </message>

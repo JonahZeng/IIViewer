@@ -1,5 +1,5 @@
 #include "ImgInfoDlg.h"
-#include "IIPviewer.h"
+#include "IIViewer.h"
 #include "ImgDiffReportDlg.h"
 #include <QMessageBox>
 
@@ -9,7 +9,7 @@ struct ImgDiffResult
     QPoint maxDiffPos;
 };
 
-void IIPviewer::updateExchangeBtn()
+void IIViewer::updateExchangeBtn()
 {
     if (ui.imageLabel[0]->openedImgType != UNKNOW_IMG && ui.imageLabel[1]->openedImgType != UNKNOW_IMG)
     {
@@ -27,7 +27,7 @@ void IIPviewer::updateExchangeBtn()
     
 }
 
-void IIPviewer::updateZoomLabelText()
+void IIViewer::updateZoomLabelText()
 {
     if (ui.imageLabel[0]->openedImgType == UNKNOW_IMG && ui.imageLabel[1]->openedImgType == UNKNOW_IMG)
     {
@@ -40,19 +40,19 @@ void IIPviewer::updateZoomLabelText()
     }
 }
 
-void IIPviewer::exchangeRight2LeftImg()
+void IIViewer::exchangeRight2LeftImg()
 {
     ui.imageLabel[0]->acceptImgFromOther(ui.imageLabel[1]);
     ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left-pressed_w20.png"));
 }
 
-void IIPviewer::restoreLeftImg()
+void IIViewer::restoreLeftImg()
 {
     ui.imageLabel[0]->restoreImg();
     ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left_w20.png"));
 }
 
-void IIPviewer::showImageInfo()
+void IIViewer::showImageInfo()
 {
     ImgInfoDlg dlg(this);
     if (openedFile[0].endsWith("raw", Qt::CaseSensitivity::CaseInsensitive))
@@ -714,7 +714,7 @@ static ImgDiffResult compareYuvImage(const unsigned char* left, const unsigned c
     }
 }
 
-void IIPviewer::showImageDiffReport()
+void IIViewer::showImageDiffReport()
 {
     if(ui.imageLabel[0]->pixMap == nullptr || ui.imageLabel[1]->pixMap == nullptr || openedFile[0].isEmpty() || openedFile[1].isEmpty())
     {
@@ -800,7 +800,7 @@ void IIPviewer::showImageDiffReport()
     }
 }
 
-void IIPviewer::scrollToPixelPos(const QPoint& pixelPos)
+void IIViewer::scrollToPixelPos(const QPoint& pixelPos)
 {
     if (pixelPos.x() < 0 || pixelPos.y() < 0)
     {
