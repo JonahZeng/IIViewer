@@ -1,4 +1,4 @@
-name: Release Ubuntu x64
+name: Release Ubuntu arm64
 
 on:
   push:
