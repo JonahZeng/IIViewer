@@ -379,7 +379,15 @@ elseif(UNIX AND NOT APPLE)
     set(CPACK_SOURCE_GENERATOR "TGZ")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
     SET(CPACK_PACKAGE_CONTACT "JonahZeng@github")
-    set(CPACK_PACKAGE_FILE_NAME "IIViewer-${CPACK_PACKAGE_VERSION}-ubuntu-amd64")
+    if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+        set(ARCH_NAME "amd64")
+    elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64" OR ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm64")
+        set(ARCH_NAME "aarch64")
+    else()
+        set(ARCH_NAME ${CMAKE_SYSTEM_PROCESSOR}) # 回退方案：直接使用处理器原始名称
+    endif()
+
+    set(CPACK_PACKAGE_FILE_NAME "IIViewer-${CPACK_PACKAGE_VERSION}-ubuntu-${ARCH_NAME}")
 endif()
 include(CPack)
 

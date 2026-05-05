@@ -1,0 +1,166 @@
+name: Release Ubuntu x64
+
+on:
+  push:
+    tags:
+      - 'v*'  # 匹配v开头的tag
+permissions:
+  contents: write   # 关键：允许创建/更新 Release
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04-arm
+
+    steps:
+    - run: gh auth status
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Update system packages 
+      run: sudo apt update
+    - name: Install dependencies
+      run: sudo apt install -y openssl libssl-dev libfuse2
+    - name: Verify OpenSSL installation 
+      run: openssl version
+    - name: Install Qt
+      run: sudo apt install qtbase5-dev libqt5datavisualization5-dev qtbase5-dev-tools libqt5charts5-dev qttools5-dev-tools qttools5-dev
+      # uses: jurplel/install-qt-action@v4
+      # with:
+      #   version: '5.15.3'
+      #   host: 'linux'
+      #   target: 'desktop'
+      #   cache: true
+      #   install-deps: 'true'
+      #   modules: 'qtcharts qtdatavis3d'
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Build libde265
+      run: |
+        cd ${{github.workspace}}
+        wget https://github.com/strukturag/libde265/releases/download/v1.0.16/libde265-1.0.16.tar.gz
+        tar -zxf libde265-1.0.16.tar.gz
+        cd libde265-1.0.16
+        mkdir build
+        cd build
+        cmake .. -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libde265/linux
+        cmake --build . -j 4
+        cmake --install .
+    
+    - name: Build libheif
+      run: |
+        cd ${{github.workspace}}
+        wget https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz
+        tar -zxf libheif-1.21.2.tar.gz
+        cd libheif-1.21.2
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/thirdparty/libheif/linux \
+          -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -DLIBDE265_STATIC_BUILD" \
+          -DWITH_LIBDE265=ON \
+          -DWITH_X265=OFF \
+          -DWITH_KVAZAAR=OFF \
+          -DWITH_UVG266=OFF \
+          -DWITH_VVDEC=OFF \
+          -DWITH_VVENC=OFF \
+          -DWITH_X264=OFF \
+          -DWITH_OpenH264_ENCODER=OFF \
+          -DWITH_OpenH264_DECODER=OFF \
+          -DWITH_DAV1D=OFF \
+          -DWITH_AOM_ENCODER=OFF \
+          -DWITH_AOM_DECODER=OFF \
+          -DWITH_SvtEnc=OFF \
+          -DWITH_RAV1E=OFF \
+          -DWITH_JPEG_ENCODER=OFF \
+          -DWITH_JPEG_DECODER=OFF \
+          -DWITH_OpenJPEG_ENCODER=OFF \
+          -DWITH_OpenJPEG_DECODER=OFF \
+          -DWITH_FFMPEG_DECODER=OFF \
+          -DWITH_OPENJPH_ENCODER=OFF \
+          -DWITH_OPENJPH_DECODER=OFF \
+          -DWITH_UNCOMPRESSED_CODEC=OFF \
+          -DWITH_WEBCODECS=OFF \
+          -DWITH_LIBSHARPYUV=OFF \
+          -DWITH_EXAMPLES=OFF \
+          -DWITH_EXAMPLE_HEIF_THUMB=OFF \
+          -DWITH_EXAMPLE_HEIF_VIEW=OFF \
+          -DWITH_GDK_PIXBUF=OFF \
+          -DBUILD_DOCUMENTATION=OFF \
+          -DBUILD_TESTING=OFF \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DLIBDE265_INCLUDE_DIR="${{github.workspace}}/thirdparty/libde265/linux/include" \
+          -DLIBDE265_LIBRARY="${{github.workspace}}/thirdparty/libde265/linux/lib/libde265.a"
+        cmake --build . -j 4
+        cmake --install .
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCI_MODE=ON
+
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build
+
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/build
+      # Execute tests defined by the CMake configuration.
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+    #   run: ctest -C ${{env.BUILD_TYPE}}
+    - name: install
+      working-directory: ${{github.workspace}}/build
+      run: cmake --install ${{github.workspace}}/build
+    - name: generate deb package
+      working-directory: ${{github.workspace}}/build
+      run: cpack -G DEB
+    - name: generate tgz package
+      working-directory: ${{github.workspace}}/build
+      run: cpack -G TGZ
+    - name: generate appimage package
+      working-directory: ${{github.workspace}}
+      run: |
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+          VERSION="pr-${GITHUB_HEAD_REF}-${GITHUB_SHA::7}"
+        else
+          VERSION="dev-${GITHUB_SHA::7}"
+        fi
+        echo "VERSION=$VERSION"
+        export VERSION="${VERSION}"
+        cp ./icon/default.png ./bin/${{env.BUILD_TYPE}}/ &&
+        cp ./icon/default.desktop ./bin/${{env.BUILD_TYPE}}/ &&
+        wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-aarch64.AppImage && 
+        chmod a+x ./linuxdeployqt-continuous-aarch64.AppImage && 
+        ./linuxdeployqt-continuous-aarch64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage -no-copy-copyright-files
+        rm ./linuxdeployqt-continuous-aarch64.AppImage
+
+    - name: Package artifacts
+      run: |
+        mkdir -p release
+        cp ${{github.workspace}}/build/*.deb release/
+        cp ${{github.workspace}}/build/*.tar.gz release/
+        cp ${{github.workspace}}/*.AppImage release/
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          release/*.deb
+          release/*.tar.gz
+          release/*.AppImage
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
+
