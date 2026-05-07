@@ -637,15 +637,15 @@ void CurveAdjustDialog::onResetClicked()
 
     // std::array<QPoint, 9> reset_curve = {QPoint{0, 0}, QPoint{v0, 32}, QPoint{v1, 64}, QPoint{v2, 96}, QPoint{v3, 128}, QPoint{v4, 160}, QPoint{v5, 192}, QPoint{v6, 224}, {max_v, 255}};
 
-    m_rgbCurve[0].setY(0);
-    m_rgbCurve[1].setY(32);
-    m_rgbCurve[2].setY(64);
-    m_rgbCurve[3].setY(96);
-    m_rgbCurve[4].setY(128);
-    m_rgbCurve[5].setY(160);
-    m_rgbCurve[6].setY(192);
-    m_rgbCurve[7].setY(224);
-    m_rgbCurve[8].setY(255);
+    m_rgbCurve.at(0).setY(0);
+    m_rgbCurve.at(1).setY(32);
+    m_rgbCurve.at(2).setY(64);
+    m_rgbCurve.at(3).setY(96);
+    m_rgbCurve.at(4).setY(128);
+    m_rgbCurve.at(5).setY(160);
+    m_rgbCurve.at(6).setY(192);
+    m_rgbCurve.at(7).setY(224);
+    m_rgbCurve.at(8).setY(255);
 
     updateChartFromCurve();
     applyCurveToImage();

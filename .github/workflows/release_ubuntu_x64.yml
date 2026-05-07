@@ -141,6 +141,7 @@ jobs:
         chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage && 
         ./linuxdeployqt-continuous-x86_64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage -no-copy-copyright-files
         rm ./linuxdeployqt-continuous-x86_64.AppImage
+        mv ./IIViewer*.AppImage ./IIViewer-${VERSION}-ubuntu-amd64.AppImage
 
     - name: Package artifacts
       run: |
