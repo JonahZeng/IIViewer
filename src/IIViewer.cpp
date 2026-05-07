@@ -627,6 +627,31 @@ void IIViewer::onSingleImgModeAction(bool check)
         ui.openFileRightAction->setEnabled(true);
         ui.reloadFileRightAction->setEnabled(true);
         ui.closeRightAction->setEnabled(true);
+
+        ui.syncLeft->setEnabled(true);
+        ui.syncRight->setEnabled(true);
+
+        ui.start_x_edit1->setEnabled(true);
+        ui.start_y_edit1->setEnabled(true);
+        ui.end_x_edit1->setEnabled(true);
+        ui.end_y_edit1->setEnabled(true);
+        ui.paintOk1->setEnabled(true);
+
+        for (int i = 0; i < ui.fileHistoryTable->rowCount(); ++i)
+        {
+            auto* wgt = qobject_cast<QWidget*>(ui.fileHistoryTable->cellWidget(i, 1));
+            if (wgt != nullptr)
+            {
+                for(const auto& childObj : wgt->children())
+                {
+                    auto* btn = qobject_cast<QPushButton*>(childObj);
+                    if(btn != nullptr && btn->text() == "R")
+                    {
+                        btn->setEnabled(true);
+                    }
+                }   
+            }
+        }
     }
     else
     {
@@ -635,6 +660,31 @@ void IIViewer::onSingleImgModeAction(bool check)
         ui.openFileRightAction->setEnabled(false);
         ui.reloadFileRightAction->setEnabled(false);
         ui.closeRightAction->setEnabled(false);
+
+        ui.syncLeft->setEnabled(false);
+        ui.syncRight->setEnabled(false);
+
+        ui.start_x_edit1->setEnabled(false);
+        ui.start_y_edit1->setEnabled(false);
+        ui.end_x_edit1->setEnabled(false);
+        ui.end_y_edit1->setEnabled(false);
+        ui.paintOk1->setEnabled(false);
+
+        for (int i = 0; i < ui.fileHistoryTable->rowCount(); ++i)
+        {
+            auto* wgt = qobject_cast<QWidget*>(ui.fileHistoryTable->cellWidget(i, 1));
+            if (wgt != nullptr)
+            {
+                for(const auto& childObj : wgt->children())
+                {
+                    auto* btn = qobject_cast<QPushButton*>(childObj);
+                    if(btn != nullptr && btn->text() == "R")
+                    {
+                        btn->setEnabled(false);
+                    }
+                }   
+            }
+        }
     }
     ui.mainWidget->adjustSize();
 }
@@ -650,6 +700,31 @@ void IIViewer::onDoubleImgModeAction(bool check)
         ui.openFileRightAction->setEnabled(true);
         ui.reloadFileRightAction->setEnabled(true);
         ui.closeRightAction->setEnabled(true);
+
+        ui.syncLeft->setEnabled(true);
+        ui.syncRight->setEnabled(true);
+
+        ui.start_x_edit1->setEnabled(true);
+        ui.start_y_edit1->setEnabled(true);
+        ui.end_x_edit1->setEnabled(true);
+        ui.end_y_edit1->setEnabled(true);
+        ui.paintOk1->setEnabled(true);
+
+        for (int i = 0; i < ui.fileHistoryTable->rowCount(); ++i)
+        {
+            auto* wgt = qobject_cast<QWidget*>(ui.fileHistoryTable->cellWidget(i, 1));
+            if (wgt != nullptr)
+            {
+                for(const auto& childObj : wgt->children())
+                {
+                    auto* btn = qobject_cast<QPushButton*>(childObj);
+                    if(btn != nullptr && btn->text() == "R")
+                    {
+                        btn->setEnabled(true);
+                    }
+                }   
+            }
+        }
     }
     else
     {
@@ -658,6 +733,31 @@ void IIViewer::onDoubleImgModeAction(bool check)
         ui.openFileRightAction->setEnabled(false);
         ui.reloadFileRightAction->setEnabled(false);
         ui.closeRightAction->setEnabled(false);
+
+        ui.syncLeft->setEnabled(false);
+        ui.syncRight->setEnabled(false);
+
+        ui.start_x_edit1->setEnabled(false);
+        ui.start_y_edit1->setEnabled(false);
+        ui.end_x_edit1->setEnabled(false);
+        ui.end_y_edit1->setEnabled(false);
+        ui.paintOk1->setEnabled(false);
+
+        for (int i = 0; i < ui.fileHistoryTable->rowCount(); ++i)
+        {
+            auto* wgt = qobject_cast<QWidget*>(ui.fileHistoryTable->cellWidget(i, 1));
+            if (wgt != nullptr)
+            {
+                for(const auto& childObj : wgt->children())
+                {
+                    auto* btn = qobject_cast<QPushButton*>(childObj);
+                    if(btn != nullptr && btn->text() == "R")
+                    {
+                        btn->setEnabled(false);
+                    }
+                }   
+            }
+        }
     }
     ui.mainWidget->adjustSize();
 

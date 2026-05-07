@@ -81,93 +81,95 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
 {
     if (json.contains("workPath"))
     {
-        workPath = json["workPath"].toString();
+        // workPath = json["workPath"].toString();
+        workPath = json.value("workPath").toString();
     }
     if (json.contains("yuvType"))
     {
-        yuvType = YuvType(json["yuvType"].toInt());
+        // yuvType = YuvType(json["yuvType"].toInt());
+        yuvType = YuvType(json.value("yuvType").toInt());
     }
     if (json.contains("yuv_bitDepth"))
     {
-        yuv_bitDepth = json["yuv_bitDepth"].toInt();
+        yuv_bitDepth = json.value("yuv_bitDepth").toInt();
     }
     if (json.contains("yuv_width"))
     {
-        yuv_width = json["yuv_width"].toInt();
+        yuv_width = json.value("yuv_width").toInt();
     }
     if (json.contains("yuv_height"))
     {
-        yuv_height = json["yuv_height"].toInt();
+        yuv_height = json.value("yuv_height").toInt();
     }
     if (json.contains("rawByType"))
     {
-        rawByType = BayerPatternType(json["rawByType"].toInt());
+        rawByType = BayerPatternType(json.value("rawByType").toInt());
     }
     if (json.contains("raw_bitDepth"))
     {
-        raw_bitDepth = json["raw_bitDepth"].toInt();
+        raw_bitDepth = json.value("raw_bitDepth").toInt();
     }
     if (json.contains("raw_width"))
     {
-        raw_width = json["raw_width"].toInt();
+        raw_width = json.value("raw_width").toInt();
     }
     if (json.contains("raw_height"))
     {
-        raw_height = json["raw_height"].toInt();
+        raw_height = json.value("raw_height").toInt();
     }
     if (json.contains("raw_byte_order"))
     {
-        rawByteOrder = ByteOrderType(json["raw_byte_order"].toInt());
+        rawByteOrder = ByteOrderType(json.value("raw_byte_order").toInt());
     }
     if (json.contains("raw_compact"))
     {
-        raw_compact = json["raw_compact"].toBool();
+        raw_compact = json.value("raw_compact").toBool();
     }
     if (json.contains("theme"))
     {
-        theme = json["theme"].toString();
+        theme = json.value("theme").toString();
     }
     if (json.contains("uv_value_disp_mode"))
     {
-        uv_value_disp_mode = json["uv_value_disp_mode"].toInt();
+        uv_value_disp_mode = json.value("uv_value_disp_mode").toInt();
     }
     if (json.contains("pix_val_bg_index"))
     {
-        pix_val_bg_index = (IIVOptionDialog::PaintPixValBgColor)json["pix_val_bg_index"].toInt();
+        pix_val_bg_index = static_cast<IIVOptionDialog::PaintPixValBgColor>(json.value("pix_val_bg_index").toInt());
     }
     if (json.contains("pix_val_cus_bg_color"))
     {
-        pix_val_cus_bg_color.setNamedColor(json["pix_val_cus_bg_color"].toString());
+        pix_val_cus_bg_color.setNamedColor(json.value("pix_val_cus_bg_color").toString());
     }
     if (json.contains("workAreaDoubleImgMode"))
     {
-        workAreaDoubleImgMode = json["workAreaDoubleImgMode"].toBool();
+        workAreaDoubleImgMode = json.value("workAreaDoubleImgMode").toBool();
     }
     if (json.contains("windowGeometry"))
     {
-        QJsonObject winGeometryObj = json["windowGeometry"].toObject();
+        const QJsonObject winGeometryObj = json.value("windowGeometry").toObject();
         if(winGeometryObj.contains("x") && winGeometryObj.contains("y") && winGeometryObj.contains("width") && winGeometryObj.contains("height"))
         {
-            windowGeometry = QRect(winGeometryObj["x"].toInt(), winGeometryObj["y"].toInt(), winGeometryObj["width"].toInt(), winGeometryObj["height"].toInt());
+            windowGeometry = QRect(winGeometryObj.value("x").toInt(), winGeometryObj.value("y").toInt(), winGeometryObj.value("width").toInt(), winGeometryObj.value("height").toInt());
         }
     }
     if (json.contains("windowScreenName"))
     {
-        windowScreenName = json["windowScreenName"].toString();
+        windowScreenName = json.value("windowScreenName").toString();
     }
     if (json.contains("windowMaximized"))
     {
-        windowMaximized = json["windowMaximized"].toBool();
+        windowMaximized = json.value("windowMaximized").toBool();
     }
     if (json.contains("penColor"))
     {
-        QJsonObject colorObj = json["penColor"].toObject();
+        const QJsonObject colorObj = json.value("penColor").toObject();
         if (colorObj.contains("r") && colorObj.contains("g") &&  colorObj.contains("b"))
         {
             penColor.setRgb(
-                colorObj["r"].toInt(),
-                colorObj["g"].toInt(),
-                colorObj["b"].toInt()
+                colorObj.value("r").toInt(),
+                colorObj.value("g").toInt(),
+                colorObj.value("b").toInt()
             );
         }
     }
@@ -175,9 +177,10 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
 
 void AppSettings::write(QJsonObject& json) const
 {
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     json["workPath"] = workPath;
 
-    json["yuvType"] = int(yuvType);
+    json["yuvType"] = static_cast<int>(yuvType);
 
     json["yuv_bitDepth"] = yuv_bitDepth;
 
@@ -185,7 +188,7 @@ void AppSettings::write(QJsonObject& json) const
 
     json["yuv_height"] = yuv_height;
 
-    json["rawByType"] = int(rawByType);
+    json["rawByType"] = static_cast<int>(rawByType);
 
     json["raw_bitDepth"] = raw_bitDepth;
 
@@ -193,15 +196,15 @@ void AppSettings::write(QJsonObject& json) const
 
     json["raw_height"] = raw_height;
 
-    json["raw_byte_order"] = int(rawByteOrder);
+    json["raw_byte_order"] = static_cast<int>(rawByteOrder);
 
-    json["raw_compact"] = (int)raw_compact;
+    json["raw_compact"] = static_cast<int>(raw_compact);
 
     json["theme"] = theme;
 
     json["uv_value_disp_mode"] = uv_value_disp_mode;
 
-    json["pix_val_bg_index"] = (int)pix_val_bg_index;
+    json["pix_val_bg_index"] = static_cast<int>(pix_val_bg_index);
 
     json["pix_val_cus_bg_color"] = pix_val_cus_bg_color.name(QColor::HexArgb);
 
@@ -222,4 +225,5 @@ void AppSettings::write(QJsonObject& json) const
     penColorObj["g"] = penColor.green();
     penColorObj["b"] = penColor.blue();
     json["penColor"] = penColorObj;
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 }
