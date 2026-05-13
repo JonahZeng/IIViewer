@@ -42,9 +42,9 @@ int main(int argc, char* argv[])
     // QCoreApplication::setOrganizationName("IIViewer.org");
     // QCoreApplication::setOrganizationDomain("IIViewer.com");
     QCoreApplication::setApplicationName("IIViewer");
-#ifdef Q_OS_WINDOWS
-    QApplication::setFont(QFont("Microsoft YaHei UI", 10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-#endif
+// #ifdef Q_OS_WINDOWS
+//     QApplication::setFont(QFont("Microsoft YaHei UI", 10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+// #endif
 
     QTranslator qt_translator; 
 #ifdef Q_OS_MACOS

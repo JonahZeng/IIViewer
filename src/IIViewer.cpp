@@ -44,6 +44,20 @@ constexpr int BIT8 = 8;
 constexpr int BIT16 = 16;
 // constexpr int BIT24 = 24;
 constexpr int BIT32 = 32;
+static QFont resolveUiDisplayFont(const AppSettings &settings)
+{
+    QFont font = QApplication::font();
+    if (!settings.uiFontFamily.isEmpty())
+    {
+        font.setFamily(settings.uiFontFamily);
+    }
+    if (settings.uiFontPointSize > 0)
+    {
+        font.setPointSize(settings.uiFontPointSize);
+    }
+    return font;
+}
+
 #ifdef Q_OS_WINDOWS
 #ifndef DWMWA_BORDER_COLOR
 #define DWMWA_BORDER_COLOR 34
@@ -124,6 +138,8 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
         QApplication::setStyle(settings.theme);
         theme_idx = QStyleFactory::keys().indexOf(settings.theme);
     }
+
+    QApplication::setFont(resolveUiDisplayFont(settings));
 
     setAcceptDrops(true);
     ui.setupUi(this);
@@ -783,11 +799,15 @@ void IIViewer::onSysOptionAction(bool check)
     dlg.set_uv_disp_mode(this->settings.uv_value_disp_mode);
     dlg.set_pix_val_bg_color_index(this->settings.pix_val_bg_index);
     dlg.set_pix_val_custom_bg_color(this->settings.pix_val_cus_bg_color);
+    dlg.set_ui_display_font(resolveUiDisplayFont(this->settings));
     if(dlg.exec() == IIVOptionDialog::DialogCode::Accepted)
     {
         this->settings.uv_value_disp_mode = dlg.uv_disp_mode;
         this->settings.pix_val_bg_index = dlg.pix_val_bg_color_index;
         this->settings.pix_val_cus_bg_color = dlg.pix_val_cus_bg_color;
+        this->settings.uiFontFamily = dlg.ui_font_family;
+        this->settings.uiFontPointSize = dlg.ui_font_point_size;
+        QApplication::setFont(resolveUiDisplayFont(this->settings));
     }
 }
 

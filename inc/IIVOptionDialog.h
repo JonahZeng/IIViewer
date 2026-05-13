@@ -3,6 +3,12 @@
 #include "ui_IIVOptionDialog.h"
 #include <QDialog>
 #include <QColor>
+#include <QFont>
+
+class QLabel;
+class QFontComboBox;
+class QSpinBox;
+class QWidget;
 
 class IIVOptionDialog final : public QDialog
 {
@@ -45,13 +51,26 @@ public:
         ui.paint_pix_val_bg_color_comboBox->setItemIcon(PaintPixValBgColor::CUSTOM, QIcon(cusColorIcon));
     }
 
+    void set_ui_display_font(const QFont &font);
+
     PaintPixValBgColor pix_val_bg_color_index;
     QColor pix_val_cus_bg_color;
     int uv_disp_mode;
+
+    QString ui_font_family;
+    int ui_font_point_size = -1;
 
 public slots:
     void change_pix_val_bg_color(int idx);
 
 public:
     Ui::IIVOptionDialog ui;
+
+private:
+    void initFontControls();
+
+    QLabel *uiFontLabel = nullptr;
+    QFontComboBox *uiFontComboBox = nullptr;
+    QSpinBox *uiFontSizeSpinBox = nullptr;
+    QWidget *uiFontFieldWidget = nullptr;
 };
