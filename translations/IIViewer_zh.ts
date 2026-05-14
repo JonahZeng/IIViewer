@@ -207,10 +207,6 @@
         <translation>自定义...</translation>
     </message>
     <message>
-        <source>other</source>
-        <translation type="vanished">其他</translation>
-    </message>
-    <message>
         <location filename="../src/IIVOptionDialog.cpp" line="112"/>
         <source>UI font:</source>
         <translation>UI字体:</translation>
@@ -218,7 +214,7 @@
     <message>
         <location filename="../src/IIVOptionDialog.cpp" line="116"/>
         <source> pt</source>
-        <translation>号</translation>
+        <translation> 号</translation>
     </message>
 </context>
 <context>
@@ -413,7 +409,7 @@
     <message>
         <location filename="../src/ImageWidgetRoiShowText.cpp" line="1178"/>
         <source> not exist!</source>
-        <translation>不存在!</translation>
+        <translation> 不存在!</translation>
     </message>
     <message>
         <location filename="../src/ImageWidget.cpp" line="1965"/>
@@ -429,14 +425,6 @@
         <location filename="../src/ImageWidgetRoiShowText.cpp" line="1184"/>
         <source>save roi data to text file</source>
         <translation>保存roi数据到txt文件</translation>
-    </message>
-    <message>
-        <source>%1 not exist!</source>
-        <translation type="vanished">%1 不存在</translation>
-    </message>
-    <message>
-        <source>save roi data to text</source>
-        <translation type="vanished">保存roi数据到txt文件</translation>
     </message>
     <message>
         <location filename="../src/ImageWidget.cpp" line="41"/>
@@ -474,7 +462,7 @@
     <message>
         <location filename="../src/ImageWidget.cpp" line="2583"/>
         <source>No image loaded to adjust curve.</source>
-        <translation>无图像可用于调节曲线</translation>
+        <translation>无图像可用于调节曲线。</translation>
     </message>
 </context>
 <context>
@@ -674,17 +662,6 @@
     </message>
 </context>
 <context>
-    <name>RoiDataExportDlg</name>
-    <message>
-        <source>close</source>
-        <translation type="vanished">关闭</translation>
-    </message>
-    <message>
-        <source>Roi data</source>
-        <translation type="vanished">Roi数据</translation>
-    </message>
-</context>
-<context>
     <name>RoiDataShowDlg</name>
     <message>
         <location filename="../src/RoiDataShowDlg.cpp" line="14"/>
@@ -875,14 +852,6 @@
         <location filename="../src/IIViewer_ui.cpp" line="396"/>
         <source>yuv hist</source>
         <translation>yuv直方图</translation>
-    </message>
-    <message>
-        <source>hsv contour/line</source>
-        <translation type="vanished">hsv数据折线</translation>
-    </message>
-    <message>
-        <source>hsv hist</source>
-        <translation type="vanished">hsv直方图</translation>
     </message>
     <message>
         <location filename="../src/IIViewer_ui.cpp" line="479"/>

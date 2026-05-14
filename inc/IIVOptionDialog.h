@@ -12,6 +12,8 @@ class QWidget;
 
 class IIVOptionDialog final : public QDialog
 {
+    Q_OBJECT
+
 public:
     enum PaintPixValBgColor {
         NONE = 0,
