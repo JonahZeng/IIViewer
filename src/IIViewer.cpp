@@ -21,6 +21,9 @@
 #include <QWindow>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#ifdef Q_OS_WINDOWS
+#include <QOperatingSystemVersion>
+#endif
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QToolTip>
@@ -78,6 +81,15 @@ static int frameBorderHeight(HWND hwnd)
     const UINT dpi = GetDpiForWindow(hwnd);
     return GetSystemMetricsForDpi(SM_CYSIZEFRAME, dpi) + GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
 }
+
+#ifdef Q_OS_WINDOWS
+static bool supportsSnapLayoutMenu()
+{
+    const QOperatingSystemVersion currentVersion = QOperatingSystemVersion::current();
+    return currentVersion.majorVersion() > 10 ||
+        (currentVersion.majorVersion() == 10 && currentVersion.microVersion() >= 22000);
+}
+#endif
 
 static void updateNativeShadow(HWND hwnd, bool maximized)
 {
@@ -518,6 +530,11 @@ bool IIViewer::nativeEvent(const QByteArray &eventType, void *message, long *res
         if (ui.titleBar->rect().contains(titleBarPos))
         {
             QWidget *hitWidget = ui.titleBar->childAt(titleBarPos);
+            if (supportsSnapLayoutMenu() && hitWidget != nullptr && hitWidget->objectName() == QStringLiteral("titleBarMaximizeButton"))
+            {
+                *result = HTMAXBUTTON;
+                return true;
+            }
             const bool hitInteractiveWidget = hitWidget != nullptr &&
                 (qobject_cast<QPushButton *>(hitWidget) != nullptr ||
                  qobject_cast<QMenuBar *>(hitWidget) != nullptr);
