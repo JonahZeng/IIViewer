@@ -364,8 +364,24 @@ elseif(UNIX AND NOT APPLE)
     )
 endif()
 
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
-set(CPACK_WIX_LICENSE_RTF "${CMAKE_SOURCE_DIR}/LICENSE.txt")
+if(WIN32)
+    set(_wix_license_rtf "${CMAKE_BINARY_DIR}/LICENSE.rtf")
+    file(READ "${CMAKE_SOURCE_DIR}/LICENSE.txt" _wix_license_text)
+    string(REPLACE "\\" "\\\\" _wix_license_text "${_wix_license_text}")
+    string(REPLACE "{" "\\{" _wix_license_text "${_wix_license_text}")
+    string(REPLACE "}" "\\}" _wix_license_text "${_wix_license_text}")
+    string(REPLACE "\r\n" "\\par\n" _wix_license_text "${_wix_license_text}")
+    string(REPLACE "\n" "\\par\n" _wix_license_text "${_wix_license_text}")
+    file(WRITE "${_wix_license_rtf}"
+        "{\\rtf1\\ansi\\deff0\n"
+        "{\\fonttbl{\\f0 Courier New;}}\n"
+        "\\fs18\n"
+        "${_wix_license_text}\n"
+        "}\n")
+    set(CPACK_WIX_LICENSE_RTF "${_wix_license_rtf}")
+endif()
 set(CPACK_PACKAGE_VERSION_MAJOR "${IIViewer_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${IIViewer_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${IIViewer_VERSION_PATCH}")

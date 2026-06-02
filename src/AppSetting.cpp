@@ -18,6 +18,8 @@ AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE),
     uv_value_disp_mode(0), // 0:0=gray 1: half-max=gray 
     pix_val_bg_index(IIVOptionDialog::PaintPixValBgColor::RED),
     pix_val_cus_bg_color(QColor(0, 0, 0)),
+    uiFontFamily(QString()),
+    uiFontPointSize(0),
     workAreaDoubleImgMode(false),
     windowMaximized(false)
 {
@@ -141,6 +143,14 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
     {
         pix_val_cus_bg_color.setNamedColor(json.value("pix_val_cus_bg_color").toString());
     }
+    if (json.contains("ui_font_family"))
+    {
+        uiFontFamily = json.value("ui_font_family").toString();
+    }
+    if (json.contains("ui_font_point_size"))
+    {
+        uiFontPointSize = json.value("ui_font_point_size").toInt();
+    }
     if (json.contains("workAreaDoubleImgMode"))
     {
         workAreaDoubleImgMode = json.value("workAreaDoubleImgMode").toBool();
@@ -207,6 +217,10 @@ void AppSettings::write(QJsonObject& json) const
     json["pix_val_bg_index"] = static_cast<int>(pix_val_bg_index);
 
     json["pix_val_cus_bg_color"] = pix_val_cus_bg_color.name(QColor::HexArgb);
+
+    json["ui_font_family"] = uiFontFamily;
+
+    json["ui_font_point_size"] = uiFontPointSize;
 
     json["workAreaDoubleImgMode"] = workAreaDoubleImgMode;
 

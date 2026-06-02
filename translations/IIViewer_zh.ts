@@ -207,73 +207,79 @@
         <translation>自定义...</translation>
     </message>
     <message>
-        <source>other</source>
-        <translation type="vanished">其他</translation>
+        <location filename="../src/IIVOptionDialog.cpp" line="112"/>
+        <source>UI font:</source>
+        <translation>UI字体:</translation>
+    </message>
+    <message>
+        <location filename="../src/IIVOptionDialog.cpp" line="116"/>
+        <source> pt</source>
+        <translation> 号</translation>
     </message>
 </context>
 <context>
     <name>IIViewer</name>
     <message>
-        <location filename="../src/IIViewer.cpp" line="712"/>
+        <location filename="../src/IIViewer.cpp" line="832"/>
         <source>find new version</source>
         <translation>发现新版本</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="716"/>
+        <location filename="../src/IIViewer.cpp" line="836"/>
         <source>no new version</source>
         <translation>没有更新的版本</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="716"/>
+        <location filename="../src/IIViewer.cpp" line="836"/>
         <source>You are using the latest version</source>
         <translation>已经是最新版本</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="719"/>
+        <location filename="../src/IIViewer.cpp" line="839"/>
         <source>network error</source>
         <translation>网络错误</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="746"/>
-        <location filename="../src/IIViewer.cpp" line="771"/>
+        <location filename="../src/IIViewer.cpp" line="866"/>
+        <location filename="../src/IIViewer.cpp" line="891"/>
         <source>file changed</source>
         <translation>文件被外部修改</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="746"/>
-        <location filename="../src/IIViewer.cpp" line="771"/>
+        <location filename="../src/IIViewer.cpp" line="866"/>
+        <location filename="../src/IIViewer.cpp" line="891"/>
         <source> has been changed, reload it?</source>
         <translation> 被外部修改，是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="789"/>
+        <location filename="../src/IIViewer.cpp" line="909"/>
         <source>Confirm</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="789"/>
+        <location filename="../src/IIViewer.cpp" line="909"/>
         <source>Are you sure to quit?</source>
         <translation>确定退出？</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1008"/>
+        <location filename="../src/IIViewer.cpp" line="1128"/>
         <source>open images</source>
         <translation>打开图像文件</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1133"/>
-        <location filename="../src/IIViewer.cpp" line="1212"/>
-        <location filename="../src/IIViewer.cpp" line="1311"/>
-        <location filename="../src/IIViewer.cpp" line="1385"/>
-        <location filename="../src/IIViewer.cpp" line="1607"/>
-        <location filename="../src/IIViewer.cpp" line="1613"/>
-        <location filename="../src/IIViewer.cpp" line="1668"/>
-        <location filename="../src/IIViewer.cpp" line="1723"/>
-        <location filename="../src/IIViewer.cpp" line="1779"/>
-        <location filename="../src/IIViewer.cpp" line="1787"/>
-        <location filename="../src/IIViewer.cpp" line="1797"/>
-        <location filename="../src/IIViewer.cpp" line="1841"/>
-        <location filename="../src/IIViewer.cpp" line="2487"/>
+        <location filename="../src/IIViewer.cpp" line="1253"/>
+        <location filename="../src/IIViewer.cpp" line="1332"/>
+        <location filename="../src/IIViewer.cpp" line="1431"/>
+        <location filename="../src/IIViewer.cpp" line="1505"/>
+        <location filename="../src/IIViewer.cpp" line="1727"/>
+        <location filename="../src/IIViewer.cpp" line="1733"/>
+        <location filename="../src/IIViewer.cpp" line="1788"/>
+        <location filename="../src/IIViewer.cpp" line="1843"/>
+        <location filename="../src/IIViewer.cpp" line="1899"/>
+        <location filename="../src/IIViewer.cpp" line="1907"/>
+        <location filename="../src/IIViewer.cpp" line="1917"/>
+        <location filename="../src/IIViewer.cpp" line="1961"/>
+        <location filename="../src/IIViewer.cpp" line="2607"/>
         <location filename="../src/IIViewerLrImgProcess.cpp" line="721"/>
         <location filename="../src/IIViewerLrImgProcess.cpp" line="726"/>
         <location filename="../src/IIViewerLrImgProcess.cpp" line="731"/>
@@ -286,71 +292,71 @@
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1143"/>
-        <location filename="../src/IIViewer.cpp" line="1159"/>
-        <location filename="../src/IIViewer.cpp" line="1222"/>
-        <location filename="../src/IIViewer.cpp" line="1240"/>
-        <location filename="../src/IIViewer.cpp" line="1394"/>
-        <location filename="../src/IIViewer.cpp" line="1416"/>
-        <location filename="../src/IIViewer.cpp" line="1622"/>
-        <location filename="../src/IIViewer.cpp" line="1644"/>
-        <location filename="../src/IIViewer.cpp" line="1677"/>
-        <location filename="../src/IIViewer.cpp" line="1699"/>
-        <location filename="../src/IIViewer.cpp" line="1732"/>
-        <location filename="../src/IIViewer.cpp" line="1754"/>
-        <location filename="../src/IIViewer.cpp" line="1811"/>
-        <location filename="../src/IIViewer.cpp" line="1824"/>
+        <location filename="../src/IIViewer.cpp" line="1263"/>
+        <location filename="../src/IIViewer.cpp" line="1279"/>
+        <location filename="../src/IIViewer.cpp" line="1342"/>
+        <location filename="../src/IIViewer.cpp" line="1360"/>
+        <location filename="../src/IIViewer.cpp" line="1514"/>
+        <location filename="../src/IIViewer.cpp" line="1536"/>
+        <location filename="../src/IIViewer.cpp" line="1742"/>
+        <location filename="../src/IIViewer.cpp" line="1764"/>
+        <location filename="../src/IIViewer.cpp" line="1797"/>
+        <location filename="../src/IIViewer.cpp" line="1819"/>
+        <location filename="../src/IIViewer.cpp" line="1852"/>
+        <location filename="../src/IIViewer.cpp" line="1874"/>
+        <location filename="../src/IIViewer.cpp" line="1931"/>
+        <location filename="../src/IIViewer.cpp" line="1944"/>
         <source>warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1143"/>
-        <location filename="../src/IIViewer.cpp" line="1159"/>
-        <location filename="../src/IIViewer.cpp" line="1222"/>
-        <location filename="../src/IIViewer.cpp" line="1240"/>
-        <location filename="../src/IIViewer.cpp" line="1394"/>
-        <location filename="../src/IIViewer.cpp" line="1416"/>
-        <location filename="../src/IIViewer.cpp" line="1622"/>
-        <location filename="../src/IIViewer.cpp" line="1644"/>
-        <location filename="../src/IIViewer.cpp" line="1677"/>
-        <location filename="../src/IIViewer.cpp" line="1699"/>
-        <location filename="../src/IIViewer.cpp" line="1732"/>
-        <location filename="../src/IIViewer.cpp" line="1754"/>
-        <location filename="../src/IIViewer.cpp" line="1811"/>
-        <location filename="../src/IIViewer.cpp" line="1824"/>
+        <location filename="../src/IIViewer.cpp" line="1263"/>
+        <location filename="../src/IIViewer.cpp" line="1279"/>
+        <location filename="../src/IIViewer.cpp" line="1342"/>
+        <location filename="../src/IIViewer.cpp" line="1360"/>
+        <location filename="../src/IIViewer.cpp" line="1514"/>
+        <location filename="../src/IIViewer.cpp" line="1536"/>
+        <location filename="../src/IIViewer.cpp" line="1742"/>
+        <location filename="../src/IIViewer.cpp" line="1764"/>
+        <location filename="../src/IIViewer.cpp" line="1797"/>
+        <location filename="../src/IIViewer.cpp" line="1819"/>
+        <location filename="../src/IIViewer.cpp" line="1852"/>
+        <location filename="../src/IIViewer.cpp" line="1874"/>
+        <location filename="../src/IIViewer.cpp" line="1931"/>
+        <location filename="../src/IIViewer.cpp" line="1944"/>
         <source>image0 size != image1 size</source>
         <translation>图像0的尺寸！=图像1的尺寸</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1193"/>
-        <location filename="../src/IIViewer.cpp" line="1276"/>
+        <location filename="../src/IIViewer.cpp" line="1313"/>
+        <location filename="../src/IIViewer.cpp" line="1396"/>
         <source>not support</source>
         <translation>不支持</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1193"/>
-        <location filename="../src/IIViewer.cpp" line="1276"/>
+        <location filename="../src/IIViewer.cpp" line="1313"/>
+        <location filename="../src/IIViewer.cpp" line="1396"/>
         <source>this format file not support yet!</source>
         <translation>该格式文件尚未支持！</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1311"/>
+        <location filename="../src/IIViewer.cpp" line="1431"/>
         <source>yuv bits &gt; 16</source>
         <translation>yuv位深 &gt; 16</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1385"/>
+        <location filename="../src/IIViewer.cpp" line="1505"/>
         <source>yuv file size &lt; your require</source>
         <translation>yuv文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="1607"/>
-        <location filename="../src/IIViewer.cpp" line="1613"/>
+        <location filename="../src/IIViewer.cpp" line="1727"/>
+        <location filename="../src/IIViewer.cpp" line="1733"/>
         <source>raw file size &lt; your input</source>
         <translation>raw文件大小不符合你的输入要求</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="2487"/>
+        <location filename="../src/IIViewer.cpp" line="2607"/>
         <source>At most 1 image!</source>
         <translation>最多打开一个图像！</translation>
     </message>
@@ -403,7 +409,7 @@
     <message>
         <location filename="../src/ImageWidgetRoiShowText.cpp" line="1178"/>
         <source> not exist!</source>
-        <translation>不存在!</translation>
+        <translation> 不存在!</translation>
     </message>
     <message>
         <location filename="../src/ImageWidget.cpp" line="1965"/>
@@ -419,14 +425,6 @@
         <location filename="../src/ImageWidgetRoiShowText.cpp" line="1184"/>
         <source>save roi data to text file</source>
         <translation>保存roi数据到txt文件</translation>
-    </message>
-    <message>
-        <source>%1 not exist!</source>
-        <translation type="vanished">%1 不存在</translation>
-    </message>
-    <message>
-        <source>save roi data to text</source>
-        <translation type="vanished">保存roi数据到txt文件</translation>
     </message>
     <message>
         <location filename="../src/ImageWidget.cpp" line="41"/>
@@ -464,7 +462,7 @@
     <message>
         <location filename="../src/ImageWidget.cpp" line="2583"/>
         <source>No image loaded to adjust curve.</source>
-        <translation>无图像可用于调节曲线</translation>
+        <translation>无图像可用于调节曲线。</translation>
     </message>
 </context>
 <context>
@@ -664,17 +662,6 @@
     </message>
 </context>
 <context>
-    <name>RoiDataExportDlg</name>
-    <message>
-        <source>close</source>
-        <translation type="vanished">关闭</translation>
-    </message>
-    <message>
-        <source>Roi data</source>
-        <translation type="vanished">Roi数据</translation>
-    </message>
-</context>
-<context>
     <name>RoiDataShowDlg</name>
     <message>
         <location filename="../src/RoiDataShowDlg.cpp" line="14"/>
@@ -867,14 +854,6 @@
         <translation>yuv直方图</translation>
     </message>
     <message>
-        <source>hsv contour/line</source>
-        <translation type="vanished">hsv数据折线</translation>
-    </message>
-    <message>
-        <source>hsv hist</source>
-        <translation type="vanished">hsv直方图</translation>
-    </message>
-    <message>
         <location filename="../src/IIViewer_ui.cpp" line="479"/>
         <source>File Name</source>
         <translation>文件名</translation>
@@ -885,14 +864,14 @@
         <translation>操作</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="904"/>
-        <location filename="../src/IIViewer.cpp" line="959"/>
+        <location filename="../src/IIViewer.cpp" line="1024"/>
+        <location filename="../src/IIViewer.cpp" line="1079"/>
         <source>Open in left</source>
         <translation>在左侧打开</translation>
     </message>
     <message>
-        <location filename="../src/IIViewer.cpp" line="920"/>
-        <location filename="../src/IIViewer.cpp" line="976"/>
+        <location filename="../src/IIViewer.cpp" line="1040"/>
+        <location filename="../src/IIViewer.cpp" line="1096"/>
         <source>Open in right</source>
         <translation>在右侧打开</translation>
     </message>

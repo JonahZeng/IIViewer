@@ -25,6 +25,8 @@ public:
     int uv_value_disp_mode;
     IIVOptionDialog::PaintPixValBgColor pix_val_bg_index;
     QColor pix_val_cus_bg_color;
+    QString uiFontFamily;
+    int uiFontPointSize;
     bool workAreaDoubleImgMode;
     QRect windowGeometry;
     QString windowScreenName;
