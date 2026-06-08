@@ -10,6 +10,7 @@
 #include <QEvent>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QHoverEvent>
 #include <QImageReader>
 #include <QMessageBox>
 #include <QMimeData>
@@ -21,13 +22,9 @@
 #include <QWindow>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#ifdef Q_OS_WINDOWS
-#include <QOperatingSystemVersion>
-#endif
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QToolTip>
-#include <QVersionNumber>
 #ifdef Q_OS_WINDOWS
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -70,6 +67,33 @@ static QFont resolveUiDisplayFont(const AppSettings &settings)
 #define DWMWA_COLOR_NONE 0xFFFFFFFE
 #endif
 
+static bool isWindows11OrGreater()
+{
+    static int result = -1;
+    if (result >= 0)
+        return result == 1;
+    result = 0;
+    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    if (ntdll != nullptr)
+    {
+        using RtlGetVersionPtr = NTSTATUS (WINAPI *)(PRTL_OSVERSIONINFOW);
+        auto RtlGetVersion = reinterpret_cast<RtlGetVersionPtr>(GetProcAddress(ntdll, "RtlGetVersion"));
+        if (RtlGetVersion != nullptr)
+        {
+            RTL_OSVERSIONINFOW ver = {};
+            ver.dwOSVersionInfoSize = sizeof(ver);
+            if (RtlGetVersion(&ver) == 0)
+            {
+                if (ver.dwMajorVersion == 10 && ver.dwMinorVersion == 0 && ver.dwBuildNumber >= 22000)
+                {
+                    result = 1;
+                }
+            }
+        }
+    }
+    return result == 1;
+}
+
 static int frameBorderWidth(HWND hwnd)
 {
     const UINT dpi = GetDpiForWindow(hwnd);
@@ -82,15 +106,6 @@ static int frameBorderHeight(HWND hwnd)
     return GetSystemMetricsForDpi(SM_CYSIZEFRAME, dpi) + GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
 }
 
-#ifdef Q_OS_WINDOWS
-static bool supportsSnapLayoutMenu()
-{
-    const QOperatingSystemVersion currentVersion = QOperatingSystemVersion::current();
-    return currentVersion.majorVersion() > 10 ||
-        (currentVersion.majorVersion() == 10 && currentVersion.microVersion() >= 22000);
-}
-#endif
-
 static void updateNativeShadow(HWND hwnd, bool maximized)
 {
     BOOL compositionEnabled = FALSE;
@@ -99,14 +114,42 @@ static void updateNativeShadow(HWND hwnd, bool maximized)
         return;
     }
 
-    const DWMNCRENDERINGPOLICY renderingPolicy = DWMNCRP_ENABLED;
-    DwmSetWindowAttribute(hwnd, DWMWA_NCRENDERING_POLICY, &renderingPolicy, sizeof(renderingPolicy));
-
-    const COLORREF borderColor = maximized ? RGB(0, 0, 0) : DWMWA_COLOR_NONE;
+    COLORREF borderColor = DWMWA_COLOR_NONE;
+    if (isWindows11OrGreater())
+    {
+        DWORD colorizationColor = 0;
+        BOOL opaqueBlend = FALSE;
+        if (SUCCEEDED(DwmGetColorizationColor(&colorizationColor, &opaqueBlend)))
+        {
+            borderColor = opaqueBlend ? colorizationColor : colorizationColor & 0x00FFFFFF;
+        }
+    }
     DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &borderColor, sizeof(borderColor));
 
-    const MARGINS shadowMargins = maximized ? MARGINS{0, 0, 0, 0} : MARGINS{1, 1, 1, 1};
-    DwmExtendFrameIntoClientArea(hwnd, &shadowMargins);
+    MARGINS margins = {0, 0, 0, 0};
+    if (!maximized && isWindows11OrGreater())
+    {
+        margins.cyTopHeight = 1;
+    }
+    DwmExtendFrameIntoClientArea(hwnd, &margins);
+}
+
+static bool isCaptionButtonHitTest(const WPARAM wParam)
+{
+    return wParam == HTMAXBUTTON || wParam == HTMINBUTTON || wParam == HTCLOSE;
+}
+
+static QPushButton *captionButtonFromHitTest(const WPARAM wParam, TitleBar *titleBar)
+{
+    if (titleBar == nullptr)
+        return nullptr;
+    switch (wParam)
+    {
+    case HTMAXBUTTON: return titleBar->getMaximizeButton();
+    case HTMINBUTTON: return titleBar->getMinimizeButton();
+    case HTCLOSE:     return titleBar->getCloseButton();
+    default:          return nullptr;
+    }
 }
 #endif
 
@@ -126,7 +169,7 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     lastFileWatcherNotifyIsWaitProcess{false, false}
 {
 #ifdef Q_OS_WINDOWS
-    setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 #endif
     if (settings.loadSettingsFromFile())
     {
@@ -155,6 +198,16 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
 
     setAcceptDrops(true);
     ui.setupUi(this);
+#ifdef Q_OS_WINDOWS
+    winId();
+    if (isWindows11OrGreater())
+    {
+        const HWND hwnd = reinterpret_cast<HWND>(winId());
+        constexpr int DWMWA_WINDOW_TREATMENT_POLICY = 20;
+        int snapValue = 2;
+        DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_TREATMENT_POLICY, &snapValue, sizeof(snapValue));
+    }
+#endif
     ui.imageLabel.at(LEFT_IMG_WIDGET)->appSettings = &settings;
     ui.imageLabel.at(RIGHT_IMG_WIDGET)->appSettings = &settings;
 
@@ -339,7 +392,7 @@ void IIViewer::changeEvent(QEvent *event)
 #ifdef Q_OS_WINDOWS
     if (event->type() == QEvent::WindowStateChange)
     {
-        updateNativeShadow(reinterpret_cast<HWND>(winId()), isMaximized());
+    updateNativeShadow(reinterpret_cast<HWND>(winId()), isMaximized());
     }
 #endif
 
@@ -418,20 +471,191 @@ bool IIViewer::nativeEvent(const QByteArray &eventType, void *message, long *res
         return false;
     }
 
+    auto setNcButtonHover = [](QPushButton *btn, bool hover) {
+        if (btn == nullptr)
+            return;
+        btn->setProperty("ncHover", hover);
+        btn->style()->unpolish(btn);
+        btn->style()->polish(btn);
+        btn->update();
+    };
+
+    auto clearNcHover = [this, &setNcButtonHover]() {
+        if (ncHoveredButton != nullptr)
+        {
+            setNcButtonHover(ncHoveredButton, false);
+            ncHoveredButton = nullptr;
+        }
+    };
+
+    if (msg->message == WM_NCHITTEST)
+    {
+        const LONG xPos = GET_X_LPARAM(msg->lParam);
+        const LONG yPos = GET_Y_LPARAM(msg->lParam);
+        const QPoint globalPos(xPos, yPos);
+        const QPoint titleBarPos = ui.titleBar != nullptr ? ui.titleBar->mapFromGlobal(globalPos) : QPoint();
+        const bool inTitleBar = ui.titleBar != nullptr && ui.titleBar->rect().contains(titleBarPos);
+        QWidget *hitWidget = inTitleBar ? ui.titleBar->childAt(titleBarPos) : nullptr;
+
+        if (hitWidget != nullptr)
+        {
+            const auto objectName = hitWidget->objectName();
+            int htResult = 0;
+            if (objectName == QLatin1String("titleBarMaximizeButton"))
+                htResult = HTMAXBUTTON;
+            else if (objectName == QLatin1String("titleBarMinimizeButton"))
+                htResult = HTMINBUTTON;
+            else if (objectName == QLatin1String("titleBarCloseButton"))
+                htResult = HTCLOSE;
+
+            if (htResult != 0)
+            {
+                *result = htResult;
+                return true;
+            }
+        }
+
+        RECT windowRect{};
+        GetWindowRect(msg->hwnd, &windowRect);
+        const int resizeBorderWidth = frameBorderWidth(msg->hwnd);
+        const int resizeBorderHeight = frameBorderHeight(msg->hwnd);
+
+        const bool onLeft = xPos >= windowRect.left && xPos < windowRect.left + resizeBorderWidth;
+        const bool onRight = xPos < windowRect.right && xPos >= windowRect.right - resizeBorderWidth;
+        const bool onTop = yPos >= windowRect.top && yPos < windowRect.top + resizeBorderHeight;
+        const bool onBottom = yPos < windowRect.bottom && yPos >= windowRect.bottom - resizeBorderHeight;
+
+        if (!isMaximized())
+        {
+            if (onTop && onLeft)  { *result = HTTOPLEFT;    return true; }
+            if (onTop && onRight) { *result = HTTOPRIGHT;   return true; }
+            if (onBottom && onLeft)  { *result = HTBOTTOMLEFT;  return true; }
+            if (onBottom && onRight) { *result = HTBOTTOMRIGHT; return true; }
+            if (onLeft)   { *result = HTLEFT;   return true; }
+            if (onRight)  { *result = HTRIGHT;  return true; }
+            if (onTop)    { *result = HTTOP;    return true; }
+            if (onBottom) { *result = HTBOTTOM; return true; }
+        }
+
+        if (ui.titleBar == nullptr)
+        {
+            return QMainWindow::nativeEvent(eventType, message, result);
+        }
+
+        if (ui.titleBar->rect().contains(titleBarPos))
+        {
+            const bool hitInteractiveWidget = hitWidget != nullptr &&
+                (qobject_cast<QPushButton *>(hitWidget) != nullptr ||
+                 qobject_cast<QMenuBar *>(hitWidget) != nullptr);
+            if (!hitInteractiveWidget)
+            {
+                *result = HTCAPTION;
+                return true;
+            }
+        }
+    }
+
+    if (msg->message == WM_NCMOUSEMOVE)
+    {
+        if (msg->wParam == HTMAXBUTTON)
+        {
+            QPushButton *btn = captionButtonFromHitTest(HTMAXBUTTON, ui.titleBar);
+            if (btn != ncHoveredButton)
+            {
+                if (ncHoveredButton != nullptr)
+                    setNcButtonHover(ncHoveredButton, false);
+                if (btn != nullptr)
+                    setNcButtonHover(btn, true);
+                ncHoveredButton = btn;
+            }
+            *result = 0;
+            return true;
+        }
+        QPushButton *btn = captionButtonFromHitTest(msg->wParam, ui.titleBar);
+        if (btn != ncHoveredButton)
+        {
+            if (ncHoveredButton != nullptr)
+                setNcButtonHover(ncHoveredButton, false);
+            if (btn != nullptr)
+                setNcButtonHover(btn, true);
+            ncHoveredButton = btn;
+        }
+        *result = 0;
+        return true;
+    }
+    if (msg->message == WM_NCMOUSEHOVER)
+    {
+        if (msg->wParam == HTMAXBUTTON)
+        {
+            *result = 0;
+            return true;
+        }
+        *result = 0;
+        return true;
+    }
+    if (msg->message == WM_NCMOUSELEAVE)
+    {
+        clearNcHover();
+        *result = 0;
+        return true;
+    }
+    if ((msg->message == WM_NCLBUTTONDOWN || msg->message == WM_NCLBUTTONDBLCLK) &&
+         isCaptionButtonHitTest(msg->wParam))
+    {
+        *result = 0;
+        return true;
+    }
+    if (msg->message == WM_NCLBUTTONUP && isCaptionButtonHitTest(msg->wParam))
+    {
+        WPARAM sc = 0;
+        switch (msg->wParam)
+        {
+        case HTMAXBUTTON: sc = IsZoomed(msg->hwnd) ? SC_RESTORE : SC_MAXIMIZE; break;
+        case HTMINBUTTON: sc = SC_MINIMIZE; break;
+        case HTCLOSE:     sc = SC_CLOSE; break;
+        default: break;
+        }
+        if (sc != 0)
+        {
+            SendMessage(msg->hwnd, WM_SYSCOMMAND, sc, 0);
+        }
+        *result = 0;
+        return true;
+    }
+    if (msg->message == WM_MOUSEMOVE)
+    {
+        clearNcHover();
+    }
+
     if (msg->message == WM_NCCALCSIZE)
     {
         if (msg->wParam != 0)
         {
-            auto *params = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
-            if (IsZoomed(msg->hwnd) == TRUE)
+            static bool firstNcCalc = true;
+            if (firstNcCalc)
             {
-                const int borderWidth = frameBorderWidth(msg->hwnd);
-                const int borderHeight = frameBorderHeight(msg->hwnd);
-                params->rgrc[0].left += borderWidth;
-                params->rgrc[0].top += borderHeight;
-                params->rgrc[0].right -= borderWidth;
-                params->rgrc[0].bottom -= borderHeight;
+                firstNcCalc = false;
+                *result = 0;
+                return false;
             }
+            auto *params = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
+            const int borderWidth = frameBorderWidth(msg->hwnd);
+            const int borderHeight = frameBorderHeight(msg->hwnd);
+            const bool maximized = IsZoomed(msg->hwnd) != FALSE;
+            const bool keepVisualFrame = maximized || isWindows11OrGreater();
+            int topInset = 0;
+            if (maximized)
+            {
+                topInset = borderHeight;
+            }
+            else if (keepVisualFrame)
+            {
+                topInset = 1;
+            }
+            params->rgrc[0].left += keepVisualFrame ? borderWidth : 0;
+            params->rgrc[0].top += topInset;
+            params->rgrc[0].right -= keepVisualFrame ? borderWidth : 0;
+            params->rgrc[0].bottom -= keepVisualFrame ? borderHeight : 0;
             *result = 0;
             return true;
         }
@@ -461,95 +685,19 @@ bool IIViewer::nativeEvent(const QByteArray &eventType, void *message, long *res
         }
     }
 
-    if (msg->message == WM_NCHITTEST)
-    {
-        const LONG xPos = GET_X_LPARAM(msg->lParam);
-        const LONG yPos = GET_Y_LPARAM(msg->lParam);
-        RECT windowRect{};
-        GetWindowRect(msg->hwnd, &windowRect);
-
-        const int resizeBorderWidth = frameBorderWidth(msg->hwnd);
-        const int resizeBorderHeight = frameBorderHeight(msg->hwnd);
-
-        const bool onLeft = xPos >= windowRect.left && xPos < windowRect.left + resizeBorderWidth;
-        const bool onRight = xPos < windowRect.right && xPos >= windowRect.right - resizeBorderWidth;
-        const bool onTop = yPos >= windowRect.top && yPos < windowRect.top + resizeBorderHeight;
-        const bool onBottom = yPos < windowRect.bottom && yPos >= windowRect.bottom - resizeBorderHeight;
-
-        if (!isMaximized())
-        {
-            if (onTop && onLeft)
-            {
-                *result = HTTOPLEFT;
-                return true;
-            }
-            if (onTop && onRight)
-            {
-                *result = HTTOPRIGHT;
-                return true;
-            }
-            if (onBottom && onLeft)
-            {
-                *result = HTBOTTOMLEFT;
-                return true;
-            }
-            if (onBottom && onRight)
-            {
-                *result = HTBOTTOMRIGHT;
-                return true;
-            }
-            if (onLeft)
-            {
-                *result = HTLEFT;
-                return true;
-            }
-            if (onRight)
-            {
-                *result = HTRIGHT;
-                return true;
-            }
-            if (onTop)
-            {
-                *result = HTTOP;
-                return true;
-            }
-            if (onBottom)
-            {
-                *result = HTBOTTOM;
-                return true;
-            }
-        }
-
-        if (ui.titleBar == nullptr)
-        {
-            return QMainWindow::nativeEvent(eventType, message, result);
-        }
-
-        const QPoint globalPos(xPos, yPos);
-        const QPoint titleBarPos = ui.titleBar->mapFromGlobal(globalPos);
-        if (ui.titleBar->rect().contains(titleBarPos))
-        {
-            QWidget *hitWidget = ui.titleBar->childAt(titleBarPos);
-            if (supportsSnapLayoutMenu() && hitWidget != nullptr && hitWidget->objectName() == QStringLiteral("titleBarMaximizeButton"))
-            {
-                *result = HTMAXBUTTON;
-                return true;
-            }
-            const bool hitInteractiveWidget = hitWidget != nullptr &&
-                (qobject_cast<QPushButton *>(hitWidget) != nullptr ||
-                 qobject_cast<QMenuBar *>(hitWidget) != nullptr);
-            if (!hitInteractiveWidget)
-            {
-                *result = HTCAPTION;
-                return true;
-            }
-        }
-    }
-
     if (msg->message == WM_DPICHANGED)
     {
         // qDebug() << "[DPI] WM_DPICHANGED" << HIWORD(msg->wParam);
         applyDpiScale(window()->windowHandle() != nullptr ? window()->windowHandle()->screen() : nullptr);
+    }
+
+    if (msg->message == WM_WINDOWPOSCHANGED)
+    {
+        auto *windowPos = reinterpret_cast<WINDOWPOS *>(msg->lParam);
+        if (windowPos != nullptr && (windowPos->flags & SWP_FRAMECHANGED))
+        {
+            updateNativeShadow(msg->hwnd, IsZoomed(msg->hwnd) == TRUE);
+        }
     }
 
     return QMainWindow::nativeEvent(eventType, message, result);
@@ -562,14 +710,11 @@ void IIViewer::showEvent(QShowEvent *event)
     static bool nativeFrameInitialized = false;
     if (!nativeFrameInitialized)
     {
+        nativeFrameInitialized = true;
         const HWND hwnd = reinterpret_cast<HWND>(winId());
-        const LONG_PTR style = GetWindowLongPtr(hwnd, GWL_STYLE);
-        const LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
-        SetWindowLongPtr(hwnd, GWL_STYLE, style | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU);
-        SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_APPWINDOW);
+
         SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
                      SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-        nativeFrameInitialized = true;
     }
     updateNativeShadow(reinterpret_cast<HWND>(winId()), isMaximized());
 #endif

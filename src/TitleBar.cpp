@@ -9,6 +9,10 @@
 #include <QPushButton>
 #include <QStyle>
 
+#ifdef Q_OS_WINDOWS
+#include <windows.h>
+#endif
+
 namespace
 {
 constexpr int baseTitleBarHeight = 32;
@@ -58,6 +62,8 @@ TitleBar::TitleBar(QWidget *parent)
         "QWidget#titleBar { background: palette(window); }"
         "QPushButton#titleBarMinimizeButton, QPushButton#titleBarMaximizeButton, QPushButton#titleBarCloseButton {"
         " border: none; background: transparent; padding: 0; }"
+        "QPushButton#titleBarMinimizeButton[ncHover=\"true\"], QPushButton#titleBarMaximizeButton[ncHover=\"true\"] { background: rgba(0, 0, 0, 0.08); }"
+        "QPushButton#titleBarCloseButton[ncHover=\"true\"] { background: rgb(232, 17, 35); }"
         "QPushButton#titleBarMinimizeButton:hover, QPushButton#titleBarMaximizeButton:hover { background: rgba(0, 0, 0, 0.08); }"
         "QPushButton#titleBarCloseButton:hover { background: rgb(232, 17, 35); }"
         "QPushButton#titleBarMinimizeButton:pressed, QPushButton#titleBarMaximizeButton:pressed { background: rgba(0, 0, 0, 0.16); }"
@@ -75,12 +81,22 @@ TitleBar::TitleBar(QWidget *parent)
     connect(minimizeButton, &QPushButton::clicked, this, [this]() {
         if (QWidget *topLevelWindow = this->window())
         {
+#ifdef Q_OS_WINDOWS
+            const HWND hwnd = reinterpret_cast<HWND>(topLevelWindow->winId());
+            SendMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+#else
             topLevelWindow->showMinimized();
+#endif
         }
     });
     connect(maximizeButton, &QPushButton::clicked, this, [this]() {
         if (QWidget *topLevelWindow = this->window())
         {
+#ifdef Q_OS_WINDOWS
+            const HWND hwnd = reinterpret_cast<HWND>(topLevelWindow->winId());
+            SendMessage(hwnd, WM_SYSCOMMAND,
+                topLevelWindow->isMaximized() ? SC_RESTORE : SC_MAXIMIZE, 0);
+#else
             if (topLevelWindow->isMaximized())
             {
                 topLevelWindow->showNormal();
@@ -89,12 +105,18 @@ TitleBar::TitleBar(QWidget *parent)
             {
                 topLevelWindow->showMaximized();
             }
+#endif
         }
     });
     connect(closeButton, &QPushButton::clicked, this, [this]() {
         if (auto *window = this->window())
         {
+#ifdef Q_OS_WINDOWS
+            const HWND hwnd = reinterpret_cast<HWND>(window->winId());
+            SendMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, 0);
+#else
             window->close();
+#endif
         }
     });
 }
@@ -177,6 +199,11 @@ void TitleBar::mouseDoubleClickEvent(QMouseEvent *event)
     {
         if (auto *mainWindow = qobject_cast<QMainWindow *>(window()))
         {
+#ifdef Q_OS_WINDOWS
+            const HWND hwnd = reinterpret_cast<HWND>(mainWindow->winId());
+            SendMessage(hwnd, WM_SYSCOMMAND,
+                mainWindow->isMaximized() ? SC_RESTORE : SC_MAXIMIZE, 0);
+#else
             if (mainWindow->isMaximized())
             {
                 mainWindow->showNormal();
@@ -185,6 +212,7 @@ void TitleBar::mouseDoubleClickEvent(QMouseEvent *event)
             {
                 mainWindow->showMaximized();
             }
+#endif
         }
     }
 
