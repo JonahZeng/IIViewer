@@ -6,6 +6,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QFileSystemWatcher>
 #include <QDateTime>
+#include <QPushButton>
 
 class QScreen;
 class QWindow;
@@ -117,6 +118,7 @@ public:
     QScrollArea *masterScrollarea;
     AppSettings settings;
     bool windowHandleConnectionsInitialized = false;
+    QPushButton *ncHoveredButton = nullptr;
 };
 
 #endif // IIViewer_H

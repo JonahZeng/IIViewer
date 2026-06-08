@@ -24,8 +24,8 @@ cmake --build . --config Debug
 # Install
 cmake --install . --config Release
 
-# Package (NSIS installer)
-cpack -C Release -G NSIS
+# Package (WiX MSI installer)
+cpack -C Release -G WIX
 ```
 
 ### Linux (Ubuntu)

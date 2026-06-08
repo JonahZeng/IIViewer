@@ -21,6 +21,10 @@ public:
     void updateMaximizeButton(bool maximized);
     void updateScale(qreal scaleFactor);
 
+    QPushButton *getMinimizeButton() const { return minimizeButton; }
+    QPushButton *getMaximizeButton() const { return maximizeButton; }
+    QPushButton *getCloseButton() const { return closeButton; }
+
 protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
