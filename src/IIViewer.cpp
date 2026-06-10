@@ -157,6 +157,37 @@ namespace
 {
 constexpr int baseToolBarHeight = 34;
 constexpr int baseToolBarIconSize = 24;
+
+static void refreshWidgetFont(QWidget *widget, const QFont &font)
+{
+    if (widget == nullptr)
+    {
+        return;
+    }
+
+    widget->setFont(font);
+    if (auto *widgetStyle = widget->style(); widgetStyle != nullptr)
+    {
+        widgetStyle->unpolish(widget);
+        widgetStyle->polish(widget);
+    }
+
+    const auto childWidgets = widget->findChildren<QWidget *>();
+    for (QWidget *childWidget : childWidgets)
+    {
+        childWidget->setFont(font);
+        if (auto *childStyle = childWidget->style(); childStyle != nullptr)
+        {
+            childStyle->unpolish(childWidget);
+            childStyle->polish(childWidget);
+        }
+        childWidget->updateGeometry();
+        childWidget->update();
+    }
+
+    widget->updateGeometry();
+    widget->update();
+}
 }
 
 IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readability-function-cognitive-complexity)
@@ -969,7 +1000,23 @@ void IIViewer::onSysOptionAction(bool check)
         this->settings.pix_val_cus_bg_color = dlg.pix_val_cus_bg_color;
         this->settings.uiFontFamily = dlg.ui_font_family;
         this->settings.uiFontPointSize = dlg.ui_font_point_size;
-        QApplication::setFont(resolveUiDisplayFont(this->settings));
+        const QFont uiFont = resolveUiDisplayFont(this->settings);
+        QApplication::setFont(uiFont);
+
+        refreshWidgetFont(this, uiFont);
+        refreshWidgetFont(ui.titleBar, uiFont);
+        refreshWidgetFont(ui.dataAnalyseDockWgt, uiFont);
+        refreshWidgetFont(ui.playListDockWgt, uiFont);
+        refreshWidgetFont(ui.dataAnalyseDockWgt != nullptr ? ui.dataAnalyseDockWgt->widget() : nullptr, uiFont);
+        refreshWidgetFont(ui.playListDockWgt != nullptr ? ui.playListDockWgt->widget() : nullptr, uiFont);
+
+        if (ui.titleBar != nullptr)
+        {
+            if (ui.titleBar->menuBar() != nullptr)
+            {
+                refreshWidgetFont(ui.titleBar->menuBar(), uiFont);
+            }
+        }
     }
 }
 

@@ -4,6 +4,21 @@
     <!-- Desktop shortcut checkbox property (default: checked) -->
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes"/>
 
+    <DirectoryRef Id="IIViewerProgramMenuFolder">
+      <Component Id="c_StartMenuShortcut" Guid="*">
+        <Shortcut Id="sc_IIViewerStartMenu"
+                  Name="IIViewer"
+                  Description="ISP Image Viewer"
+                  Target="[INSTALL_ROOT]bin\IIViewer.exe"
+                  WorkingDirectory="INSTALL_ROOT"
+                  Icon="ProductIcon.ico"/>
+        <RegistryValue Root="HKCU" Key="Software\IIViewer"
+                       Name="StartMenuShortcut" Type="integer"
+                       Value="1" KeyPath="yes"/>
+        <RemoveFolder Id="rf_IIViewerProgramMenuFolder" On="uninstall"/>
+      </Component>
+    </DirectoryRef>
+
     <!-- Desktop shortcut component (placed on user's Desktop) -->
     <DirectoryRef Id="DesktopFolder">
       <Component Id="c_DesktopShortcut" Guid="*">
@@ -11,30 +26,23 @@
         <Shortcut Id="sc_IIViewerDesktop"
                   Name="IIViewer"
                   Description="ISP Image Viewer"
-                  Target="[APPLICATIONFOLDER]bin\IIViewer.exe"
-                  WorkingDirectory="APPLICATIONFOLDER"
-                  Icon="IIViewer.exe"/>
+                  Target="[INSTALL_ROOT]bin\IIViewer.exe"
+                  WorkingDirectory="INSTALL_ROOT"
+                  Icon="ProductIcon.ico"/>
         <RegistryValue Root="HKCU" Key="Software\IIViewer"
                        Name="DesktopShortcut" Type="integer"
                        Value="1" KeyPath="yes"/>
-        <RemoveFolder Id="rf_DesktopShortcut" On="uninstall"/>
       </Component>
     </DirectoryRef>
-
-    <!-- Feature for the desktop shortcut; Level=0 disables the component when unchecked -->
-    <Feature Id="FeatureDesktopShortcut" Title="Desktop Shortcut" Level="1">
-      <ComponentRef Id="c_DesktopShortcut"/>
-      <Condition Level="0">INSTALLDESKTOPSHORTCUT = "0"</Condition>
-    </Feature>
 
     <!-- Custom UI: insert a dialog with desktop shortcut checkbox
          between InstallDirDlg and VerifyReadyDlg in WixUI_Minimal -->
     <UI>
       <DialogRef Id="DesktopShortcutDlg"/>
 
-      <!-- Redirect InstallDirDlg Next -> DesktopShortcutDlg (Order=3 overrides WixUI_Minimal's Order=2) -->
+      <!-- Redirect InstallDirDlg Next -> DesktopShortcutDlg after the built-in path validation succeeds. -->
       <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog"
-               Value="DesktopShortcutDlg" Order="3">NOT Installed</Publish>
+           Value="DesktopShortcutDlg" Order="5">NOT Installed AND (WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID = "1")</Publish>
       <Publish Dialog="DesktopShortcutDlg" Control="Back" Event="NewDialog"
                Value="InstallDirDlg" Order="1">NOT Installed</Publish>
       <Publish Dialog="DesktopShortcutDlg" Control="Next" Event="NewDialog"
@@ -61,18 +69,23 @@
           <Text>Create a &amp;desktop shortcut</Text>
         </Control>
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17">
-          <Text>{\WixUI_Font_Button}&amp;Back</Text>
+          <Text>&amp;Back</Text>
         </Control>
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
                  Default="yes">
-          <Text>{\WixUI_Font_Button}&amp;Next</Text>
+          <Text>&amp;Next</Text>
         </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
                  Cancel="yes">
-          <Text>{\WixUI_Font_Button}Cancel</Text>
+          <Text>Cancel</Text>
           <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
         </Control>
       </Dialog>
     </UI>
+  </CPackWiXFragment>
+
+  <CPackWiXFragment Id="#PRODUCTFEATURE">
+    <ComponentRef Id="c_StartMenuShortcut"/>
+    <ComponentRef Id="c_DesktopShortcut"/>
   </CPackWiXFragment>
 </CPackWiXPatch>
