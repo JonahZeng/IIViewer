@@ -5,6 +5,7 @@
 
 class QLabel;
 class QMenuBar;
+class QEvent;
 class QMouseEvent;
 class QPushButton;
 class QIcon;
@@ -26,9 +27,11 @@ public:
     QPushButton *getCloseButton() const { return closeButton; }
 
 protected:
+    void changeEvent(QEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
+    void syncMenuBarFont();
     void updateButtonIcons(bool maximized);
 
     QLabel *iconLabel;

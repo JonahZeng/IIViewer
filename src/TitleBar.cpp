@@ -152,7 +152,8 @@ void TitleBar::setMenuBar(QMenuBar *menuBar)
     menuBarWidget->setStyleSheet("QMenuBar { background: transparent; border: none; }"
                                  "QMenuBar::item { padding: 4px 8px; margin: 0; }"
                                  "QMenuBar::item:selected { background: rgba(0, 0, 0, 0.08); }");
-    layout->insertWidget(2, menuBarWidget, 0, Qt::AlignVCenter);
+    syncMenuBarFont();
+    layout->insertWidget(2, menuBarWidget, 0, Qt::AlignmentFlag::AlignVCenter);
 }
 
 QMenuBar *TitleBar::menuBar() const
@@ -169,6 +170,25 @@ void TitleBar::setWindowIconPixmap(const QIcon &icon)
 void TitleBar::updateMaximizeButton(bool maximized)
 {
     updateButtonIcons(maximized);
+}
+
+void TitleBar::changeEvent(QEvent *event)
+{
+    if (event != nullptr)
+    {
+        switch (event->type())
+        {
+        case QEvent::FontChange:
+        case QEvent::ApplicationFontChange:
+        case QEvent::StyleChange:
+            syncMenuBarFont();
+            break;
+        default:
+            break;
+        }
+    }
+
+    QWidget::changeEvent(event);
 }
 
 void TitleBar::updateScale(qreal scaleFactor)
@@ -191,6 +211,8 @@ void TitleBar::updateScale(qreal scaleFactor)
     {
         setWindowIconPixmap(window->windowIcon());
     }
+
+    syncMenuBarFont();
 }
 
 void TitleBar::mouseDoubleClickEvent(QMouseEvent *event)
@@ -226,4 +248,22 @@ void TitleBar::updateButtonIcons(bool maximized)
         ? QStringLiteral(":/image/src/resource/titlebar-restore.svg")
         : QStringLiteral(":/image/src/resource/titlebar-maximize.svg")));
     closeButton->setIcon(QIcon(QStringLiteral(":/image/src/resource/titlebar-close.svg")));
+}
+
+void TitleBar::syncMenuBarFont()
+{
+    if (menuBarWidget == nullptr)
+    {
+        return;
+    }
+
+    menuBarWidget->setFont(font());
+    if (auto *menuBarStyle = menuBarWidget->style(); menuBarStyle != nullptr)
+    {
+        menuBarStyle->unpolish(menuBarWidget);
+        menuBarStyle->polish(menuBarWidget);
+    }
+    menuBarWidget->updateGeometry();
+    menuBarWidget->adjustSize();
+    menuBarWidget->update();
 }
