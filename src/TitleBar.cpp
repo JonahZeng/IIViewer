@@ -76,7 +76,7 @@ TitleBar::TitleBar(QWidget *parent)
         connect(window, &QWidget::windowIconChanged, this, &TitleBar::setWindowIconPixmap);
     }
 
-    updateScale(devicePixelRatioF());
+    updateScale(1.0);
 
     connect(minimizeButton, &QPushButton::clicked, this, [this]() {
         if (QWidget *topLevelWindow = this->window())

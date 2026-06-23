@@ -1565,14 +1565,14 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
                 {
                     rightMouseContextMenu.actions().at(0)->setEnabled(true);
                     rightMouseContextMenu.actions().at(1)->setEnabled(true);
-                    rightMouseContextMenu.exec(event->globalPos());
+                    rightMouseContextMenu.exec(event->globalPosition().toPoint());
                     return;
                 }
             }
         }
         rightMouseContextMenu.actions().at(0)->setEnabled(false);
         rightMouseContextMenu.actions().at(1)->setEnabled(false);
-        rightMouseContextMenu.exec(event->globalPos());
+        rightMouseContextMenu.exec(event->globalPosition().toPoint());
     }
 }
 

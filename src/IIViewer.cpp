@@ -437,7 +437,11 @@ void IIViewer::applyDpiScale(QScreen *screen)
         return;
     }
 
+#if QT_VERSION_MAJOR >= 6
+    const qreal scale = 1.0;
+#else
     const qreal scale = screen->logicalDotsPerInch() / 96.0;
+#endif
     const int toolBarHeight = qRound(static_cast<qreal>(baseToolBarHeight) * scale);
     const int toolBarIconSize = qRound(static_cast<qreal>(baseToolBarIconSize) * scale);
     ui.toolBar->setFixedHeight(toolBarHeight);
@@ -491,8 +495,13 @@ void IIViewer::ensureWindowHandleConnections()
     windowHandleConnectionsInitialized = true;
 }
 
+
 #ifdef Q_OS_WINDOWS
+#if QT_VERSION_MAJOR < 6
 bool IIViewer::nativeEvent(const QByteArray &eventType, void *message, long *result)
+#else
+bool IIViewer::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
+#endif
 {
     Q_UNUSED(eventType);
     auto *msg = static_cast<MSG *>(message);
@@ -523,7 +532,13 @@ bool IIViewer::nativeEvent(const QByteArray &eventType, void *message, long *res
     {
         const LONG xPos = GET_X_LPARAM(msg->lParam);
         const LONG yPos = GET_Y_LPARAM(msg->lParam);
+#if QT_VERSION_MAJOR >= 6
+        const UINT dpi = GetDpiForWindow(msg->hwnd);
+        const qreal dpr = dpi / 96.0;
+        const QPoint globalPos(qRound(xPos / dpr), qRound(yPos / dpr));
+#else
         const QPoint globalPos(xPos, yPos);
+#endif
         const QPoint titleBarPos = ui.titleBar != nullptr ? ui.titleBar->mapFromGlobal(globalPos) : QPoint();
         const bool inTitleBar = ui.titleBar != nullptr && ui.titleBar->rect().contains(titleBarPos);
         QWidget *hitWidget = inTitleBar ? ui.titleBar->childAt(titleBarPos) : nullptr;

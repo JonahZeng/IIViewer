@@ -41,20 +41,10 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: '5.15.2'
+        version: '6.8.3'
         cache: true
-        arch: 'win64_msvc2019_64'
-        modules: 'qtcharts qtdatavis3d'
-        # dir: '${{github.workspace}}\thirdparty'
-        # version: '5.15.2'
-        # host: 'windows'
-        # target: 'desktop'
-        # arch: 'win64_msvc2019_64'
-        # modules: 'qtcharts qtdatavis3d'
-        # set-env: 'true'
-        # cache: 'false'
-        # cache-key-prefix: 'install-qt-action'
-        # install-deps: 'true'
+        arch: 'win64_msvc2022_64'
+        modules: 'qtcharts qtdatavis3d qtimageformats qtnetworkauth qtgraphs'
 
     - name: Show QT_ROOT_DIR
       run: echo "QT_ROOT_DIR is ${env:QT_ROOT_DIR}"

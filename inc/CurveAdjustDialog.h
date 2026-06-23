@@ -14,8 +14,9 @@
 class QComboBox;
 class QPushButton;
 class QLabel;
-
+#if QT_VERSION_MAJOR < 6
 QT_CHARTS_USE_NAMESPACE
+#endif
 
 class CurveAdjustChart final : public QChart
 {
