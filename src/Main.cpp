@@ -53,7 +53,11 @@ int main(int argc, char* argv[])
     const QString qt_locale = QLocale::system().name();
 #endif
     // qDebug() << "System language: " << qt_locale;
+#if QT_VERSION_MAJOR >= 6
+    if(qt_translator.load(QString("qt_%1").arg(qt_locale), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+#else
     if(qt_translator.load(QString("qt_%1").arg(qt_locale), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+#endif
     {
         QApplication::installTranslator(&qt_translator);
     }

@@ -141,7 +141,11 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
     }
     if (json.contains("pix_val_cus_bg_color"))
     {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
+        pix_val_cus_bg_color = QColor::fromString(json.value("pix_val_cus_bg_color").toString());
+#else
         pix_val_cus_bg_color.setNamedColor(json.value("pix_val_cus_bg_color").toString());
+#endif
     }
     if (json.contains("ui_font_family"))
     {
