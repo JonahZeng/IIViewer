@@ -41,20 +41,21 @@ jobs:
     steps:
     - name: Update system packages 
       run: sudo apt update
-    - name: Install OpenSSL 
-      run: sudo apt install -y openssl libssl-dev
+    - name: Install dependencies
+      run: sudo apt install -y openssl libssl-dev libgl1-mesa-dev
     - name: Verify OpenSSL installation 
       run: openssl version
     - name: Install Qt6
-      run: sudo apt install -y qt6-base-dev qt6-charts-dev qt6-tools-dev qt6-tools-dev-tools qt6-datavis3d-dev
-      # uses: jurplel/install-qt-action@v4
-      # with:
-      #   version: '6.8.3'
-      #   host: 'linux'
-      #   target: 'desktop'
-      #   cache: true
-      #   install-deps: 'true'
-      #   modules: 'qtcharts qtdatavis3d'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.3'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+        cache: true
+        modules: 'qtcharts qtdatavis3d qtimageformats qtnetworkauth qtgraphs'
+    - name: Show QT install dir
+      run: echo "${{ env.QT_ROOT_DIR }}"
     - uses: actions/checkout@v4
       with:
         submodules: recursive
