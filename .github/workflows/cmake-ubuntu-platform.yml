@@ -51,7 +51,7 @@ jobs:
         version: '6.8.3'
         host: 'linux'
         target: 'desktop'
-        arch: 'gcc_64'
+        rch: 'linux_gcc_64'
         cache: true
         modules: 'qtcharts qtdatavis3d qtimageformats qtnetworkauth qtgraphs'
     - name: Show QT install dir
