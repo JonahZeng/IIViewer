@@ -44,7 +44,7 @@ function(windeployqt target directory)
         COMMAND "${_qt_bin_dir}/windeployqt.exe"
                 --verbose 0
                 --no-compiler-runtime
-                --no-angle
+                # --no-angle
                 --no-opengl-sw
                 "$<TARGET_FILE:${target}>"
     )

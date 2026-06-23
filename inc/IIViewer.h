@@ -25,7 +25,11 @@ public:
     bool eventFilter(QObject *obj, QEvent *event) override;
     void changeEvent(QEvent *event) override;
 #ifdef Q_OS_WINDOWS
+    #if QT_VERSION_MAJOR < 6
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+    #else
+    bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override;
+    #endif
 #endif
 
 private:

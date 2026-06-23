@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 0.6.8 LANGUAGES CXX)
+project(IIViewer VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -176,24 +176,27 @@ set(PROJECT_SOURCES
 set(TRANSLATIONS
     translations/IIViewer_zh.ts
 )
-qt5_add_translation(QM_FILES ${TRANSLATIONS})
 
 set(RESOURCES
     IIViewer.qrc
 )
 
-qt5_add_resources(RESOURCE_FILES ${RESOURCES})
-
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        ${RESOURCES}
+    )
+    qt_add_translations(${PROJECT_NAME}
+        TS_FILES ${TRANSLATIONS}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
+    qt5_add_translation(QM_FILES ${TRANSLATIONS})
+    qt5_add_resources(RESOURCE_FILES ${RESOURCES})
     if(WIN32)
         add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${RESOURCE_FILES} ${QM_FILES})
         if(MSVC)
@@ -269,37 +272,41 @@ if(WIN32)
     include(windeployqt)
     windeployqt(${PROJECT_NAME} "bin")
 elseif(UNIX AND NOT APPLE)
-    set(_qm_translation_path "")
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/translations)
-    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/translations)
+    if(QT_VERSION_MAJOR LESS 6)
+        set(_qm_translation_path "")
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/translations)
+        elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(_qm_translation_path ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/translations)
+        endif()
+        if(NOT EXISTS ${_qm_translation_path})
+            file(MAKE_DIRECTORY ${_qm_translation_path})
+        endif()
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_BINARY_DIR}/IIViewer_zh.qm
+            $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
+            COMMENT "Copy translation qm file to target directory"
+        )
     endif()
-    if(NOT EXISTS ${_qm_translation_path})
-        file(MAKE_DIRECTORY ${_qm_translation_path})
-    endif()
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_BINARY_DIR}/IIViewer_zh.qm
-        $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
-        COMMENT "Copy translation qm file to target directory"
-    )
 elseif(APPLE)
-    set(_qm_translation_path "")
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app/Contents/Resources/translations")
-    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/${PROJECT_NAME}.app/Contents/Resources/translations")
+    if(QT_VERSION_MAJOR LESS 6)
+        set(_qm_translation_path "")
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app/Contents/Resources/translations")
+        elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(_qm_translation_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/${PROJECT_NAME}.app/Contents/Resources/translations")
+        endif()
+        if(NOT EXISTS ${_qm_translation_path})
+            file(MAKE_DIRECTORY ${_qm_translation_path})
+        endif()
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${LRELEASE_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
+            -qm 
+            ${_qm_translation_path}/IIViewer_zh.qm
+        )
     endif()
-    if(NOT EXISTS ${_qm_translation_path})
-        file(MAKE_DIRECTORY ${_qm_translation_path})
-    endif()
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${LRELEASE_EXECUTABLE}
-        ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
-        -qm 
-        ${_qm_translation_path}/IIViewer_zh.qm
-    )
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(_app_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app")
     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
