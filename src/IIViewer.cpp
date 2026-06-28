@@ -910,7 +910,22 @@ void IIViewer::onSingleImgModeAction(bool check)
             }
         }
     }
-    ui.mainWidget->adjustSize();
+    // activate() redistributes space among visible children (triggers
+    // QResizeEvent → layoutChildren() on scroll areas). It does not
+    // trigger a mainWidget resize, so eventFilter won't run. Resize
+    // empty containers manually to match the new viewport sizes.
+    ui.mainWidget->layout()->activate();
+    for (int i = 0; i < 2; ++i) {
+        if (ui.imageLabel.at(i)->pixMap == nullptr && ui.scrollArea.at(i)->isVisible()) {
+            const int sw = ui.scrollArea.at(i)->width();
+            const int sh = ui.scrollArea.at(i)->height();
+            const int sbw = ui.scrollArea.at(i)->verticalScrollBar()->width();
+            const int sbh = ui.scrollArea.at(i)->horizontalScrollBar()->height();
+            ui.imageLabelContianer.at(i)->resize(sw - sbw, sh - sbh);
+            ui.imageLabelContianer.at(i)->layout()->setContentsMargins(0, 0, 0, 0);
+        }
+    }
+    ui.mainWidget->updateGeometry();
 }
 
 void IIViewer::onDoubleImgModeAction(bool check)
@@ -983,7 +998,18 @@ void IIViewer::onDoubleImgModeAction(bool check)
             }
         }
     }
-    ui.mainWidget->adjustSize();
+    ui.mainWidget->layout()->activate();
+    for (int i = 0; i < 2; ++i) {
+        if (ui.imageLabel.at(i)->pixMap == nullptr && ui.scrollArea.at(i)->isVisible()) {
+            const int sw = ui.scrollArea.at(i)->width();
+            const int sh = ui.scrollArea.at(i)->height();
+            const int sbw = ui.scrollArea.at(i)->verticalScrollBar()->width();
+            const int sbh = ui.scrollArea.at(i)->horizontalScrollBar()->height();
+            ui.imageLabelContianer.at(i)->resize(sw - sbw, sh - sbh);
+            ui.imageLabelContianer.at(i)->layout()->setContentsMargins(0, 0, 0, 0);
+        }
+    }
+    ui.mainWidget->updateGeometry();
 
     if(check && ui.imageLabel.at(RIGHT_IMG_WIDGET)->pixMap != nullptr && ui.imageLabel.at(LEFT_IMG_WIDGET)->pixMap != nullptr)
     {
@@ -992,7 +1018,7 @@ void IIViewer::onDoubleImgModeAction(bool check)
             const int hval = ui.scrollArea.at(RIGHT_IMG_WIDGET)->horizontalScrollBar()->value();
             syncScrollArea0_horScBarVal(hval);
         }
-        if(ui.scrollArea.at(RIGHT_IMG_WIDGET)->verticalScrollBar() != nullptr) 
+        if(ui.scrollArea.at(RIGHT_IMG_WIDGET)->verticalScrollBar() != nullptr)
         {
             const int vval = ui.scrollArea.at(RIGHT_IMG_WIDGET)->verticalScrollBar()->value();
             syncScrollArea0_verScBarVal(vval);
