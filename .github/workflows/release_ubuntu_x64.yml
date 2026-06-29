@@ -22,19 +22,18 @@ jobs:
     - name: Update system packages 
       run: sudo apt update
     - name: Install dependencies
-      run: sudo apt install -y openssl libssl-dev libfuse2
+      run: sudo apt install -y openssl libssl-dev libfuse2 libgl1-mesa-dev
     - name: Verify OpenSSL installation 
       run: openssl version
-    - name: Install Qt
-      run: sudo apt install qtbase5-dev libqt5datavisualization5-dev qtbase5-dev-tools libqt5charts5-dev qttools5-dev-tools qttools5-dev
-      # uses: jurplel/install-qt-action@v4
-      # with:
-      #   version: '5.15.3'
-      #   host: 'linux'
-      #   target: 'desktop'
-      #   cache: true
-      #   install-deps: 'true'
-      #   modules: 'qtcharts qtdatavis3d'
+    - name: Install Qt6
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.3'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
+        cache: true
+        modules: 'qtcharts qtdatavis3d qtimageformats qtnetworkauth qtgraphs'
 
     - uses: actions/checkout@v4
       with:

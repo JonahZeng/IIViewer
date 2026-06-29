@@ -9,6 +9,7 @@
 #include <QLibraryInfo>
 
 #ifdef Q_OS_MACOS
+#include <CoreFoundation/CoreFoundation.h>
 #include <QProcess>
 
 QString detectSystemLanguage()
@@ -38,6 +39,16 @@ int main(int argc, char* argv[])
 {
     // QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     // QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#ifdef Q_OS_MACOS
+    // Force macOS to show scrollbars always for this app, overriding the
+    // system "Show scroll bars" preference. Qt's QMacStyle maps
+    // ScrollBarAlwaysOn through NSScroller.preferredScrollerStyle, which
+    // respects the system-level setting by default. Setting this
+    // app-specific default ensures scrollbars are always visible.
+    CFPreferencesSetAppValue(CFSTR("AppleShowScrollBars"), CFSTR("Always"),
+                             kCFPreferencesCurrentApplication);
+    CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
+#endif
     const QApplication app(argc, argv);
     // QCoreApplication::setOrganizationName("IIViewer.org");
     // QCoreApplication::setOrganizationDomain("IIViewer.com");

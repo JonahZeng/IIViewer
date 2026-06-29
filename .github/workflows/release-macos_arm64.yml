@@ -20,19 +20,19 @@ jobs:
       run: |
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    - name: Install Qt5 (ARM64)
+    - name: Install Qt6 (ARM64)
       run: |
-        brew install qt@5
-        echo 'export PATH="$(brew --prefix qt@5)/bin:$PATH"' >> $GITHUB_ENV
-        echo 'export LDFLAGS="-L$(brew --prefix qt@5)/lib"' >> $GITHUB_ENV
-        echo 'export CPPFLAGS="-I$(brew --prefix qt@5)/include"' >> $GITHUB_ENV
-        echo 'export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"' >> $GITHUB_ENV
-        echo 'export Qt5_DIR="$(brew --prefix qt@5)/lib/cmake/Qt5"' >> $GITHUB_ENV
+        brew install qt
+        echo 'export PATH="$(brew --prefix qt)/bin:$PATH"' >> $GITHUB_ENV
+        echo 'export LDFLAGS="-L$(brew --prefix qt)/lib"' >> $GITHUB_ENV
+        echo 'export CPPFLAGS="-I$(brew --prefix qt)/include"' >> $GITHUB_ENV
+        echo 'export PKG_CONFIG_PATH="$(brew --prefix qt)/lib/pkgconfig"' >> $GITHUB_ENV
+        echo 'export Qt6_DIR="$(brew --prefix qt)/lib/cmake/Qt6"' >> $GITHUB_ENV
 
     - name: Verify Qt Installation
       run: |
-        file $(brew --prefix qt@5)/lib/QtWidgets.framework/Versions/5/QtWidgets
-        ls $(brew --prefix qt@5)/lib/cmake/Qt5
+        file $(brew --prefix qt)/lib/QtWidgets.framework/Versions/A/QtWidgets
+        ls $(brew --prefix qt)/lib/cmake/Qt6
 
     - uses: actions/checkout@v4
       with:
@@ -98,7 +98,7 @@ jobs:
         cmake --install .
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt@5) -DCI_MODE=ON
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt) -DCI_MODE=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
@@ -110,14 +110,14 @@ jobs:
       run: |
         cd ${{github.workspace}}
         mkdir -p qt_clean
-        cp -R $(brew --prefix qt@5)/lib qt_clean/
+        cp -R $(brew --prefix qt)/lib qt_clean/
         sudo chflags -R nouchg qt_clean/lib || true
         sudo xattr -cr qt_clean/lib || true
 
     - name: MacDeployQt
       run: |
         cd ${{github.workspace}}/bin/${{env.BUILD_TYPE}}
-        $(brew --prefix qt@5)/bin/macdeployqt ./IIViewer.app -libpath=${{github.workspace}}/qt_clean/lib
+        $(brew --prefix qt)/bin/macdeployqt ./IIViewer.app -libpath=${{github.workspace}}/qt_clean/lib
 
     - name: Fix permissions & sign
       run: |
