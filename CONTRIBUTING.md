@@ -8,35 +8,76 @@ Thanks for your interest in contributing! This guide covers everything you need 
 
 - CMake >= 3.20
 - C++17 compatible compiler (MSVC 2022, GCC 11+, or AppleClang)
-- Qt5 (5.15.2+) with modules: Widgets, DataVisualization, Network, Charts, LinguistTools
+- Qt6 (6.8+) with modules: Widgets, DataVisualization, Network, Charts, LinguistTools
 - OpenSSL, libheif, libde265 (bundled in `thirdparty/`)
+
+> For Qt5 support, see the [qt5 branch](https://github.com/JonahZeng/IIViewer/tree/qt5).
 
 ### Build
 
 **Windows (MSVC)**
 ```powershell
-cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH=<QtPath> -Wno-dev -S ..
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH=<Qt6Path> -Wno-dev -S ..
 cmake --build . --config Release
 ```
 
 **Linux (Ubuntu)**
 ```bash
-sudo apt install build-essential libssl-dev qtbase5-dev libqt5datavisualization5-dev \
-    qtbase5-dev-tools libqt5charts5-dev qttools5-dev-tools qttools5-dev
+sudo apt install build-essential libssl-dev libgl1-mesa-dev
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ```
 
 **macOS (Apple Silicon)**
 ```bash
-brew install qt@5
+brew install qt
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@5 \
-    -DLRELEASE_EXECUTABLE=/opt/homebrew/opt/qt@5/bin/lrelease
+    -DCMAKE_PREFIX_PATH=$(brew --prefix qt)
 cmake --build build -j$(sysctl -n hw.ncpu)
 ```
 
-See [README.md](README.md) for detailed dependency build instructions (OpenSSL, libde265, libheif, Qt).
+### Build third-party libraries (Windows)
+
+1. Build and install OpenSSL. Copy its install dir to `thirdparty/` directory.
+
+2. Build libde265:
+   ```bash
+   wget https://github.com/strukturag/libde265/releases/download/v1.0.16/libde265-1.0.16.tar.gz
+   tar -zxf libde265-1.0.16.tar.gz
+   cd libde265-1.0.16 && mkdir build && cd build
+   cmake .. -G "Visual Studio 17 2022" -A x64 \
+       -DENABLE_DECODER=OFF -DENABLE_ENCODER=OFF -DENABLE_SDL=OFF \
+       -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release \
+       -DCMAKE_INSTALL_PREFIX=<repo>/thirdparty/libde265/msvc
+   cmake --build . --config Release
+   cmake --install . --config Release
+   ```
+
+3. Build libheif:
+   ```bash
+   wget https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz
+   tar -zxf libheif-1.21.2.tar.gz
+   cd libheif-1.21.2 && mkdir build && cd build
+   cmake .. -G "Visual Studio 17 2022" -A x64 \
+       -DWITH_LIBDE265=ON -DBUILD_SHARED_LIBS=OFF \
+       -DLIBDE265_INCLUDE_DIR=<repo>/thirdparty/libde265/msvc/include \
+       -DLIBDE265_LIBRARY=<repo>/thirdparty/libde265/msvc/lib/libde265.lib \
+       -DCMAKE_INSTALL_PREFIX=<repo>/thirdparty/libheif/msvc
+   cmake --build . --config Release
+   cmake --install . --config Release
+   ```
+
+### Package
+
+**Windows:**
+```powershell
+cpack -C Release -G ZIP   # or -G WIX (requires WiX Toolset)
+```
+
+**Linux (DEB):**
+```bash
+cd build && cpack -G DEB -C Release
+```
 
 ## Code Style
 
@@ -161,7 +202,7 @@ Clang-tidy is configured via `.clang-tidy`:
 
 ```powershell
 # Generate compile_commands.json first
-cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH=<QtPath> -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -S ..
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH=<Qt6Path> -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -S ..
 clang-tidy -p build src/*.cpp
 ```
 

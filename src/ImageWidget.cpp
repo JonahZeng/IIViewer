@@ -1692,7 +1692,12 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
     if (imgName->endsWith(".pgm", Qt::CaseInsensitive))
     {
         QFile input_f(*imgName);
-        input_f.open(QIODevice::ReadOnly);
+        bool open_result = input_f.open(QIODevice::ReadOnly);
+        if (!open_result)
+        {
+            QMessageBox::critical(this, "error", "failed to open portable gray image", QMessageBox::StandardButton::Ok);
+            return;
+        }
         QByteArray p5 = input_f.readLine();
         QByteArray w_h = input_f.readLine();
         QByteArray maxVal = input_f.readLine();
@@ -1801,7 +1806,12 @@ void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
     {
         bool isGray = false;
         QFile input_f(*imgName);
-        input_f.open(QIODevice::ReadOnly);
+        bool open_result = input_f.open(QIODevice::ReadOnly);
+        if (!open_result)
+        {
+            QMessageBox::critical(this, "error", "failed to open pnm image", QMessageBox::StandardButton::Ok);
+            return;
+        }
         QByteArray p6 = input_f.readLine();
         QByteArray w_h = input_f.readLine();
         QByteArray maxVal = input_f.readLine();
@@ -2168,7 +2178,12 @@ void ImageWidget::setPixmap(BayerPatternType by, ByteOrderType order, int bitDep
     unsigned char *bufferShow = pixMap->bits();
 
     QFile rawFile(*imgName);
-    rawFile.open(QIODevice::ReadOnly);
+    bool open_result = rawFile.open(QIODevice::ReadOnly);
+    if (!open_result)
+    {
+        QMessageBox::critical(this, "error", "failed to open raw image", QMessageBox::StandardButton::Ok);
+        return;
+    }
     if (compact)
         rawFile.read((char *)compact_buffer, (bitDepth * width * height + 7) / 8);
     else
@@ -2311,7 +2326,12 @@ void ImageWidget::setPixmap(YuvType tp, int bitDepth, int width, int height, int
     unsigned char *bufferShow = pixMap->bits();
 
     QFile yuvFile(*imgName);
-    yuvFile.open(QIODevice::ReadOnly);
+    bool open_result = yuvFile.open(QIODevice::ReadOnly);
+    if (!open_result)
+    {
+        QMessageBox::critical(this, "error", "failed to open yuv image", QMessageBox::StandardButton::Ok);
+        return;
+    }
     yuvFile.read((char *)buffer, total_size);
     yuvFile.close();
 
