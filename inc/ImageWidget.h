@@ -152,4 +152,5 @@ signals:
     void inform_zoom_out(int);
     void inform_change_master();
     void inform_open_file_selector();
+    void inform_plot_contourf();
 };
