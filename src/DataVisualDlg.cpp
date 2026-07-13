@@ -108,9 +108,9 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
                 for (int j = 0; j < width; j++)
                 {
                     wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).red();
-                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).red(), (float)i));
-                    (*newRow1)[j].setPosition(QVector3D((float)j, (float)wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).green(), (float)i));
-                    (*newRow2)[j].setPosition(QVector3D((float)j, (float)wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).blue(), (float)i));
+                    (*newRow0)[j].setPosition(QVector3D(static_cast<float>(j), static_cast<float>(wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).red()), static_cast<float>(i))); // NOLINT(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+                    (*newRow1)[j].setPosition(QVector3D(static_cast<float>(j), static_cast<float>(wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).green()), static_cast<float>(i))); // NOLINT(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+                    (*newRow2)[j].setPosition(QVector3D(static_cast<float>(j), static_cast<float>(wgt->pixMap->pixelColor((leftPos + j), (i + topPos)).blue()), static_cast<float>(i))); // NOLINT(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                 }
                 dataArray0->append(newRow0);
                 dataArray1->append(newRow1);
@@ -154,9 +154,9 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
                     const int pix_r = bitPerPixel <= 8 ? buffer[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 0] : ((uint16_t *)buffer)[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 0];
                     const int pix_g = bitPerPixel <= 8 ? buffer[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 1] : ((uint16_t *)buffer)[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 1];
                     const int pix_b = bitPerPixel <= 8 ? buffer[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 2] : ((uint16_t *)buffer)[((i + topPos) * lineWidth * 3) + ((leftPos + j) * 3) + 2];
-                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)pix_r, (float)i));
-                    (*newRow1)[j].setPosition(QVector3D((float)j, (float)pix_g, (float)i));
-                    (*newRow2)[j].setPosition(QVector3D((float)j, (float)pix_b, (float)i));
+                    (*newRow0)[j].setPosition(QVector3D(static_cast<float>(j), static_cast<float>(pix_r), static_cast<float>(i)));
+                    (*newRow1)[j].setPosition(QVector3D(static_cast<float>(j), static_cast<float>(pix_g), static_cast<float>(i)));
+                    (*newRow2)[j].setPosition(QVector3D(static_cast<float>(j), static_cast<float>(pix_b), static_cast<float>(i)));
                 }
                 dataArray0->append(newRow0);
                 dataArray1->append(newRow1);
@@ -191,7 +191,7 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
                 for (int j = 0; j < width; j++)
                 {
                     const int pix_gray = bitPerPixel <= 8 ? buffer[((i + topPos) * lineWidth) + (leftPos + j)] : ((uint16_t *)buffer)[((i + topPos) * lineWidth) + (leftPos + j)];
-                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)pix_gray, (float)i));
+                    (*newRow0)[j].setPosition(QVector3D(static_cast<float>(j), static_cast<float>(pix_gray), static_cast<float>(i)));
                 }
                 dataArray0->append(newRow0);
             }
@@ -231,7 +231,7 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
                     {
                         pix_val = (int32_t)((uint32_t *)buffer)[((i + topPos) * lineWidth) + (leftPos + j)];
                     }
-                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)pix_val, (float)i));
+                    (*newRow0)[j].setPosition(QVector3D(static_cast<float>(j), static_cast<float>(pix_val), static_cast<float>(i)));
                 }
                 dataArray0->append(newRow0);
             }
@@ -251,14 +251,163 @@ DataVisualDialog::DataVisualDialog(QWidget *parent, bool prepared, ImageWidget *
         }
         else if (wgt->openedImgType == OpenedImageType::YUV_IMG)
         {
-            // bitPerPixel = wg->yuvDataBit;
+            bitPerPixel = wgt->yuvDataBit;
+            uchar *buffer = wgt->yuvDataPtr;
+            const int lineWidth = wgt->pixMap->width();
+            const int lineHeight = wgt->pixMap->height();
+            const YuvType yuvTp = wgt->yuvType;
+
+            // Read a single sample from the buffer (handles 8-bit and 10/12/16-bit)
+            auto readSample = [buffer, bitPerPixel](qint64 idx) -> int {
+                if (bitPerPixel <= BIT8)
+                {
+                    return buffer[idx];
+                }
+                return reinterpret_cast<unsigned short *>(buffer)[idx];
+            };
+
+            // Get Y value at image coordinate (col, row)
+            auto getY = [&](int col, int row) -> int {
+                switch (yuvTp)
+                {
+                case YUV444_INTERLEAVE:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 3 + (col * 3) + 0);
+                case YUV444_PLANAR:
+                    return readSample(static_cast<qint64>(row) * lineWidth + col);
+                case YUV422_UYVY:
+                case YUV422_UYVY_AS1:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 2 + (col * 2) + 1);
+                case YUV422_YUYV:
+                case YUV422_YUYV_AS1:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 2 + (col * 2) + 0);
+                case YUV420_NV12:
+                case YUV420_NV21:
+                case YUV420P_YU12:
+                case YUV420P_YV12:
+                case YUV400:
+                    return readSample(static_cast<qint64>(row) * lineWidth + col);
+                default:
+                    return 0;
+                }
+            };
+
+            // Get U value at image coordinate (col, row) with nearest-neighbor upsampling for subsampled formats
+            auto getU = [&](int col, int row) -> int {
+                switch (yuvTp)
+                {
+                case YUV444_INTERLEAVE:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 3 + (col * 3) + 1);
+                case YUV444_PLANAR:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(row) * lineWidth + col);
+                case YUV422_UYVY:
+                case YUV422_UYVY_AS1:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 2 + ((col & ~1) * 2) + 0);
+                case YUV422_YUYV:
+                case YUV422_YUYV_AS1:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 2 + ((col & ~1) * 2) + 1);
+                case YUV420_NV12:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(row / 2) * lineWidth + (col & ~1));
+                case YUV420_NV21:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(row / 2) * lineWidth + (col & ~1) + 1);
+                case YUV420P_YU12:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(row / 2) * (lineWidth / 2) + (col / 2));
+                case YUV420P_YV12:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(lineWidth) * lineHeight / 4 + static_cast<qint64>(row / 2) * (lineWidth / 2) + (col / 2));
+                case YUV400:
+                    return 0;
+                default:
+                    return 0;
+                }
+            };
+
+            // Get V value at image coordinate (col, row) with nearest-neighbor upsampling for subsampled formats
+            auto getV = [&](int col, int row) -> int {
+                switch (yuvTp)
+                {
+                case YUV444_INTERLEAVE:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 3 + (col * 3) + 2);
+                case YUV444_PLANAR:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight * 2 + static_cast<qint64>(row) * lineWidth + col);
+                case YUV422_UYVY:
+                case YUV422_UYVY_AS1:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 2 + ((col | 1) * 2) + 0);
+                case YUV422_YUYV:
+                case YUV422_YUYV_AS1:
+                    return readSample(static_cast<qint64>(row) * lineWidth * 2 + ((col | 1) * 2) + 1);
+                case YUV420_NV12:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(row / 2) * lineWidth + (col & ~1) + 1);
+                case YUV420_NV21:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(row / 2) * lineWidth + (col & ~1));
+                case YUV420P_YU12:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(lineWidth) * lineHeight / 4 + static_cast<qint64>(row / 2) * (lineWidth / 2) + (col / 2));
+                case YUV420P_YV12:
+                    return readSample(static_cast<qint64>(lineWidth) * lineHeight + static_cast<qint64>(row / 2) * (lineWidth / 2) + (col / 2));
+                case YUV400:
+                    return 0;
+                default:
+                    return 0;
+                }
+            };
+
+            const bool hasUV = (yuvTp != YUV400);
+
+            // Relabel checkboxes to Y/U/V for YUV data
+            dispR->setText("Y");
+            dispG->setText("U");
+            dispB->setText("V");
+
+            QSurfaceDataArray *dataArray0 = new QSurfaceDataArray;
+            QSurfaceDataArray *dataArray1 = new QSurfaceDataArray;
+            QSurfaceDataArray *dataArray2 = new QSurfaceDataArray;
+            for (int i = 0; i < height; i++)
+            {
+                QSurfaceDataRow *newRow0 = new QSurfaceDataRow(width);
+                QSurfaceDataRow *newRow1 = new QSurfaceDataRow(width);
+                QSurfaceDataRow *newRow2 = new QSurfaceDataRow(width);
+                for (int j = 0; j < width; j++)
+                {
+                    const int pix_y = getY(leftPos + j, topPos + i);
+                    (*newRow0)[j].setPosition(QVector3D((float)j, (float)pix_y, (float)i));
+                    if (hasUV)
+                    {
+                        const int pix_u = getU(leftPos + j, topPos + i);
+                        const int pix_v = getV(leftPos + j, topPos + i);
+                        (*newRow1)[j].setPosition(QVector3D((float)j, (float)pix_u, (float)i));
+                        (*newRow2)[j].setPosition(QVector3D((float)j, (float)pix_v, (float)i));
+                    }
+                }
+                dataArray0->append(newRow0);
+                dataArray1->append(newRow1);
+                dataArray2->append(newRow2);
+            }
+
+            seriesProxy0->resetArray(dataArray0);
+            seriesProxy1->resetArray(dataArray1);
+            seriesProxy2->resetArray(dataArray2);
+
+            series0->setBaseColor(QColor(200, 200, 200)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers) // Y - gray
+            series1->setBaseColor(QColor(0, 50, 255)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers) // U - blue
+            series2->setBaseColor(QColor(255, 50, 0)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers) // V - red
 
             series0->setVisible(true);
-            series1->setVisible(true);
-            series2->setVisible(true);
+            series1->setVisible(hasUV);
+            series2->setVisible(hasUV);
+
             dispR->setChecked(true);
-            dispG->setChecked(true);
-            dispB->setChecked(true);
+            dispG->setChecked(hasUV);
+            dispB->setChecked(hasUV);
+
+            graph->addSeries(series0);
+            if (hasUV)
+            {
+                graph->addSeries(series1);
+                graph->addSeries(series2);
+            }
+            else
+            {
+                dispG->setDisabled(true);
+                dispB->setDisabled(true);
+            }
         }
     }
     graph->axisX()->setLabelFormat("%.2f");

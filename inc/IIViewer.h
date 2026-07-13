@@ -73,8 +73,8 @@ public slots:
     void flushPaintPosEdit1(QPointF startPt, QPointF endPt) const;
     void handleInputPaintPos0();
     void handleInputPaintPos1();
-    void plotRgbContourf();
-    void plotRgbHist();
+    void plotContourf();
+    // void plotRgbHist();
     void selectPenPaintColor();
     void zoomIn0(int zoomIdx);
     void zoomIn1(int zoomIdx);

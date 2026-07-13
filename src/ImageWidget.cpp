@@ -25,7 +25,7 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       paintBegin(false), paintEnd(false),
       doDragImg(false), imgDragStartPos(0, 0), imgDragEndPos(0, 0),
       pixMap(nullptr),
-      zoomIdx(2), zoomList{0.25, 0.5, 1, 2, 4, 8, 12, 16, 24, 32, 48, 64, 96},
+      zoomIdx(2), zoomList{0.25f, 0.5f, 1.0f, 2.0f, 4.0f, 8.0f, 12.0f, 16.0f, 24.0f, 32.0f, 48.0f, 64.0f, 96.0f},
       zoomListLabel{"1/4", "1/2", "1x", "2x", "4x", "8x", "12x", "16x", "24x", "32x", "48x", "64x", "96x"},
       zoomTextRect(), 
       pixValPaintRect(), 
@@ -38,12 +38,14 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       imgName(nullptr),
       lastCurve{QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}, QPoint{0, 0}}
 {
-    QAction* showRoiData = rightMouseContextMenu.addAction(tr("show roi data"));
-    QAction* exportRoiData = rightMouseContextMenu.addAction(tr("export roi data"));
-    QAction* adjPreviewCurve = rightMouseContextMenu.addAction(tr("adjust preview curve"));
+    const QAction* showRoiData = rightMouseContextMenu.addAction(tr("show roi data"));
+    const QAction* exportRoiData = rightMouseContextMenu.addAction(tr("export roi data"));
+    const QAction* adjPreviewCurve = rightMouseContextMenu.addAction(tr("adjust preview curve"));
+    const QAction* plotDataContourf = rightMouseContextMenu.addAction(tr("visualize roi contourf"));
     connect(showRoiData, &QAction::triggered, this, &ImageWidget::showRoiDataToText);
     connect(exportRoiData, &QAction::triggered, this, &ImageWidget::exportRoiDataToDisk);
     connect(adjPreviewCurve, &QAction::triggered, this, &ImageWidget::adjustPreviewCurve);
+    connect(plotDataContourf, &QAction::triggered, this, &ImageWidget::plotDataContourf);
 }
 
 ImageWidget::~ImageWidget()
@@ -1565,6 +1567,7 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
                 {
                     rightMouseContextMenu.actions().at(0)->setEnabled(true);
                     rightMouseContextMenu.actions().at(1)->setEnabled(true);
+                    rightMouseContextMenu.actions().at(3)->setEnabled(true);
                     rightMouseContextMenu.exec(event->globalPosition().toPoint());
                     return;
                 }
@@ -1572,6 +1575,7 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
         }
         rightMouseContextMenu.actions().at(0)->setEnabled(false);
         rightMouseContextMenu.actions().at(1)->setEnabled(false);
+        rightMouseContextMenu.actions().at(3)->setEnabled(false);
         rightMouseContextMenu.exec(event->globalPosition().toPoint());
     }
 }
@@ -2662,4 +2666,9 @@ void ImageWidget::adjustPreviewCurve()
     curveDialog->show();
     curveDialog->raise();
     curveDialog->activateWindow();
+}
+
+void ImageWidget::plotDataContourf()
+{
+    emit inform_plot_contourf();
 }

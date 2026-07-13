@@ -25,8 +25,9 @@ Ui::IIViewerUi::IIViewerUi() : titleBar(nullptr), toolBar(nullptr), openFileLeft
     syncRight(nullptr), syncLeft(nullptr), clearPaintBtn(nullptr), start_x_edit0(nullptr), start_y_edit0(nullptr),
     start_x_edit1(nullptr), start_y_edit1(nullptr), end_x_edit0(nullptr), end_y_edit0(nullptr), end_x_edit1(nullptr),
     end_y_edit1(nullptr),
-    plot_rgb_contourf_line(nullptr), plot_rgb_hist(nullptr), plot_yuv_contourf_line(nullptr),
-    plot_yuv_hist(nullptr), fileHistoryTable(nullptr)
+    // plot_rgb_contourf_line(nullptr), plot_rgb_hist(nullptr), plot_yuv_contourf_line(nullptr),
+    // plot_yuv_hist(nullptr), 
+    fileHistoryTable(nullptr)
 {
 }
 
@@ -389,17 +390,17 @@ void Ui::IIViewerUi::createDockWidget0(IIViewer *mainWindow)
     h_line->setStyleSheet("color: #d9d9d9;");
     vlayout->addWidget(h_line);
 
-    QGridLayout *plot_btn_layout = new QGridLayout();
-    plot_rgb_contourf_line = new QPushButton(QCoreApplication::translate("mainWindow", "rgb contour/line", nullptr));
-    plot_rgb_hist = new QPushButton(QCoreApplication::translate("mainWindow", "rgb hist", nullptr));
-    plot_yuv_contourf_line = new QPushButton(QCoreApplication::translate("mainWindow", "yuv contour/line", nullptr));
-    plot_yuv_hist = new QPushButton(QCoreApplication::translate("mainWindow", "yuv hist", nullptr));
-    plot_btn_layout->addWidget(plot_rgb_contourf_line, 0, 0, 1, 1);
-    plot_btn_layout->addWidget(plot_rgb_hist, 0, 1, 1, 1);
-    plot_btn_layout->addWidget(plot_yuv_contourf_line, 1, 0, 1, 1);
-    plot_btn_layout->addWidget(plot_yuv_hist, 1, 1, 1, 1);
+    // QGridLayout *plot_btn_layout = new QGridLayout();
+    // plot_rgb_contourf_line = new QPushButton(QCoreApplication::translate("mainWindow", "rgb contour/line", nullptr));
+    // plot_rgb_hist = new QPushButton(QCoreApplication::translate("mainWindow", "rgb hist", nullptr));
+    // plot_yuv_contourf_line = new QPushButton(QCoreApplication::translate("mainWindow", "yuv contour/line", nullptr));
+    // plot_yuv_hist = new QPushButton(QCoreApplication::translate("mainWindow", "yuv hist", nullptr));
+    // plot_btn_layout->addWidget(plot_rgb_contourf_line, 0, 0, 1, 1);
+    // plot_btn_layout->addWidget(plot_rgb_hist, 0, 1, 1, 1);
+    // plot_btn_layout->addWidget(plot_yuv_contourf_line, 1, 0, 1, 1);
+    // plot_btn_layout->addWidget(plot_yuv_hist, 1, 1, 1, 1);
 
-    vlayout->addLayout(plot_btn_layout);
+    // vlayout->addLayout(plot_btn_layout);
 
     // QGridLayout *rgb2yuv_mat_layout = new QGridLayout();
     // QLabel *rgb2yuv_mat_label = new QLabel("rgb2yuv:");

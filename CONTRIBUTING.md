@@ -212,7 +212,7 @@ Enabled checks: `bugprone-*`, `performance-*`, `readability-*`, `modernize-*`, `
 
 1. Run `lupdate` to scan source and generate/update `.ts` files:
    ```bash
-   lupdate ./src/*.cpp ./inc/*.h -ts ./translations/IIViewer_zh.ts
+   lupdate ./src/AboutDlg.cpp ./src/AppSetting.cpp ./src/ColorSpaceCvt.cpp ./src/CurveAdjustDialog.cpp ./src/DataVisualDlg.cpp ./src/IIViewer.cpp ./src/IIViewerLrImgProcess.cpp ./src/IIViewer_ui.cpp ./src/IIVOptionDialog.cpp ./src/ImageWidget.cpp ./src/ImageWidgetRoiShowText.cpp ./src/ImgDiffReportDlg.cpp ./src/ImgInfoDlg.cpp ./src/Main.cpp ./src/RawFileInfoDlg.cpp ./src/RoiDataShowDlg.cpp ./src/TitleBar.cpp ./src/YuvFileInfoDlg.cpp ./inc/AboutDlg.h ./inc/AppSetting.h ./inc/ColorSpaceCvt.h ./inc/common_type.h ./inc/CurveAdjustDialog.h ./inc/DataVisualDlg.h ./inc/IIViewer.h ./inc/IIViewer_ui.h ./inc/IIVOptionDialog.h ./inc/ImageWidget.h ./inc/ImgDiffReportDlg.h ./inc/ImgInfoDlg.h ./inc/RawFileInfoDlg.h ./inc/resource.h ./inc/RoiDataShowDlg.h ./inc/TitleBar.h ./inc/YuvFileInfoDlg.h ./inc/IIVOptionDialog.ui ./inc/RawFileInfoDlg.ui ./inc/YuvFileInfoDlg.ui  -ts ./translations/IIViewer_zh.ts 
    ```
 2. Use Qt Linguist to translate the `.ts` file, then release it to a `.qm` file
 3. The app loads the appropriate `.qm` file at startup based on the user's locale
