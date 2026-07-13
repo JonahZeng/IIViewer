@@ -73,10 +73,10 @@ namespace Ui
         QLineEdit *end_y_edit0;
         QLineEdit *end_x_edit1;
         QLineEdit *end_y_edit1;
-        QPushButton *plot_rgb_contourf_line;
-        QPushButton *plot_rgb_hist;
-        QPushButton *plot_yuv_contourf_line;
-        QPushButton *plot_yuv_hist;
+        // QPushButton *plot_rgb_contourf_line;
+        // QPushButton *plot_rgb_hist;
+        // QPushButton *plot_yuv_contourf_line;
+        // QPushButton *plot_yuv_hist;
         QTableWidget *fileHistoryTable;
 
     private:

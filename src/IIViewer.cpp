@@ -321,8 +321,8 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     connect(ui.syncLeft, &QPushButton::clicked, this, &IIViewer::syncLeftPos);
     connect(ui.clearPaintBtn, &QPushButton::clicked, this, &IIViewer::clearPaint);
 
-    connect(ui.plot_rgb_contourf_line, &QPushButton::clicked, this, &IIViewer::plotRgbContourf);
-    connect(ui.plot_rgb_hist, &QPushButton::clicked, this, &IIViewer::plotRgbHist);
+    // connect(ui.plot_rgb_contourf_line, &QPushButton::clicked, this, &IIViewer::plotRgbContourf);
+    // connect(ui.plot_rgb_hist, &QPushButton::clicked, this, &IIViewer::plotRgbHist);
     connect(ui.imageLabel.at(LEFT_IMG_WIDGET), &ImageWidget::inform_real_Pos, this, &IIViewer::flushPaintPosEdit0);
     connect(ui.imageLabel.at(RIGHT_IMG_WIDGET), &ImageWidget::inform_real_Pos, this, &IIViewer::flushPaintPosEdit1);
     connect(ui.imageLabel.at(LEFT_IMG_WIDGET), &ImageWidget::inform_drag_img, this, &IIViewer::handleRightMouseBtnDrag0);
@@ -351,6 +351,8 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     connect(ui.scrollArea.at(RIGHT_IMG_WIDGET)->verticalScrollBar(), &QScrollBar::valueChanged, this, &IIViewer::syncScrollArea0_verScBarVal);
     connect(ui.scrollArea.at(RIGHT_IMG_WIDGET)->horizontalScrollBar(), &QScrollBar::sliderPressed, this, &IIViewer::setScrollArea1Master);
     connect(ui.scrollArea.at(RIGHT_IMG_WIDGET)->verticalScrollBar(), &QScrollBar::sliderPressed, this, &IIViewer::setScrollArea1Master);
+    connect(ui.imageLabel.at(LEFT_IMG_WIDGET), &ImageWidget::inform_plot_contourf, this, &IIViewer::plotContourf);
+    connect(ui.imageLabel.at(RIGHT_IMG_WIDGET), &ImageWidget::inform_plot_contourf, this, &IIViewer::plotContourf);
 
     connect(ui.dataAnalyseAction, &QAction::toggled, this, &IIViewer::toggleDataAnalyseDockWgt);
     connect(ui.playListAction, &QAction::toggled, this, &IIViewer::togglePlayListDockWgt);
@@ -2533,41 +2535,54 @@ void IIViewer::handleInputPaintPos1()
     ui.imageLabel.at(RIGHT_IMG_WIDGET)->repaint();
 }
 
-void IIViewer::plotRgbContourf()
+void IIViewer::plotContourf()
 {
-    bool leftPrepared = true;
-    bool rightPrepared = true;
-    if (ui.imageLabel.at(LEFT_IMG_WIDGET)->pixMap == nullptr)
+    // Distinguish which image widget triggered the signal
+    ImageWidget *srcWidget = nullptr;
+    int editIndex = 0;
+    if (sender() == static_cast<QObject *>(ui.imageLabel.at(LEFT_IMG_WIDGET)))
     {
-        leftPrepared = false;
+        srcWidget = ui.imageLabel.at(LEFT_IMG_WIDGET);
+        editIndex = 0;
     }
-    if (ui.imageLabel.at(RIGHT_IMG_WIDGET)->pixMap == nullptr)
+    else if (sender() == static_cast<QObject *>(ui.imageLabel.at(RIGHT_IMG_WIDGET)))
     {
-        rightPrepared = false;
+        srcWidget = ui.imageLabel.at(RIGHT_IMG_WIDGET);
+        editIndex = 1;
     }
-    if (ui.start_x_edit0->text().isEmpty() || ui.start_y_edit0->text().isEmpty() || ui.end_x_edit0->text().isEmpty() || ui.end_y_edit0->text().isEmpty())
-    {
-        leftPrepared = false;
-    }
-    if (ui.start_x_edit1->text().isEmpty() || ui.start_y_edit1->text().isEmpty() || ui.end_x_edit1->text().isEmpty() || ui.end_y_edit1->text().isEmpty())
-    {
-        rightPrepared = false;
-    }
-    if (!leftPrepared && !rightPrepared)
+    else
     {
         return;
     }
-    const QPoint st0(ui.start_x_edit0->text().toInt(), ui.start_y_edit0->text().toInt());
-    const QPoint st1(ui.end_x_edit0->text().toInt(), ui.end_y_edit0->text().toInt());
 
-    DataVisualDialog *dlg = new DataVisualDialog(this, leftPrepared, ui.imageLabel.at(LEFT_IMG_WIDGET), st0, st1);
+    // Check whether the source widget has a valid pixmap
+    if (srcWidget->pixMap == nullptr)
+    {
+        return;
+    }
+
+    // Pick the matching coordinate edit fields (edit0 for left, edit1 for right)
+    const QLineEdit *startXEdit = (editIndex == 0) ? ui.start_x_edit0 : ui.start_x_edit1;
+    const QLineEdit *startYEdit = (editIndex == 0) ? ui.start_y_edit0 : ui.start_y_edit1;
+    const QLineEdit *endXEdit = (editIndex == 0) ? ui.end_x_edit0 : ui.end_x_edit1;
+    const QLineEdit *endYEdit = (editIndex == 0) ? ui.end_y_edit0 : ui.end_y_edit1;
+
+    if (startXEdit->text().isEmpty() || startYEdit->text().isEmpty() || endXEdit->text().isEmpty() || endYEdit->text().isEmpty())
+    {
+        return;
+    }
+
+    const QPoint st0(startXEdit->text().toInt(), startYEdit->text().toInt());
+    const QPoint st1(endXEdit->text().toInt(), endYEdit->text().toInt());
+
+    DataVisualDialog *dlg = new DataVisualDialog(this, true, srcWidget, st0, st1);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->exec();
 }
 
-void IIViewer::plotRgbHist()
-{
-}
+// void IIViewer::plotRgbHist()
+// {
+// }
 
 void IIViewer::selectPenPaintColor()
 {

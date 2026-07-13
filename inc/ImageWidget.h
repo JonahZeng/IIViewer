@@ -93,6 +93,7 @@ private:
     void exportRoiDataToDisk();
     void exportRoiYuvData(QString &roiPixelValStr, int roi_top, int roi_bottom, int roi_left, int roi_right);
     void adjustPreviewCurve();
+    void plotDataContourf();
 
 public:
     QMenu rightMouseContextMenu;
