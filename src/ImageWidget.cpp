@@ -2667,3 +2667,8 @@ void ImageWidget::adjustPreviewCurve()
     curveDialog->raise();
     curveDialog->activateWindow();
 }
+
+void ImageWidget::plotDataContourf()
+{
+    emit inform_plot_contourf();
+}
