@@ -16,23 +16,19 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - name: Install Homebrew
-      run: |
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.11.1'
+        host: 'mac'
+        target: 'desktop'
+        arch: 'arm64'
+        cache: true
+        modules: 'qtcharts qtdatavis3d qtimageformats qtnetworkauth qtgraphs'
+        install-deps: 'true'
 
-    - name: Install Qt6 (ARM64)
-      run: |
-        brew install qt
-        echo 'export PATH="$(brew --prefix qt)/bin:$PATH"' >> $GITHUB_ENV
-        echo 'export LDFLAGS="-L$(brew --prefix qt)/lib"' >> $GITHUB_ENV
-        echo 'export CPPFLAGS="-I$(brew --prefix qt)/include"' >> $GITHUB_ENV
-        echo 'export PKG_CONFIG_PATH="$(brew --prefix qt)/lib/pkgconfig"' >> $GITHUB_ENV
-        echo 'export Qt6_DIR="$(brew --prefix qt)/lib/cmake/Qt6"' >> $GITHUB_ENV
-
-    - name: Verify Qt Installation
-      run: |
-        file $(brew --prefix qt)/lib/QtWidgets.framework/Versions/A/QtWidgets
-        ls $(brew --prefix qt)/lib/cmake/Qt6
+    - name: Show QT install dir
+      run: echo "${{ env.QT_ROOT_DIR }}"
 
     - uses: actions/checkout@v4
       with:
@@ -98,26 +94,18 @@ jobs:
         cmake --install .
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=$(brew --prefix qt) -DCI_MODE=ON
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_PREFIX_PATH=${QT_ROOT_DIR} -DCI_MODE=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
 
     - name: Install
       run: cmake --install ${{github.workspace}}/build
-    
-    - name: Prepare writable Qt frameworks
-      run: |
-        cd ${{github.workspace}}
-        mkdir -p qt_clean
-        cp -R $(brew --prefix qt)/lib qt_clean/
-        sudo chflags -R nouchg qt_clean/lib || true
-        sudo xattr -cr qt_clean/lib || true
 
     - name: MacDeployQt
       run: |
         cd ${{github.workspace}}/bin/${{env.BUILD_TYPE}}
-        $(brew --prefix qt)/bin/macdeployqt ./IIViewer.app -libpath=${{github.workspace}}/qt_clean/lib
+        "$QT_ROOT_DIR/bin/macdeployqt" ./IIViewer.app
 
     - name: Fix permissions & sign
       run: |
