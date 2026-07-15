@@ -22,7 +22,7 @@ jobs:
         version: '6.11.1'
         host: 'mac'
         target: 'desktop'
-        arch: 'arm64'
+        arch: 'clang_64'
         cache: true
         modules: 'qtcharts qtdatavis3d qtimageformats qtnetworkauth qtgraphs'
         install-deps: 'true'
