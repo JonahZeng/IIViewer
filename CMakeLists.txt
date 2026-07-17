@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 1.0.0 LANGUAGES CXX)
+project(IIViewer VERSION 1.0.1 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -170,6 +170,8 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/CurveAdjustDialog.cpp
         ${CMAKE_SOURCE_DIR}/inc/ColorSpaceCvt.h
         ${CMAKE_SOURCE_DIR}/src/ColorSpaceCvt.cpp
+        ${CMAKE_SOURCE_DIR}/inc/PenColorButton.h
+        ${CMAKE_SOURCE_DIR}/src/PenColorButton.cpp
         ${CMAKE_SOURCE_DIR}/inc/common_type.h
 )
 
