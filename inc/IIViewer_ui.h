@@ -3,6 +3,7 @@
 class IIViewer;
 
 #include "ImageWidget.h"
+#include "PenColorButton.h"
 #include "TitleBar.h"
 #include <QAction>
 #include <QComboBox>
@@ -41,10 +42,11 @@ namespace Ui
         QAction *workAreaDoubleModeAction;
         QAction *aboutThisAction;
         QAction *checkUpdateAction;
+        QAction *onlineHelpAction;
         QAction *useRoiToolAction;
         QAction *useMoveToolAction;
         QAction *sysOptionAction;
-        QPushButton *penColorSetBtn;
+        PenColorButton *penColorSetBtn;
         QAction* penColorSetAction;
         QSpinBox *penWidthSbox;
         QAction* penWidthAction;

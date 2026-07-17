@@ -15,7 +15,7 @@ Ui::IIViewerUi::IIViewerUi() : titleBar(nullptr), toolBar(nullptr), openFileLeft
     exitAction(nullptr),
     closeLeftAction(nullptr), closeRightAction(nullptr), dataAnalyseAction(nullptr), playListAction(nullptr), // aboutQtAction(nullptr), 
     workAreaSingleModeAction(nullptr), workAreaDoubleModeAction(nullptr),
-    aboutThisAction(nullptr), checkUpdateAction(nullptr), useRoiToolAction(nullptr), useMoveToolAction(nullptr),
+    aboutThisAction(nullptr), checkUpdateAction(nullptr), onlineHelpAction(nullptr), useRoiToolAction(nullptr), useMoveToolAction(nullptr),
     sysOptionAction(nullptr), penColorSetBtn(nullptr), penColorSetAction(nullptr), penWidthSbox(nullptr), penWidthAction(nullptr),
     mainWidget(nullptr),
     scrollArea{nullptr, nullptr}, scrollAreaCenterFrame(nullptr), imageLabelContianer{nullptr, nullptr}, imageLabel{nullptr, nullptr},
@@ -92,7 +92,9 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
     viewMenu->addMenu(dockWidgetMenu);
     viewMenu->addMenu(workAreaModeMenu);
     dataAnalyseAction = new QAction(QApplication::translate("mainWindow", "data analyse", nullptr), mainWindow);
+    dataAnalyseAction->setIcon(QIcon(":/image/src/resource/data-analyse.svg"));
     playListAction = new QAction(QApplication::translate("mainWindow", "play list", nullptr), mainWindow);
+    playListAction->setIcon(QIcon(":/image/src/resource/play-list.svg"));
     dockWidgetMenu->addAction(dataAnalyseAction);
     dockWidgetMenu->addAction(playListAction);
     dataAnalyseAction->setCheckable(true);
@@ -158,6 +160,9 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
     checkUpdateAction = new QAction(QApplication::translate("mainWindow", "Check update", nullptr), mainWindow);
     checkUpdateAction->setIcon(QIcon(":/image/src/resource/update_version.svg"));
     helpMenu->addAction(checkUpdateAction);
+    onlineHelpAction = new QAction(QApplication::translate("mainWindow", "Online help", nullptr), mainWindow);
+    onlineHelpAction->setIcon(QIcon(":/image/src/resource/help-circle.svg"));
+    helpMenu->addAction(onlineHelpAction);
 
     toolBar->addAction(openFileLeftAction);
     toolBar->addAction(openFileRightAction);
@@ -173,14 +178,10 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
     toolBar->addAction(useMoveToolAction);
     toolBar->addAction(useRoiToolAction);
     toolBar->addSeparator();
-    penColorSetBtn = new QPushButton(toolBar);
+    penColorSetBtn = new PenColorButton(toolBar);
     QPixmap penColorIcon(32, 32); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     penColorIcon.fill(QColor(0, 0, 0));
     penColorSetBtn->setIcon(penColorIcon);
-    penColorSetBtn->setStyleSheet("QPushButton {border: none;}"
-                                  "QPushButton:hover{background-color:#41a7e0} "
-                                  "QPushButton:pressed{background-color:#a7a7a7}");
-    penColorSetBtn->setMinimumWidth(64); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     penColorSetBtn->setVisible(false);
     penColorSetBtn->setEnabled(true);
     penColorSetAction = toolBar->addWidget(penColorSetBtn);
@@ -226,7 +227,7 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
     exchangeAreaPreviewBtn->setIconSize(QSize(30, 16)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
     imageInfoBtn = new QPushButton();
-    imageInfoBtn->setIcon(QIcon(":/image/src/resource/info.svg"));
+    imageInfoBtn->setIcon(QIcon(":/image/src/resource/img-info.svg"));
     imageInfoBtn->setMaximumWidth(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     imageInfoBtn->setStyleSheet("QPushButton{border: none} QPushButton:hover{background-color:#a8a8a8} QPushButton:pressed{background-color:#a7a7a7}");
     imageInfoBtn->setToolTip(QCoreApplication::translate("mainWindow", "show image infomation", nullptr));

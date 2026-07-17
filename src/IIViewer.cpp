@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QColorDialog>
 #include <QCursor>
+#include <QDesktopServices>
 #include <QDir>
 #include <QEvent>
 #include <QFileDialog>
@@ -301,6 +302,8 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     connect(ui.aboutThisAction, &QAction::triggered, this, [this]()
             { AboutDlg dlg(this); dlg.exec(); });
     connect(ui.checkUpdateAction, &QAction::triggered, this, &IIViewer::checkUpdate);
+    connect(ui.onlineHelpAction, &QAction::triggered, this, []()
+            { QDesktopServices::openUrl(QUrl("https://jonahzeng.github.io/IIViewer/")); });
 
     connect(ui.penColorSetBtn, &QPushButton::clicked, this, &IIViewer::selectPenPaintColor);
     connect(ui.penWidthSbox, QOverload<int>::of(&QSpinBox::valueChanged), this, &IIViewer::setPenWidth);
