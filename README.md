@@ -16,15 +16,17 @@
 
 This repo is designed for open and view ISP intermediate image. We support these formats:
 
-- jpg / bmp / png / tiff
-- pgm (8/10/12/14/16 bit)
-- pnm (8/10/12/14/16 bit)
-- raw (8/10/12/14/16/18/20/22/24 bit)
-- mipi-raw (10/12/14 bit)
-- rgbir-raw (8/10/12/14/16/18/20/22/24 bit)
-- dng (CFA Bayer / LinearRaw, uncompressed & LJPEG-compressed)
-- yuv (8/10/12, 444-interleave/444-planar/422-UYVY/422-YUYV/420-NV12/420-NV21/420P-YU12/420P-YV12/400)
-- heif (.heic 8bit yuv420/422/444)
+|format|detail|
+|:--:|:--:|
+|jpg/bmp/png/tiff|only baseline jpg, 8bit|
+|pgm|8/10/12/14/16 bit|
+|pnm|8/10/12/14/16 bit|
+|raw|8/10/12/14/16/18/20/22/24 bit|
+|mipi-raw|10/12/14 bit|
+|rgbir-raw|8/10/12/14/16/18/20/22/24 bit|
+|dng|CFA Bayer / LinearRaw, uncompressed & LossJPEG-compressed|
+|yuv|8/10/12, 444-interleave/444-planar/422-UYVY/422-YUYV/420-NV12/420-NV21/420P-YU12/420P-YV12/400|
+|heif|yuv420/422/444 8bit|
 
 ## Usage
 
