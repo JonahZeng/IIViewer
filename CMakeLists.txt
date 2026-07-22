@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 1.0.1 LANGUAGES CXX)
+project(IIViewer VERSION 1.1.0 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -133,6 +133,7 @@ configure_file (config.h.in ${CMAKE_SOURCE_DIR}/inc/config.h)
 set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/Main.cpp
         ${CMAKE_SOURCE_DIR}/src/IIViewer.cpp
+        ${CMAKE_SOURCE_DIR}/src/IIViewerLoadFile.cpp
         ${CMAKE_SOURCE_DIR}/src/IIViewerLrImgProcess.cpp
         ${CMAKE_SOURCE_DIR}/inc/IIViewer.h
         ${CMAKE_SOURCE_DIR}/src/AboutDlg.cpp
@@ -173,6 +174,13 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/inc/PenColorButton.h
         ${CMAKE_SOURCE_DIR}/src/PenColorButton.cpp
         ${CMAKE_SOURCE_DIR}/inc/common_type.h
+        ${CMAKE_SOURCE_DIR}/src/dng/dng_parser.cpp
+        ${CMAKE_SOURCE_DIR}/src/dng/ljpeg_decoder.cpp
+        ${CMAKE_SOURCE_DIR}/src/dng/tiff_reader.cpp
+        ${CMAKE_SOURCE_DIR}/inc/dng/dng_image.h
+        ${CMAKE_SOURCE_DIR}/inc/dng/dng_parser.h
+        ${CMAKE_SOURCE_DIR}/inc/dng/tiff_reader.h
+        ${CMAKE_SOURCE_DIR}/inc/dng/ljpeg_decoder.h
 )
 
 set(TRANSLATIONS

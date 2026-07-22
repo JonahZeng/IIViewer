@@ -38,6 +38,8 @@ public:
     void wheelEvent(QWheelEvent *event) override;
     void setPixmap();
     void setPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height);
+    void setDngRawPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, const uint8_t* raw_buffer);
+    void setDngPnmPixmap(int bitDepth, int width, int height, const uint8_t* rgb_buffer);
     void setPixmap(YuvType tp, int bitDepth, int width, int height, int pixSize);
     void zoomIn(int zoomIdx);
     void zoomOut(int zoomIdx);
