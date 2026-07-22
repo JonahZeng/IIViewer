@@ -1,6 +1,6 @@
 # IIViewer
 
-A cross-platform image viewer designed for ISP (Image Signal Process) developers. Supports various raw image formats including RAW, MIPI-RAW, RGBIR-RAW, YUV, PGM, PNM, HEIF, and standard formats (JPG, BMP, PNG, TIFF).
+A cross-platform image viewer designed for ISP (Image Signal Process) developers. Supports various raw image formats including RAW, MIPI-RAW, RGBIR-RAW, DNG, YUV, PGM, PNM, HEIF, and standard formats (JPG, BMP, PNG, TIFF).
 
 ## Build Commands
 
@@ -213,6 +213,7 @@ Use Qt's platform macros:
 ### Supported Image Formats
 - Standard: JPG, BMP, PNG, TIFF
 - RAW: 8/10/12/14/16/18/20/22/24 bit, MIPI-RAW (10/12/14 bit), RGBIR-RAW
+- DNG: CFA (Bayer) / LinearRaw, uncompressed & LJPEG-compressed (e.g. DJI, Apple ProRAW)
 - YUV: 8/10/12 bit, multiple layouts (444, 422, 420, 400)
 - PGM/PNM: 8/10/12/14/16 bit
 - HEIF: .heic 8bit YUV 420/422/444
@@ -222,6 +223,7 @@ Use Qt's platform macros:
 - `ImageWidget`: Custom widget for image display with zoom/ROI support
 - `AppSettings`: Application settings persistence
 - `RawFileInfoDlg`, `YuvFileInfoDlg`: Dialogs for format configuration
+- `dng::DngParser`: DNG file parser, supports CFA (Bayer) and LinearRaw with uncompressed and LJPEG-compressed data (sources in `src/dng/`, headers in `inc/dng/`)
 
 ### Translation
 Update translations using lupdate:

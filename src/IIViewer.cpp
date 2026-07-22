@@ -379,10 +379,10 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     ui.playListDockWgt->installEventFilter(this);
     ui.mainWidget->installEventFilter(this);
 
-    ui.dataAnalyseDockWgt->hide();
-    ui.playListDockWgt->hide();
-    ui.dataAnalyseAction->setChecked(false);
-    ui.playListAction->setChecked(false);
+    ui.dataAnalyseAction->setChecked(settings.dataAnalyseDockVisible);
+    ui.playListAction->setChecked(settings.playListDockVisible);
+    if (settings.dataAnalyseDockVisible) { ui.dataAnalyseDockWgt->show(); } else { ui.dataAnalyseDockWgt->hide(); }
+    if (settings.playListDockVisible)    { ui.playListDockWgt->show(); } else { ui.playListDockWgt->hide(); }
     ui.exchangeAreaPreviewBtn->setEnabled(false);
     ui.imageInfoBtn->setEnabled(false);
     ui.imageDiffInfoBtn->setEnabled(false);
@@ -1193,6 +1193,10 @@ void IIViewer::closeEvent(QCloseEvent *event)
 
         // Save window maximized state
         settings.windowMaximized = isMaximized();
+
+        // Save dock panel visibility
+        settings.dataAnalyseDockVisible = ui.dataAnalyseAction->isChecked();
+        settings.playListDockVisible = ui.playListAction->isChecked();
 
         onCloseLeftFileAction();
         onCloseRightFileAction();
