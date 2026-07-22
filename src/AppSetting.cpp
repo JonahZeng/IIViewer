@@ -21,7 +21,9 @@ AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE),
     uiFontFamily(QString()),
     uiFontPointSize(0),
     workAreaDoubleImgMode(false),
-    windowMaximized(false)
+    windowMaximized(false),
+    dataAnalyseDockVisible(false),
+    playListDockVisible(false)
 {
     workPath = QDir::homePath();
     theme = QStyleFactory::keys().first();
@@ -187,6 +189,8 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
             );
         }
     }
+    if (json.contains("dataAnalyseDockVisible")) { dataAnalyseDockVisible = json.value("dataAnalyseDockVisible").toBool(); }
+    if (json.contains("playListDockVisible"))   { playListDockVisible = json.value("playListDockVisible").toBool(); }
 }
 
 void AppSettings::write(QJsonObject& json) const
@@ -243,5 +247,7 @@ void AppSettings::write(QJsonObject& json) const
     penColorObj["g"] = penColor.green();
     penColorObj["b"] = penColor.blue();
     json["penColor"] = penColorObj;
+    json["dataAnalyseDockVisible"] = dataAnalyseDockVisible;
+    json["playListDockVisible"] = playListDockVisible;
     // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 }

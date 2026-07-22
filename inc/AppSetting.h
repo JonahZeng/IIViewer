@@ -32,6 +32,8 @@ public:
     QString windowScreenName;
     bool windowMaximized;
     QColor penColor;
+    bool dataAnalyseDockVisible;
+    bool playListDockVisible;
 
     bool loadSettingsFromFile();
     void dumpSettingsToFile();
