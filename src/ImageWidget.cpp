@@ -2295,6 +2295,162 @@ void ImageWidget::setPixmap(BayerPatternType by, ByteOrderType order, int bitDep
     repaint();
 }
 
+void ImageWidget::setDngRawPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, const uint8_t* raw_buffer)
+{
+    if(imgName == nullptr)
+    {
+        return;
+    }
+    releaseBuffer();
+
+    int pixSize = 2; // dng store one pix in 2 byte
+    qint64 raw_buffer_length = pixSize * width * height;
+    unsigned char *buffer = new unsigned char[raw_buffer_length];
+
+    pixMap = new QImage(width, height, QImage::Format_Grayscale8);
+    unsigned char *bufferShow = pixMap->bits();
+
+    memcpy(buffer, raw_buffer, raw_buffer_length);
+
+    int buffer_show_width = pixMap->bytesPerLine();
+    if (pixSize == 1)
+    {
+        for (qint64 i = 0; i < height; i++)
+        {
+            for (qint64 j = 0; j < width; j++)
+            {
+                bufferShow[i * buffer_show_width + j] = buffer[i * width + j];
+            }
+        }
+    }
+    else if (pixSize == 2)
+    {
+        unsigned short *buffer_us = (unsigned short *)buffer;
+        if (order == RAW_BIG_ENDIAN)
+        {
+            for (qint64 i = 0; i < height; i++)
+            {
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * buffer_show_width + j] = CLIP3(((buffer_us[i * width + j] & 0x00ff << 8) | (buffer_us[i * width + j] & 0xff00 >> 8)) >> (bitDepth - 8), 0, 255);
+                }
+            }
+        }
+        else
+        {
+            for (qint64 i = 0; i < height; i++)
+            {
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * buffer_show_width + j] = CLIP3(buffer_us[i * width + j] >> (bitDepth - 8), 0, 255);
+                }
+            }
+        }
+    }
+    else if (pixSize == 4)
+    {
+        unsigned int *buffer_ui = (unsigned int *)buffer;
+        if (order == RAW_BIG_ENDIAN)
+        {
+            for (qint64 i = 0; i < height; i++)
+            {
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * buffer_show_width + j] = CLIP3(((buffer_ui[i * width + j] & 0x000000ff << 24) | (buffer_ui[i * width + j] & 0x0000ff00 << 8) | (buffer_ui[i * width + j] & 0x00ff0000 >> 8) | (buffer_ui[i * width + j] & 0xff000000 >> 24)) >> (bitDepth - 8), 0, 255);
+                }
+            }
+        }
+        else
+        {
+            for (qint64 i = 0; i < height; i++)
+            {
+                for (qint64 j = 0; j < width; j++)
+                {
+                    bufferShow[i * buffer_show_width + j] = CLIP3(buffer_ui[i * width + j] >> (bitDepth - 8), 0, 255);
+                }
+            }
+        }
+    }
+
+    rawDataPtr = buffer;
+    rawDataBit = bitDepth;
+    rawBayerType = by;
+    rawByteOrderType = order;
+    openedImgType = RAW_IMG;
+    pnmDataPtr = nullptr;
+    pnmDataBit = 0;
+    pgmDataPtr = nullptr;
+    pgmDataBit = 0;
+    yuvDataBit = 0;
+    yuvDataPtr = nullptr;
+    normalDataPixMap = nullptr;
+    yuvType = YuvType::YUV_UNKNOW;
+
+    resize(pixMap->size() * zoomList[zoomIdx]);
+    repaint();
+}
+
+void ImageWidget::setDngPnmPixmap(int bitDepth, int width, int height, const uint8_t* rgb_buffer)
+{
+    if(imgName == nullptr)
+    {
+        return;
+    }
+    releaseBuffer();
+
+    int pixSize = 2; // dng store one pix in 2 byte
+    qint64 raw_buffer_length = pixSize * width * height;
+
+    unsigned char* buffer = new unsigned char[pixSize * width * height * 3];
+    memcpy(buffer, rgb_buffer, pixSize * width * height * 3);
+    pixMap = new QImage(width, height, QImage::Format_RGB888);
+    normalDataPixMap = new QImage(width, height, QImage::Format_RGB888);
+
+    int bytesperline = pixMap->bytesPerLine();
+    unsigned char *bufferShow = pixMap->bits();
+    unsigned char *bufferShowBak = normalDataPixMap->bits();
+
+    if (pixSize == 1)
+    {
+        for (qint64 i = 0; i < height; i++)
+        {
+            for (qint64 j = 0; j < width * 3; j++)
+            {
+                bufferShow[i * bytesperline + j] = buffer[i * width * 3 + j];
+                bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
+            }
+        }
+    }
+    else if (pixSize == 2)
+    {
+        unsigned short *buffer_us = (unsigned short *)buffer;
+        for (qint64 i = 0; i < height; i++)
+        {
+            for (qint64 j = 0; j < width * 3; j++)
+            {
+                // buffer_us[i * width * 3 + j] = ((buffer_us[i * width * 3 + j] & 0xff00) >> 8) | ((buffer_us[i * width * 3 + j] & 0x00ff) << 8);
+                bufferShow[i * bytesperline + j] = buffer_us[i * width * 3 + j] >> (bitDepth - 8);
+                bufferShowBak[i * bytesperline + j] = bufferShow[i * bytesperline + j];
+            }
+        }
+    }
+
+    rawDataPtr = nullptr;
+    rawDataBit = 0;
+    rawBayerType = BayerPatternType::BAYER_UNKNOW;
+    rawByteOrderType = ByteOrderType::RAW_LITTLE_ENDIAN;
+    yuvDataBit = 0;
+    yuvDataPtr = nullptr;
+    yuvType = YuvType::YUV_UNKNOW;
+    openedImgType = PNM_IMG;
+    pnmDataPtr = buffer;
+    pnmDataBit = bitDepth;
+    pgmDataPtr = nullptr;
+    pgmDataBit = 0;
+
+    resize(pixMap->size() * zoomList[zoomIdx]);
+    repaint();
+}
 
 void ImageWidget::setPixmap(YuvType tp, int bitDepth, int width, int height, int pixSize) // yuv
 {

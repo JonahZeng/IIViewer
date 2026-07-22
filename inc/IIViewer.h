@@ -42,10 +42,13 @@ private:
     void loadPnmFile(const QString &fileName, int scrollArea, bool reload=false);
     void loadPgmFile(const QString &fileName, int scrollArea, bool reload=false);
     void loadHeifFile(const QString &fileName, int scrollArea, bool reload=false);
+    void loadDngFile(const QString &fileName, int scrollArea, bool reload=false);
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
     void setRawImage(QString &image, BayerPatternType bay, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
+    void setDngRawImage(QString &image, BayerPatternType bay, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight, const uint8_t* raw_buffer);
+    void setDngPnmImage(QString &imageName, int bitDepth, int width, int height, int leftOrRight, const uint8_t* rgb_buffer);
     void openGivenFileFromCmdArgv(QString& image);
     void addFileToHistory(const QString &filePath);
     void scrollToPixelPos(const QPoint& pixelPos);
@@ -124,5 +127,12 @@ public:
     bool windowHandleConnectionsInitialized = false;
     QPushButton *ncHoveredButton = nullptr;
 };
+
+constexpr int LEFT_IMG_WIDGET = 0;
+constexpr int RIGHT_IMG_WIDGET = 1;
+constexpr int BIT8 = 8;
+constexpr int BIT16 = 16;
+// constexpr int BIT24 = 24;
+constexpr int BIT32 = 32;
 
 #endif // IIViewer_H

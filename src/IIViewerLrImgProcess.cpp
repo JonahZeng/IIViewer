@@ -11,7 +11,7 @@ struct ImgDiffResult
 
 void IIViewer::updateExchangeBtn()
 {
-    if (ui.imageLabel[0]->openedImgType != UNKNOW_IMG && ui.imageLabel[1]->openedImgType != UNKNOW_IMG)
+    if (ui.imageLabel.at(0)->openedImgType != UNKNOW_IMG && ui.imageLabel.at(1)->openedImgType != UNKNOW_IMG)
     {
         ui.exchangeAreaPreviewBtn->setEnabled(true);
         ui.imageDiffInfoBtn->setEnabled(true);
@@ -23,13 +23,13 @@ void IIViewer::updateExchangeBtn()
     }
 
 
-    ui.imageInfoBtn->setEnabled((ui.imageLabel[0]->openedImgType != UNKNOW_IMG) || (ui.imageLabel[1]->openedImgType != UNKNOW_IMG));
+    ui.imageInfoBtn->setEnabled((ui.imageLabel.at(0)->openedImgType != UNKNOW_IMG) || (ui.imageLabel.at(1)->openedImgType != UNKNOW_IMG));
     
 }
 
 void IIViewer::updateZoomLabelText()
 {
-    if (ui.imageLabel[0]->openedImgType == UNKNOW_IMG && ui.imageLabel[1]->openedImgType == UNKNOW_IMG)
+    if (ui.imageLabel.at(0)->openedImgType == UNKNOW_IMG && ui.imageLabel.at(1)->openedImgType == UNKNOW_IMG)
     {
         ui.zoomRatioLabel->setEnabled(false);
         ui.zoomRatioLabel->setText("1x");
@@ -42,69 +42,95 @@ void IIViewer::updateZoomLabelText()
 
 void IIViewer::exchangeRight2LeftImg()
 {
-    ui.imageLabel[0]->acceptImgFromOther(ui.imageLabel[1]);
+    ui.imageLabel.at(0)->acceptImgFromOther(ui.imageLabel.at(1));
     ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left-pressed_w20.png"));
 }
 
 void IIViewer::restoreLeftImg()
 {
-    ui.imageLabel[0]->restoreImg();
+    ui.imageLabel.at(0)->restoreImg();
     ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left_w20.png"));
 }
 
 void IIViewer::showImageInfo()
 {
     ImgInfoDlg dlg(this);
-    if (openedFile[0].endsWith("raw", Qt::CaseSensitivity::CaseInsensitive))
+    auto img0Name = openedFile.at(0);
+    auto img0Size = originSize.at(0);
+    if (img0Name.endsWith("raw", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], ui.imageLabel[0]->rawBayerType, YUV_UNKNOW, ui.imageLabel[0]->rawDataBit, true);
+        dlg.setImgInfo(img0Name, img0Size, ui.imageLabel.at(0)->rawBayerType, YUV_UNKNOW, ui.imageLabel.at(0)->rawDataBit, true);
     }
-    else if (openedFile[0].endsWith("pnm", Qt::CaseSensitivity::CaseInsensitive))
+    else if (img0Name.endsWith("pnm", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[0]->pnmDataBit, true);
+        dlg.setImgInfo(img0Name, img0Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(0)->pnmDataBit, true);
     }
-    else if (openedFile[0].endsWith("pgm", Qt::CaseSensitivity::CaseInsensitive))
+    else if (img0Name.endsWith("pgm", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[0]->pgmDataBit, true);
+        dlg.setImgInfo(img0Name, img0Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(0)->pgmDataBit, true);
     }
-    else if (openedFile[0].endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
+    else if (openedFile.at(0).endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, ui.imageLabel[0]->yuvType, ui.imageLabel[0]->yuvDataBit, true);
+        dlg.setImgInfo(img0Name, img0Size, BAYER_UNKNOW, ui.imageLabel.at(0)->yuvType, ui.imageLabel.at(0)->yuvDataBit, true);
     }
-    else if (openedFile[0].endsWith("jpg", Qt::CaseSensitivity::CaseInsensitive) || openedFile[0].endsWith("jpeg", Qt::CaseSensitivity::CaseInsensitive) || 
-        openedFile[0].endsWith("bmp", Qt::CaseSensitivity::CaseInsensitive) || openedFile[0].endsWith("png", Qt::CaseSensitivity::CaseInsensitive))
+    else if (img0Name.endsWith("jpg", Qt::CaseSensitivity::CaseInsensitive) || img0Name.endsWith("jpeg", Qt::CaseSensitivity::CaseInsensitive) || 
+        img0Name.endsWith("bmp", Qt::CaseSensitivity::CaseInsensitive) || img0Name.endsWith("png", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[0], originSize[0], BAYER_UNKNOW, YUV_UNKNOW, 8, true);
+        dlg.setImgInfo(img0Name, img0Size, BAYER_UNKNOW, YUV_UNKNOW, 8, true);
+    }
+    else if (img0Name.endsWith("dng", Qt::CaseSensitivity::CaseInsensitive))
+    {
+        if(ui.imageLabel.at(0)->rawBayerType != BayerPatternType::BAYER_UNKNOW)
+        {
+            dlg.setImgInfo(img0Name, img0Size, ui.imageLabel.at(0)->rawBayerType, YUV_UNKNOW, ui.imageLabel.at(0)->rawDataBit, true);
+        }
+        else if(ui.imageLabel.at(0)->openedImgType == OpenedImageType::PNM_IMG)
+        {
+            dlg.setImgInfo(img0Name, img0Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(0)->pnmDataBit, true);
+        }
     }
 
-    if (openedFile[1].endsWith("raw", Qt::CaseSensitivity::CaseInsensitive))
+    auto img1Name = openedFile.at(1);
+    auto img1Size = originSize.at(1);
+    if (img1Name.endsWith("raw", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], ui.imageLabel[1]->rawBayerType, YUV_UNKNOW, ui.imageLabel[1]->rawDataBit, false);
+        dlg.setImgInfo(img1Name, img1Size, ui.imageLabel.at(1)->rawBayerType, YUV_UNKNOW, ui.imageLabel.at(1)->rawDataBit, false);
     }
-    else if (openedFile[1].endsWith("pnm", Qt::CaseSensitivity::CaseInsensitive))
+    else if (img1Name.endsWith("pnm", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[1]->pnmDataBit, false);
+        dlg.setImgInfo(img1Name, img1Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(1)->pnmDataBit, false);
     }
-    else if (openedFile[1].endsWith("pgm", Qt::CaseSensitivity::CaseInsensitive))
+    else if (img1Name.endsWith("pgm", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel[1]->pgmDataBit, false);
+        dlg.setImgInfo(img1Name, img1Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(1)->pgmDataBit, false);
     }
-    else if (openedFile[1].endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
+    else if (img1Name.endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, ui.imageLabel[1]->yuvType, ui.imageLabel[1]->yuvDataBit, false);
+        dlg.setImgInfo(img1Name, img1Size, BAYER_UNKNOW, ui.imageLabel.at(1)->yuvType, ui.imageLabel.at(1)->yuvDataBit, false);
     }
-    else if (openedFile[1].endsWith("jpg", Qt::CaseSensitivity::CaseInsensitive) || openedFile[1].endsWith("jpeg", Qt::CaseSensitivity::CaseInsensitive) || 
-        openedFile[1].endsWith("bmp", Qt::CaseSensitivity::CaseInsensitive) || openedFile[1].endsWith("png", Qt::CaseSensitivity::CaseInsensitive))
+    else if (img1Name.endsWith("jpg", Qt::CaseSensitivity::CaseInsensitive) || img1Name.endsWith("jpeg", Qt::CaseSensitivity::CaseInsensitive) || 
+        img1Name.endsWith("bmp", Qt::CaseSensitivity::CaseInsensitive) || img1Name.endsWith("png", Qt::CaseSensitivity::CaseInsensitive))
     {
-        dlg.setImgInfo(openedFile[1], originSize[1], BAYER_UNKNOW, YUV_UNKNOW, 8, false);
+        dlg.setImgInfo(img1Name, img1Size, BAYER_UNKNOW, YUV_UNKNOW, 8, false);
     }
+    else if (img1Name.endsWith("dng", Qt::CaseSensitivity::CaseInsensitive))
+    {
+        if(ui.imageLabel.at(1)->rawBayerType != BayerPatternType::BAYER_UNKNOW)
+        {
+            dlg.setImgInfo(img1Name, img1Size, ui.imageLabel.at(1)->rawBayerType, YUV_UNKNOW, ui.imageLabel.at(1)->rawDataBit, false);
+        }
+        else if(ui.imageLabel.at(0)->openedImgType == OpenedImageType::PNM_IMG)
+        {
+            dlg.setImgInfo(img1Name, img1Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(1)->pnmDataBit, false);
+        }
+    }  
     dlg.exec();
 }
 
 static ImgDiffResult compareNormalImage(const QImage* left, const QImage* right)
 {
     Q_ASSERT(left->size() == right->size());
-    QSize imgSize = left->size();
+    const QSize imgSize = left->size();
 
     quint64 pixDiffSum = 0;
     quint32 pixDiff = 0;
@@ -115,12 +141,12 @@ static ImgDiffResult compareNormalImage(const QImage* left, const QImage* right)
     {
         for (int x = 0; x < imgSize.width(); x++)
         {
-            unsigned int l_red = qRed(left->pixel(x, y));
-            unsigned int r_red = qRed(right->pixel(x, y));
-            unsigned int l_green = qGreen(left->pixel(x, y));
-            unsigned int r_green = qGreen(right->pixel(x, y));
-            unsigned int l_blue = qBlue(left->pixel(x, y));
-            unsigned int r_blue = qBlue(right->pixel(x, y));
+            const unsigned int l_red = qRed(left->pixel(x, y));
+            const unsigned int r_red = qRed(right->pixel(x, y));
+            const unsigned int l_green = qGreen(left->pixel(x, y));
+            const unsigned int r_green = qGreen(right->pixel(x, y));
+            const unsigned int l_blue = qBlue(left->pixel(x, y));
+            const unsigned int r_blue = qBlue(right->pixel(x, y));
 
             pixDiff = l_red > r_red ? l_red - r_red : r_red - l_red;
             pixDiff += l_green > r_green ? l_green - r_green : r_green - l_green;
@@ -139,7 +165,7 @@ static ImgDiffResult compareNormalImage(const QImage* left, const QImage* right)
             pixDiffSum += pixDiff;
         }
     }
-    int pixCnt = imgSize.height() * imgSize.width();
+    const int pixCnt = imgSize.height() * imgSize.width();
     auto tmp = QString("max diff:%1 @ [%4, %5], min diff:%2, mean diff:%3\n").arg(pixMaxDiff).arg(pixMinDiff).arg(pixDiffSum / (qreal)pixCnt).arg(maxDiffPos.y()).arg(maxDiffPos.x());
     return {tmp, maxDiffPos};
 }
