@@ -43,13 +43,13 @@ void IIViewer::updateZoomLabelText()
 void IIViewer::exchangeRight2LeftImg()
 {
     ui.imageLabel.at(0)->acceptImgFromOther(ui.imageLabel.at(1));
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left-pressed_w20.png"));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left-pressed.svg"));
 }
 
 void IIViewer::restoreLeftImg()
 {
     ui.imageLabel.at(0)->restoreImg();
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left_w20.png"));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left.svg"));
 }
 
 void IIViewer::showImageInfo()
