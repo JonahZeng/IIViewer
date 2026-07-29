@@ -14,7 +14,7 @@
 
 ## About
 
-This repo is designed for open and view ISP intermediate image. We support these formats:
+This image viewer is designed for open, view and compare ISP intermediate image. We support these formats:
 
 |format|detail|
 |:--:|:--:|
@@ -24,13 +24,13 @@ This repo is designed for open and view ISP intermediate image. We support these
 |raw|8/10/12/14/16/18/20/22/24 bit|
 |mipi-raw|10/12/14 bit|
 |rgbir-raw|8/10/12/14/16/18/20/22/24 bit|
-|dng|CFA Bayer / LinearRaw, uncompressed & LossJPEG-compressed|
+|dng|(CFA Bayer + uncompressed) produced by DJI pocket 4, (LinearRaw + LossJPEG-compressed) produced by iPhone 13 pro|
 |yuv|8/10/12, 444-interleave/444-planar/422-UYVY/422-YUYV/420-NV12/420-NV21/420P-YU12/420P-YV12/400|
 |heif|yuv420/422/444 8bit|
 
 ## Usage
 
-Download from the [release page](https://github.com/JonahZeng/IIViewer/releases) (we provide precompiled x64 exe, deb, and dmg). Start the app and drag any supported image file onto the window:
+Download pre-compiled binary file from the [release page](https://github.com/JonahZeng/IIViewer/releases) (we provide x64 exe, deb, and arm64 dmg). Start the app and drag any supported image file onto the window:
 
 ![windows-main-ui](./doc/image/main-ui.png)
 

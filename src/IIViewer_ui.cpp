@@ -58,15 +58,15 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
     // QMenu{background:rgb(128,128,128)}
     // QMenu::item:selected{background-color:#654321;}");
     openFileLeftAction = new QAction(QApplication::translate("mainWindow", "Open file in left", nullptr), mainWindow);
-    openFileLeftAction->setIcon(QIcon(":/image/src/resource/file-earmark-left.png"));
+    openFileLeftAction->setIcon(QIcon(":/image/src/resource/file-earmark-left.svg"));
     openFileLeftAction->setShortcut(QKeySequence(Qt::CTRL, Qt::Key_L));
     openFileRightAction = new QAction(QApplication::translate("mainWindow", "Open file in right", nullptr), mainWindow);
-    openFileRightAction->setIcon(QIcon(":/image/src/resource/file-earmark-right.png"));
+    openFileRightAction->setIcon(QIcon(":/image/src/resource/file-earmark-right.svg"));
     openFileRightAction->setShortcut(QKeySequence(Qt::CTRL, Qt::Key_R));
     reloadFileLeftAction = new QAction(QApplication::translate("mainWindow", "Reload left image", nullptr), mainWindow);
-    reloadFileLeftAction->setIcon(QIcon(":/image/src/resource/reload-left.png"));
+    reloadFileLeftAction->setIcon(QIcon(":/image/src/resource/reload-left.svg"));
     reloadFileRightAction = new QAction(QApplication::translate("mainWindow", "Reload right image", nullptr), mainWindow);
-    reloadFileRightAction->setIcon(QIcon(":/image/src/resource/reload-right.png"));
+    reloadFileRightAction->setIcon(QIcon(":/image/src/resource/reload-right.svg"));
 
     exitAction = new QAction(QApplication::translate("mainWindow", "Exit", nullptr), mainWindow);
     exitAction->setShortcut(QKeySequence(Qt::CTRL, Qt::Key_Q));
@@ -222,7 +222,7 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
 
     exchangeAreaPreviewBtn = new QPushButton();
     exchangeAreaPreviewBtn->setMaximumWidth(20); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-    exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left_w20.png"));
+    exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left.svg"));
     exchangeAreaPreviewBtn->setStyleSheet("QPushButton{border: none}");
     exchangeAreaPreviewBtn->setIconSize(QSize(30, 16)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 
