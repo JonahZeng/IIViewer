@@ -30,7 +30,9 @@ This image viewer is designed for open, view and compare ISP intermediate image.
 
 ## Usage
 
-Download pre-compiled binary file from the [release page](https://github.com/JonahZeng/IIViewer/releases) (we provide x64 exe, deb, and arm64 dmg). Start the app and drag any supported image file onto the window:
+For windows 10/11 user, winget is the most convenient install method, just run command `winget install JonahZeng.IIViewer`.
+
+Download pre-compiled binary file from the [release page](https://github.com/JonahZeng/IIViewer/releases) (we provide x64 exe, deb, AppImage, and arm64 dmg). Start the app and drag any supported image file onto the window:
 
 ![windows-main-ui](./doc/image/main-ui.png)
 
