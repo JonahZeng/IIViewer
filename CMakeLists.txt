@@ -348,6 +348,7 @@ include(InstallRequiredSystemLibraries)
 # install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin)
 
 install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION bin
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 if(WIN32)
@@ -403,13 +404,32 @@ set(CPACK_PACKAGE_VERSION_MAJOR "${IIViewer_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${IIViewer_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${IIViewer_VERSION_PATCH}")
 set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_PROJECT_NAME "${PROJECT_NAME}")
 if(WIN32)
-    set(CPACK_GENERATOR "WIX")
+    set(CPACK_GENERATOR "NSIS")
     set(CPACK_PACKAGE_FILE_NAME "IIViewer-${CPACK_PACKAGE_VERSION}-win-amd64")
     set(CPACK_WIX_UPGRADE_GUID "974511F3-FE4B-401B-97A5-E66390E16772")
     set(CPACK_WIX_PATCH_FILE "${CMAKE_SOURCE_DIR}/cmake/wix_patch.xml")
     set(CPACK_WIX_EXTRA_SOURCES "${CMAKE_SOURCE_DIR}/cmake/wix_extra_dirs.wxs")
     set(CPACK_WIX_PRODUCT_ICON "${CMAKE_SOURCE_DIR}/icon/icon.ico")
+
+    # NSIS 需要显式声明要为哪个可执行文件创建开始菜单和桌面快捷方式。
+    set(CPACK_PACKAGE_EXECUTABLES "")
+    set(CPACK_NSIS_MENU_LINKS "")
+    set(CPACK_CREATE_DESKTOP_LINKS "")
+    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin/IIViewer.exe")
+    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
+        "CreateDirectory \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\"
+StrCmp \\\"$START_MENU\\\" \\\"1\\\" 0 +2
+  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\IIViewer.lnk\\\" \\\"$INSTDIR\\\\bin\\\\IIViewer.exe\\\"
+StrCmp \\\"$DESKTOP\\\" \\\"1\\\" 0 +2
+  CreateShortCut \\\"$DESKTOP\\\\IIViewer.lnk\\\" \\\"$INSTDIR\\\\bin\\\\IIViewer.exe\\\"")
+    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
+        "Delete \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\IIViewer.lnk\\\"
+Delete \\\"$DESKTOP\\\\IIViewer.lnk\\\"
+RMDir /r \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\"")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/icon/icon.ico")
+    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/icon/icon.ico")
 elseif(UNIX AND NOT APPLE)
     # set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libstdc++6, libqt5core5a, libqt5gui5, libqt5widgets5, libqt5network5, libqt5charts5, libqt5datavisualization5, libgl1, libx11-6, libxcb1, libfreetype6, libharfbuzz0b, libicu70")
     set(CPACK_SOURCE_GENERATOR "TGZ")
