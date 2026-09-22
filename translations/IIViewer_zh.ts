@@ -414,6 +414,36 @@
         <source>left image yuv type not equal to right side!</source>
         <translation>左右两侧图像yuv类型不一致!</translation>
     </message>
+    <message>
+        <location filename="../src/IIViewer.cpp" line="1452"/>
+        <source>open image from url</source>
+        <translation>打开网络图像</translation>
+    </message>
+    <message>
+        <location filename="../src/IIViewer.cpp" line="1453"/>
+        <source>Image URL:</source>
+        <translation>图像链接：</translation>
+    </message>
+    <message>
+        <location filename="../src/IIViewer.cpp" line="1464"/>
+        <source>invalid url</source>
+        <translation>无效链接</translation>
+    </message>
+    <message>
+        <location filename="../src/IIViewer.cpp" line="1465"/>
+        <source>Please input a valid http/https url</source>
+        <translation>请输入有效的 http/https 链接</translation>
+    </message>
+    <message>
+        <location filename="../src/IIViewer.cpp" line="1492"/>
+        <source>Failed to download image: %1</source>
+        <translation>下载图像失败：%1</translation>
+    </message>
+    <message>
+        <location filename="../src/IIViewer.cpp" line="1512"/>
+        <source>Failed to decode image: %1</source>
+        <translation>解码图像失败：%1</translation>
+    </message>
 </context>
 <context>
     <name>ImageWidget</name>
@@ -724,6 +754,16 @@
     </message>
     <message>
         <location filename="../src/IIViewer_ui.cpp" line="66"/>
+        <source>Open image from URL in left</source>
+        <translation>在左侧打开网络图像</translation>
+    </message>
+    <message>
+        <location filename="../src/IIViewer_ui.cpp" line="68"/>
+        <source>Open image from URL in right</source>
+        <translation>在右侧打开网络图像</translation>
+    </message>
+    <message>
+        <location filename="../src/IIViewer_ui.cpp" line="70"/>
         <source>Reload left image</source>
         <translation>重新加载左侧图像</translation>
     </message>

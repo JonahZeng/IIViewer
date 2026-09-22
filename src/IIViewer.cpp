@@ -11,6 +11,8 @@
 #include <QEvent>
 #include <QFileDialog>
 #include <QHoverEvent>
+#include <QInputDialog>
+#include <QBuffer>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QMenuBar>
@@ -185,9 +187,10 @@ static void refreshWidgetFont(QWidget *widget, const QFont &font)
 
 IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readability-function-cognitive-complexity)
     : QMainWindow(parent),
-    originSize{QSize{0, 0}, QSize{0, 0}}, 
+    originSize{QSize{0, 0}, QSize{0, 0}},
     openedFile{QString(), QString()},
     openedFileLastModifiedTime{QDateTime(), QDateTime()},
+    networkManager(this), // 复用连接池，随窗口析构统一回收
     lastFileWatcherNotifyTime{QDateTime(), QDateTime()},
     lastFileWatcherNotifyPath{QString(), QString()},
     lastFileWatcherNotifyIsWaitProcess{false, false}
@@ -279,6 +282,8 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
 
     connect(ui.openFileLeftAction, &QAction::triggered, this, &IIViewer::onOpenFileAction);
     connect(ui.openFileRightAction, &QAction::triggered, this, &IIViewer::onOpenFileAction);
+    connect(ui.openUrlLeftAction, &QAction::triggered, this, &IIViewer::onOpenUrlAction);
+    connect(ui.openUrlRightAction, &QAction::triggered, this, &IIViewer::onOpenUrlAction);
     connect(ui.reloadFileLeftAction, &QAction::triggered, this, &IIViewer::onReloadFileAction);
     connect(ui.reloadFileRightAction, &QAction::triggered, this, &IIViewer::onReloadFileAction);
     connect(ui.exchangeAreaPreviewBtn, &QPushButton::pressed, this, &IIViewer::exchangeRight2LeftImg);
@@ -847,6 +852,7 @@ void IIViewer::onSingleImgModeAction(bool check) // NOLINT(readability-function-
         ui.scrollArea.at(1)->show();
         ui.scrollAreaCenterFrame->show();
         ui.openFileRightAction->setEnabled(true);
+        ui.openUrlRightAction->setEnabled(true);
         ui.reloadFileRightAction->setEnabled(true);
         ui.closeRightAction->setEnabled(true);
 
@@ -880,6 +886,7 @@ void IIViewer::onSingleImgModeAction(bool check) // NOLINT(readability-function-
         ui.scrollArea.at(1)->hide();
         ui.scrollAreaCenterFrame->hide();
         ui.openFileRightAction->setEnabled(false);
+        ui.openUrlRightAction->setEnabled(false);
         ui.reloadFileRightAction->setEnabled(false);
         ui.closeRightAction->setEnabled(false);
 
@@ -935,6 +942,7 @@ void IIViewer::onDoubleImgModeAction(bool check) // NOLINT(readability-function-
         ui.scrollArea.at(1)->show();
         ui.scrollAreaCenterFrame->show();
         ui.openFileRightAction->setEnabled(true);
+        ui.openUrlRightAction->setEnabled(true);
         ui.reloadFileRightAction->setEnabled(true);
         ui.closeRightAction->setEnabled(true);
 
@@ -968,6 +976,7 @@ void IIViewer::onDoubleImgModeAction(bool check) // NOLINT(readability-function-
         ui.scrollArea.at(1)->hide();
         ui.scrollAreaCenterFrame->hide();
         ui.openFileRightAction->setEnabled(false);
+        ui.openUrlRightAction->setEnabled(false);
         ui.reloadFileRightAction->setEnabled(false);
         ui.closeRightAction->setEnabled(false);
 
@@ -1061,8 +1070,12 @@ void IIViewer::onSysOptionAction(bool check)
 
 void IIViewer::checkUpdate()
 {
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
-    QObject::connect(manager, &QNetworkAccessManager::finished, [this, manager](QNetworkReply *reply) {
+    QNetworkRequest request(QUrl("https://api.github.com/repos/JonahZeng/IIViewer/releases/latest"));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    request.setTransferTimeout(30'000);
+#endif
+    QNetworkReply *reply = networkManager.get(request);
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply] {
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray const response = reply->readAll();
             QJsonDocument const jsonDoc = QJsonDocument::fromJson(response);
@@ -1072,7 +1085,7 @@ void IIViewer::checkUpdate()
             {
                 latestVersion.remove(QChar('v'), Qt::CaseSensitivity::CaseInsensitive);
              }
-             const QVersionNumber currentVersion{IIViewer_VERSION_MAJOR, IIViewer_VERSION_MINOR, IIViewer_VERSION_PATCH}; // 当前版本号 
+             const QVersionNumber currentVersion{IIViewer_VERSION_MAJOR, IIViewer_VERSION_MINOR, IIViewer_VERSION_PATCH}; // 当前版本号
              const QVersionNumber newVersion = QVersionNumber::fromString(latestVersion);
             //  qDebug() << currentVersion << newVersion << latestVersion;
              if (newVersion > currentVersion) {
@@ -1080,18 +1093,14 @@ void IIViewer::checkUpdate()
                 QMessageBox msgBox(QMessageBox::Icon::Information, tr("find new version"), text, QMessageBox::StandardButton::Ok, this);
                 msgBox.exec();
                 // QMessageBox::information(this, tr("find new version"), tr("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>"), QMessageBox::StandardButton::Ok);
-            } else { 
+            } else {
                 QMessageBox::information(this, tr("no new version"), tr("You are using the latest version"), QMessageBox::StandardButton::Ok);
-            } 
+            }
         } else {
             QMessageBox::critical(this, tr("network error"), QString("Error checking for updates: %1").arg(reply->errorString()), QMessageBox::StandardButton::Ok);
-        } 
+        }
         reply->deleteLater();
-        manager->deleteLater();
-    }); 
-    const QUrl url("https://api.github.com/repos/JonahZeng/IIViewer/releases/latest");
-    const QNetworkRequest request(url); 
-    manager->get(request);
+    });
 }
 
 void IIViewer::openedFileChanged(const QString &filePath)
@@ -1418,8 +1427,8 @@ void IIViewer::onOpenFileAction()
 
 /**
  * @brief 从命令行参数启动并打开图像，如果注册了文件关联，双击图像直接进入程序
- * 
- * @param image 
+ *
+ * @param image
  */
 void IIViewer::openGivenFileFromCmdArgv(QString& image)
 {
@@ -1437,6 +1446,120 @@ void IIViewer::openGivenFileFromCmdArgv(QString& image)
         emit updateExchangeBtnStatus();
         emit updateZoomLabelStatus();
     }
+}
+
+bool IIViewer::isRemoteUrl(const QString &s)
+{
+    return s.startsWith("http://", Qt::CaseInsensitive) || s.startsWith("https://", Qt::CaseInsensitive);
+}
+
+void IIViewer::onOpenUrlAction()
+{
+    bool ok = false;
+    const QString text = QInputDialog::getText(this, tr("open image from url"),
+        tr("Image URL:"), QLineEdit::Normal, QString(), &ok);
+    if (!ok || text.trimmed().isEmpty())
+    {
+        return;
+    }
+
+    const QUrl url = QUrl::fromUserInput(text.trimmed());
+    if (!url.isValid() || (url.scheme() != "http" && url.scheme() != "https"))
+    {
+        QMessageBox::warning(this, tr("invalid url"),
+            tr("Please input a valid http/https url"), QMessageBox::StandardButton::Ok);
+        return;
+    }
+
+    if (sender() == static_cast<QObject *>(ui.openUrlRightAction))
+    {
+        loadNetworkImage(url, RIGHT_IMG_WIDGET);
+    }
+    else
+    {
+        loadNetworkImage(url, LEFT_IMG_WIDGET);
+    }
+}
+
+void IIViewer::loadNetworkImage(const QUrl &url, int scrollArea)
+{
+    QNetworkRequest request(url);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    request.setTransferTimeout(30'000); // 避免挂死的连接无限期占用 reply/socket
+#endif
+    QNetworkReply *reply = networkManager.get(request); // manager 为成员，连接池复用，随窗口析构
+    QObject::connect(reply, &QNetworkReply::finished, this,
+        [this, reply, url, scrollArea]
+        {
+            if (reply->error() != QNetworkReply::NoError)
+            {
+                QMessageBox::critical(this, tr("network error"),
+                    tr("Failed to download image: %1").arg(reply->errorString()),
+                    QMessageBox::StandardButton::Ok);
+                reply->deleteLater();
+                return;
+            }
+
+            const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            if (httpStatus >= 400)
+            {
+                QMessageBox::critical(this, tr("network error"),
+                    tr("Failed to download image: HTTP %1").arg(httpStatus),
+                    QMessageBox::StandardButton::Ok);
+                reply->deleteLater();
+                return;
+            }
+
+            QByteArray data = reply->readAll();
+            reply->deleteLater();
+
+            QBuffer buffer(&data);
+            buffer.open(QIODevice::ReadOnly);
+            QImageReader reader(&buffer);
+            reader.setAutoTransform(true);
+            reader.setAutoDetectImageFormat(true); // 按内容识别 jpg/webp，忽略 URL 后缀/token
+            const QImage image = reader.read();
+            if (image.isNull())
+            {
+                QMessageBox::critical(this, tr("error"),
+                    tr("Failed to decode image: %1").arg(reader.errorString()),
+                    QMessageBox::StandardButton::Ok);
+                return;
+            }
+
+            const int other = (scrollArea == LEFT_IMG_WIDGET) ? RIGHT_IMG_WIDGET : LEFT_IMG_WIDGET;
+            if (!openedFile.at(other).isEmpty() && image.size() != originSize.at(other))
+            {
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"),
+                    QMessageBox::StandardButton::Ok);
+                return;
+            }
+
+            const QString urlStr = url.toString();
+            if (scrollArea == LEFT_IMG_WIDGET)
+            {
+                onCloseLeftFileAction();
+                openedFile.at(0) = urlStr; // 标题栏显示 URL
+                originSize.at(0) = image.size();
+                ui.imageLabel.at(LEFT_IMG_WIDGET)->imgName = &openedFile.at(0);
+                ui.imageLabel.at(LEFT_IMG_WIDGET)->setPixmap(image);
+                loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+            }
+            else
+            {
+                onCloseRightFileAction();
+                openedFile.at(1) = urlStr;
+                originSize.at(1) = image.size();
+                ui.imageLabel.at(RIGHT_IMG_WIDGET)->imgName = &openedFile.at(1);
+                ui.imageLabel.at(RIGHT_IMG_WIDGET)->setPixmap(image);
+                loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+            }
+
+            masterScrollarea = ui.scrollArea.at(scrollArea);
+            setTitle();
+            emit updateExchangeBtnStatus();
+            emit updateZoomLabelStatus();
+        });
 }
 
 void IIViewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)
@@ -1502,6 +1625,11 @@ void IIViewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)
 void IIViewer::reLoadFile(int scrollArea) // NOLINT(readability-function-cognitive-complexity)
 {
     QString& dstFn = openedFile.at(scrollArea == LEFT_IMG_WIDGET ? 0 : 1);
+    if (isRemoteUrl(dstFn))
+    {
+        loadNetworkImage(QUrl(dstFn), scrollArea); // 重新下载
+        return;
+    }
     if (dstFn.endsWith(".jpg", Qt::CaseInsensitive) || dstFn.endsWith(".jpeg", Qt::CaseInsensitive) || dstFn.endsWith(".png", Qt::CaseInsensitive) || dstFn.endsWith(".bmp", Qt::CaseInsensitive))
     {
         QImageReader reader(dstFn);

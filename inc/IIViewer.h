@@ -6,7 +6,9 @@
 #include <QtWidgets/QMainWindow>
 #include <QFileSystemWatcher>
 #include <QDateTime>
+#include <QUrl>
 #include <QPushButton>
+#include <QNetworkAccessManager>
 
 class QScreen;
 class QWindow;
@@ -36,6 +38,8 @@ private:
     void applyDpiScale(QScreen *screen);
     void ensureWindowHandleConnections();
     void loadFile(const QString &fileName, int scrollArea);
+    void loadNetworkImage(const QUrl &url, int scrollArea);
+    static bool isRemoteUrl(const QString &s);
     void reLoadFile(int scrollArea);
     void loadYuvFile(const QString &fileName, int scrollArea, bool reload=false);
     void loadRawFile(const QString &fileName, int scrollArea, bool reload=false);
@@ -58,6 +62,7 @@ protected:
 
 public slots:
     void onOpenFileAction();
+    void onOpenUrlAction();
     void onCloseLeftFileAction();
     void onCloseRightFileAction();
     void onReloadFileAction();
@@ -118,6 +123,7 @@ public:
     std::array<QSize, 2> originSize;
     std::array<QString, 2> openedFile;
     std::array<QDateTime, 2> openedFileLastModifiedTime;
+    QNetworkAccessManager networkManager; // 统一复用，随窗口析构，避免每次请求泄漏
     QFileSystemWatcher openedFileWatcher;
     std::array<QDateTime, 2> lastFileWatcherNotifyTime; // on windows, rewrite file will notify 2 same message, record first messge path and time, ignore second message
     std::array<QString, 2> lastFileWatcherNotifyPath;

@@ -1687,6 +1687,28 @@ void ImageWidget::wheelEvent(QWheelEvent *event)
     event->accept();
 }
 
+void ImageWidget::setPixmap(const QImage &image)
+{
+    releaseBuffer();
+    pixMap = new QImage(image);
+    normalDataPixMap = new QImage(image);
+    openedImgType = NORMAL_IMG;
+    rawBayerType = BayerPatternType::BAYER_UNKNOW;
+    rawByteOrderType = ByteOrderType::RAW_LITTLE_ENDIAN;
+    rawDataBit = 0;
+    rawDataPtr = nullptr;
+    pnmDataBit = 0;
+    pnmDataPtr = nullptr;
+    pgmDataBit = 0;
+    pgmDataPtr = nullptr;
+    yuvDataBit = 0;
+    yuvDataPtr = nullptr;
+    yuvType = YuvType::YUV_UNKNOW;
+
+    resize(pixMap->size() * zoomList[zoomIdx]);
+    repaint();
+}
+
 void ImageWidget::setPixmap() // jpg, jpeg, bmp, png, pnm, pgm, tiff
 {
     if(imgName == nullptr)

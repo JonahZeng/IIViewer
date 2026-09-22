@@ -63,6 +63,10 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
     openFileRightAction = new QAction(QApplication::translate("mainWindow", "Open file in right", nullptr), mainWindow);
     openFileRightAction->setIcon(QIcon(":/image/src/resource/file-earmark-right.svg"));
     openFileRightAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
+    openUrlLeftAction = new QAction(QApplication::translate("mainWindow", "Open image from URL in left", nullptr), mainWindow);
+    openUrlLeftAction->setIcon(QIcon(":/image/src/resource/open-url-left.svg"));
+    openUrlRightAction = new QAction(QApplication::translate("mainWindow", "Open image from URL in right", nullptr), mainWindow);
+    openUrlRightAction->setIcon(QIcon(":/image/src/resource/open-url-right.svg"));
     reloadFileLeftAction = new QAction(QApplication::translate("mainWindow", "Reload left image", nullptr), mainWindow);
     reloadFileLeftAction->setIcon(QIcon(":/image/src/resource/reload-left.svg"));
     reloadFileRightAction = new QAction(QApplication::translate("mainWindow", "Reload right image", nullptr), mainWindow);
@@ -78,6 +82,8 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
     closeRightAction->setIcon(QIcon(":/image/src/resource/file-x.svg"));
     fileMenu->addAction(openFileLeftAction);
     fileMenu->addAction(openFileRightAction);
+    fileMenu->addAction(openUrlLeftAction);
+    fileMenu->addAction(openUrlRightAction);
     fileMenu->addAction(reloadFileLeftAction);
     fileMenu->addAction(reloadFileRightAction);
     fileMenu->addAction(closeLeftAction);
@@ -166,6 +172,8 @@ void Ui::IIViewerUi::setupUi(IIViewer *mainWindow)
 
     toolBar->addAction(openFileLeftAction);
     toolBar->addAction(openFileRightAction);
+    toolBar->addAction(openUrlLeftAction);
+    toolBar->addAction(openUrlRightAction);
     toolBar->addAction(reloadFileLeftAction);
     toolBar->addAction(reloadFileRightAction);
     toolBar->addAction(closeLeftAction);
