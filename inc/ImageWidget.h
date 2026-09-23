@@ -37,6 +37,7 @@ public:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void setPixmap();
+    void setPixmap(const QImage &image);
     void setPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height);
     void setDngRawPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, const uint8_t* raw_buffer);
     void setDngPnmPixmap(int bitDepth, int width, int height, const uint8_t* rgb_buffer);

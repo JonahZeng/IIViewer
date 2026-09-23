@@ -31,6 +31,8 @@ namespace Ui
         QToolBar *toolBar;
         QAction *openFileLeftAction;
         QAction *openFileRightAction;
+        QAction *openUrlLeftAction;
+        QAction *openUrlRightAction;
         QAction *reloadFileLeftAction;
         QAction *reloadFileRightAction;
         QAction *exitAction;
