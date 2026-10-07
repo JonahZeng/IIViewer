@@ -20,24 +20,24 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Download NASM
-      working-directory: ${{github.workspace}}
-      shell: pwsh
-      run: |
-        Invoke-WebRequest -Uri https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/win64/nasm-2.16.03-win64.zip -OutFile nasm.zip
-        Expand-Archive nasm.zip -DestinationPath nasm
-        $nasmDir = (Get-ChildItem nasm -Directory | Select-Object -First 1).FullName
-        echo $nasmDir >> $env:GITHUB_PATH
-        & "$nasmDir\nasm.exe" -v
+    # - name: Download NASM
+    #   working-directory: ${{github.workspace}}
+    #   shell: pwsh
+    #   run: |
+    #     Invoke-WebRequest -Uri https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/win64/nasm-2.16.03-win64.zip -OutFile nasm.zip
+    #     Expand-Archive nasm.zip -DestinationPath nasm
+    #     $nasmDir = (Get-ChildItem nasm -Directory | Select-Object -First 1).FullName
+    #     echo $nasmDir >> $env:GITHUB_PATH
+    #     & "$nasmDir\nasm.exe" -v
 
-    - name: Download openssl-1.1
-      working-directory: ${{github.workspace}}
-      shell: pwsh
-      run: |
-        $ErrorActionPreference = "Stop"
-        $OPENSSL_URL = "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz"
-        Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
-        tar -xzf openssl.tar.gz
+    # - name: Download openssl-1.1
+    #   working-directory: ${{github.workspace}}
+    #   shell: pwsh
+    #   run: |
+    #     $ErrorActionPreference = "Stop"
+    #     $OPENSSL_URL = "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz"
+    #     Invoke-WebRequest -Uri $OPENSSL_URL -OutFile openssl.tar.gz
+    #     tar -xzf openssl.tar.gz
     
     - name: Download libde265
       working-directory: ${{github.workspace}}
@@ -142,18 +142,18 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}\build --config Release
 
-    - name: Build OpenSSL 1.1.1w (Win64)
-      shell: cmd
-      run: |
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        set PATH=%PATH%;${{ github.workspace }}\nasm\nasm-2.16.03
-        dir ${{ github.workspace }}
-        cd ${{ github.workspace }}\openssl-1.1.1w
-        perl Configure VC-WIN64A --prefix=%CD%\_install
-        nmake
-        nmake install
-        copy _install\bin\libssl-1_1-x64.dll ${{ github.workspace }}\bin\Release
-        copy _install\bin\libcrypto-1_1-x64.dll ${{ github.workspace }}\bin\Release
+    # - name: Build OpenSSL 1.1.1w (Win64)
+    #   shell: cmd
+    #   run: |
+    #     call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+    #     set PATH=%PATH%;${{ github.workspace }}\nasm\nasm-2.16.03
+    #     dir ${{ github.workspace }}
+    #     cd ${{ github.workspace }}\openssl-1.1.1w
+    #     perl Configure VC-WIN64A --prefix=%CD%\_install
+    #     nmake
+    #     nmake install
+    #     copy _install\bin\libssl-1_1-x64.dll ${{ github.workspace }}\bin\Release
+    #     copy _install\bin\libcrypto-1_1-x64.dll ${{ github.workspace }}\bin\Release
 
     - name: install
       working-directory: ${{github.workspace}}\build
