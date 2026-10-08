@@ -28,7 +28,7 @@ jobs:
       - name: Install Qt6
         uses: jurplel/install-qt-action@v4
         with:
-          version: "6.5.3"
+          version: "6.7.3"
           host: "linux_arm64"
           target: "desktop"
           arch: "linux_gcc_arm64"
