@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=IIViewer
-Exec=AppRun %F
+Exec=IIViewer %F
 Icon=default
 Comment=isp develop image viewer
 Terminal=false
