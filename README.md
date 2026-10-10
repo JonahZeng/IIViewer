@@ -10,6 +10,12 @@
     <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-windows-platform.yml/badge.svg?branch=main" alt="Windows Build"/>
     <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-ubuntu-platform.yml/badge.svg?branch=main" alt="Ubuntu Build"/>
     <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-macos-platform.yml/badge.svg?branch=main" alt="MacOS Build"/>
+    <a href="https://appimage.github.io/IIViewer/">
+        <img src="https://img.shields.io/badge/listed-AppImageHub-be5137?logo=appimage&logoColor=white" alt="IIViewer on AppImageHub"/>
+    </a>
+    <a href="https://github.com/microsoft/winget-pkgs/tree/master/manifests/j/JonahZeng/IIViewer">
+        <img src="https://img.shields.io/badge/winget-JonahZeng.IIViewer-0078D7?logo=windows&logoColor=white" alt="Install via winget"/>
+    </a>
 </p>
 
 ## About

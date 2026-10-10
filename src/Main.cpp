@@ -5,6 +5,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QLocale>
+#include <QPalette>
+#include <QStyleHints>
 #include <QTranslator>
 #include <QLibraryInfo>
 
@@ -50,6 +52,12 @@ int main(int argc, char* argv[])
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
 #endif
     const QApplication app(argc, argv);
+    // Pin the UI to the light color scheme so it does not follow the OS
+    // light/dark switching (Qt >= 6.5). Qt < 6.5 has no dark-mode support
+    // and is always light, so nothing to do there.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    app.styleHints()->setColorScheme(Qt::ColorScheme::Light);
+#endif
     // QCoreApplication::setOrganizationName("IIViewer.org");
     // QCoreApplication::setOrganizationDomain("IIViewer.com");
     QCoreApplication::setApplicationName("IIViewer");

@@ -13,7 +13,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-24.04-arm
 
     steps:
       - run: gh auth status
@@ -28,7 +28,7 @@ jobs:
       - name: Install Qt6
         uses: jurplel/install-qt-action@v4
         with:
-          version: "6.5.3"
+          version: "6.8.3"
           host: "linux_arm64"
           target: "desktop"
           arch: "linux_gcc_arm64"
@@ -133,15 +133,27 @@ jobs:
             VERSION="dev-${GITHUB_SHA::7}"
           fi
           echo "VERSION=$VERSION"
-          export VERSION="${VERSION}"
-          cp ./icon/default.png ./bin/${{env.BUILD_TYPE}}/ &&
-          cp ./icon/default.desktop ./bin/${{env.BUILD_TYPE}}/ &&
-          wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-aarch64.AppImage && 
-          chmod a+x ./linuxdeployqt-continuous-aarch64.AppImage && 
-          ./linuxdeployqt-continuous-aarch64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage -no-copy-copyright-files
-          rm ./linuxdeployqt-continuous-aarch64.AppImage
-          mv ./IIViewer*.AppImage ./IIViewer-${VERSION}-ubuntu-aarch64.AppImage
-          zsyncmake -u "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/IIViewer-${VERSION}-ubuntu-aarch64.AppImage" ./IIViewer-${VERSION}-ubuntu-aarch64.AppImage
+          export OUTPUT="IIViewer-${VERSION}-ubuntu-aarch64.AppImage"
+          # linuxdeploy (maintained successor of linuxdeployqt) + Qt/AppImage plugins
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage
+          wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-aarch64.AppImage
+          wget https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-aarch64.AppImage
+          chmod +x linuxdeploy-aarch64.AppImage linuxdeploy-plugin-qt-aarch64.AppImage linuxdeploy-plugin-appimage-aarch64.AppImage
+          # GitHub runners provide no /dev/fuse, run the AppImage tools in extraction mode
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          # linuxdeploy-plugin-qt locates Qt via qmake in PATH
+          export PATH="$QT_ROOT_DIR/bin:$PATH"
+          ./linuxdeploy-aarch64.AppImage \
+            --appdir AppDir \
+            --executable ./bin/${{env.BUILD_TYPE}}/IIViewer \
+            --desktop-file ./icon/default.desktop \
+            --icon-file ./icon/default.png \
+            --plugin qt \
+            --output appimage
+          rm linuxdeploy-aarch64.AppImage linuxdeploy-plugin-qt-aarch64.AppImage linuxdeploy-plugin-appimage-aarch64.AppImage
+          # regenerate .zsync with the real download URL (overwrite the one made by the plugin)
+          rm -f "./${OUTPUT}.zsync"
+          zsyncmake -u "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${OUTPUT}" "./${OUTPUT}"
 
       - name: Package artifacts
         run: |
