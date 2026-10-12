@@ -21,6 +21,7 @@ public:
     void setWindowIconPixmap(const QIcon &icon);
     void updateMaximizeButton(bool maximized);
     void updateScale(qreal scaleFactor);
+    void refreshThemeStyles();
 
     QPushButton *getMinimizeButton() const { return minimizeButton; }
     QPushButton *getMaximizeButton() const { return maximizeButton; }

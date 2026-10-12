@@ -2044,7 +2044,9 @@ void IIViewer::refreshIcons()
     }
     if (ui.titleBar != nullptr)
     {
-        ui.titleBar->updateMaximizeButton(isMaximized());
+        // Refresh hover overlays and themed window-button icons explicitly;
+        // palette-change events alone are not reliable on style switches.
+        ui.titleBar->refreshThemeStyles();
     }
 }
 

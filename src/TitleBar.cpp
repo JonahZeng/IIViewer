@@ -1,6 +1,7 @@
 #include "TitleBar.h"
 #include "IconResource.h"
 
+#include <QGuiApplication>
 #include <QIcon>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -263,9 +264,15 @@ void TitleBar::updateButtonIcons(bool maximized)
 void TitleBar::refreshWindowButtonStyles()
 {
     // Hover/pressed highlight overlays must flip with the color scheme:
-    // a translucent black overlay is invisible on a dark background.
-    const QColor windowColor = palette().color(QPalette::Window);
-    const bool dark = windowColor.lightness() < 128;
+    // a translucent black overlay is invisible on a dark background, and
+    // vice versa. Use styleHints() as the source of truth - the same one
+    // iconPath() uses - instead of guessing from the palette, which may
+    // not have propagated yet when this runs.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+    constexpr bool dark = false; // Qt < 6.5 has no dark-mode support, always light
+#endif
     const char *overlayHover = dark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)";
     const char *overlayPressed = dark ? "rgba(255, 255, 255, 0.20)" : "rgba(0, 0, 0, 0.16)";
 
@@ -290,13 +297,28 @@ void TitleBar::refreshMenuBarStyles()
         return;
     }
 
-    const QColor windowColor = palette().color(QPalette::Window);
-    const bool dark = windowColor.lightness() < 128;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+    constexpr bool dark = false; // Qt < 6.5 has no dark-mode support, always light
+#endif
     menuBarWidget->setStyleSheet(QStringLiteral(
         "QMenuBar { background: transparent; border: none; }"
         "QMenuBar::item { padding: 4px 8px; margin: 0; }"
         "QMenuBar::item:selected { background: %1; }")
             .arg(QLatin1String(dark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)")));
+}
+
+void TitleBar::refreshThemeStyles()
+{
+    // Called explicitly after a color scheme change; the reentry guard is
+    // inherited from changeEvent handling. Also refreshes themed icons.
+    refreshWindowButtonStyles();
+    refreshMenuBarStyles();
+    if (auto *mainWindow = qobject_cast<QMainWindow *>(window()))
+    {
+        updateButtonIcons(mainWindow->isMaximized());
+    }
 }
 
 void TitleBar::syncMenuBarFont()
