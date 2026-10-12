@@ -105,6 +105,7 @@ public slots:
     void syncScrollArea0_verScBarVal(int);
     void updateExchangeBtn();
     void updateZoomLabelText();
+    void refreshIcons();
     void exchangeRight2LeftImg();
     void restoreLeftImg();
     void showImageInfo();

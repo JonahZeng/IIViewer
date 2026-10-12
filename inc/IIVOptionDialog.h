@@ -28,6 +28,11 @@ public:
         MAGENTA = 9,
         CUSTOM = 10
     };
+
+    enum ColorScheme {
+        LIGHT = 0,
+        DARK = 1
+    };
 public:
     IIVOptionDialog() = delete;
     explicit IIVOptionDialog(QWidget *parent);
@@ -53,11 +58,18 @@ public:
         ui.paint_pix_val_bg_color_comboBox->setItemIcon(PaintPixValBgColor::CUSTOM, QIcon(cusColorIcon));
     }
 
+    void set_color_scheme(ColorScheme scheme)
+    {
+        color_scheme = scheme;
+        ui.color_scheme_comboBox->setCurrentIndex(scheme);
+    }
+
     void set_ui_display_font(const QFont &font);
 
     PaintPixValBgColor pix_val_bg_color_index;
     QColor pix_val_cus_bg_color;
     int uv_disp_mode;
+    ColorScheme color_scheme;
 
     QString ui_font_family;
     int ui_font_point_size = -1;

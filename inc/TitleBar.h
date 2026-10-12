@@ -33,6 +33,8 @@ protected:
 private:
     void syncMenuBarFont();
     void updateButtonIcons(bool maximized);
+    void refreshWindowButtonStyles();
+    void refreshMenuBarStyles();
 
     QLabel *iconLabel;
     QMenuBar *menuBarWidget;
@@ -40,4 +42,5 @@ private:
     QPushButton *maximizeButton;
     QPushButton *closeButton;
     qreal scale;
+    bool refreshingStyles = false;
 };

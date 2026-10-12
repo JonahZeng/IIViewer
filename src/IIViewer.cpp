@@ -3,6 +3,7 @@
 #include "AboutDlg.h"
 #include "DataVisualDlg.h"
 #include "IIVOptionDialog.h"
+#include "IconResource.h"
 #include <QApplication>
 #include <QColorDialog>
 #include <QCursor>
@@ -51,6 +52,31 @@ static QFont resolveUiDisplayFont(const AppSettings &settings)
         font.setPointSize(settings.uiFontPointSize);
     }
     return font;
+}
+
+static void applyColorScheme(IIVOptionDialog::ColorScheme scheme)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    // Only the "windows11" and "fusion" styles honor the color scheme hint;
+    // legacy styles (e.g. windowsvista) keep painting light. Force a
+    // scheme-capable style while dark mode is requested: windows11 where
+    // available, otherwise the first style from the factory (fusion is the
+    // cross-platform fallback that also honors the scheme).
+    const QString curStyle = QApplication::style()->objectName();
+    const bool styleSupportsScheme = (curStyle.compare(QLatin1String("fusion"), Qt::CaseInsensitive) == 0)
+                                     || (curStyle.compare(QLatin1String("windows11"), Qt::CaseInsensitive) == 0);
+    if (scheme == IIVOptionDialog::ColorScheme::DARK && !styleSupportsScheme)
+    {
+        const QStringList styleKeys = QStyleFactory::keys();
+        const int windows11Idx = styleKeys.indexOf(QLatin1String("windows11"), Qt::CaseInsensitive);
+        QApplication::setStyle(windows11Idx >= 0 ? styleKeys.at(windows11Idx) : styleKeys.first());
+    }
+    qApp->styleHints()->setColorScheme(scheme == IIVOptionDialog::ColorScheme::DARK
+                                           ? Qt::ColorScheme::Dark
+                                           : Qt::ColorScheme::Light);
+#else
+    Q_UNUSED(scheme); // Qt < 6.5 has no dark-mode support and is always light
+#endif
 }
 
 #ifdef Q_OS_WINDOWS
@@ -216,10 +242,13 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     }
     int theme_idx = 0;
     if(QStyleFactory::keys().contains(settings.theme))
-    {    
+    {
         QApplication::setStyle(settings.theme);
         theme_idx = QStyleFactory::keys().indexOf(settings.theme);
     }
+    // Apply the color scheme after the style: switching style resets the
+    // palette, and dark mode may itself force a scheme-capable style.
+    applyColorScheme(settings.colorScheme);
 
     QApplication::setFont(resolveUiDisplayFont(settings));
 
@@ -1040,6 +1069,7 @@ void IIViewer::onSysOptionAction(bool check)
     dlg.set_uv_disp_mode(this->settings.uv_value_disp_mode);
     dlg.set_pix_val_bg_color_index(this->settings.pix_val_bg_index);
     dlg.set_pix_val_custom_bg_color(this->settings.pix_val_cus_bg_color);
+    dlg.set_color_scheme(this->settings.colorScheme);
     dlg.set_ui_display_font(resolveUiDisplayFont(this->settings));
     if(dlg.exec() == IIVOptionDialog::DialogCode::Accepted)
     {
@@ -1048,6 +1078,21 @@ void IIViewer::onSysOptionAction(bool check)
         this->settings.pix_val_cus_bg_color = dlg.pix_val_cus_bg_color;
         this->settings.uiFontFamily = dlg.ui_font_family;
         this->settings.uiFontPointSize = dlg.ui_font_point_size;
+        if (this->settings.colorScheme != dlg.color_scheme)
+        {
+            this->settings.colorScheme = dlg.color_scheme;
+            if (dlg.color_scheme == IIVOptionDialog::ColorScheme::LIGHT)
+            {
+                // Restore the style saved in settings when leaving dark mode
+                // (dark mode may have forced the windows11 style).
+                if (QStyleFactory::keys().contains(this->settings.theme))
+                {
+                    QApplication::setStyle(this->settings.theme);
+                }
+            }
+            applyColorScheme(this->settings.colorScheme);
+            refreshIcons();
+        }
         const QFont uiFont = resolveUiDisplayFont(this->settings);
         QApplication::setFont(uiFont);
 
@@ -1938,6 +1983,69 @@ void IIViewer::setPenWidth(int width)
 {
     ui.imageLabel.at(0)->setPenWidth(width);
     ui.imageLabel.at(1)->setPenWidth(width);
+}
+
+void IIViewer::refreshIcons()
+{
+    // Re-set every themed icon after a color scheme change; iconPath()
+    // resolves the -light/-dark suffix from the current scheme.
+    ui.openFileLeftAction->setIcon(QIcon(iconPath("file-earmark-left")));
+    ui.openFileRightAction->setIcon(QIcon(iconPath("file-earmark-right")));
+    ui.openUrlLeftAction->setIcon(QIcon(iconPath("open-url-left")));
+    ui.openUrlRightAction->setIcon(QIcon(iconPath("open-url-right")));
+    ui.reloadFileLeftAction->setIcon(QIcon(iconPath("reload-left")));
+    ui.reloadFileRightAction->setIcon(QIcon(iconPath("reload-right")));
+    ui.closeLeftAction->setIcon(QIcon(iconPath("file-x")));
+    ui.closeRightAction->setIcon(QIcon(iconPath("file-x")));
+    ui.dataAnalyseAction->setIcon(QIcon(iconPath("data-analyse")));
+    ui.playListAction->setIcon(QIcon(iconPath("play-list")));
+    ui.workAreaSingleModeAction->setIcon(QIcon(iconPath("single_rect")));
+    ui.workAreaDoubleModeAction->setIcon(QIcon(iconPath("double_rect")));
+    ui.useRoiToolAction->setIcon(QIcon(iconPath("bounding-box-circles")));
+    ui.useMoveToolAction->setIcon(QIcon(iconPath("arrows-move")));
+    ui.sysOptionAction->setIcon(QIcon(iconPath("options")));
+    ui.aboutThisAction->setIcon(QIcon(iconPath("info-circle")));
+    ui.checkUpdateAction->setIcon(QIcon(iconPath("update_version")));
+    ui.onlineHelpAction->setIcon(QIcon(iconPath("help-circle")));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(iconPath("right2left")));
+    ui.imageInfoBtn->setIcon(QIcon(iconPath("img-info")));
+    ui.imageDiffInfoBtn->setIcon(QIcon(iconPath("compare_diff")));
+    ui.paintOk0->setIcon(QIcon(iconPath("check-lg")));
+    ui.paintOk1->setIcon(QIcon(iconPath("check-lg")));
+    ui.syncRight->setIcon(QIcon(iconPath("arrow-right-short")));
+    ui.syncLeft->setIcon(QIcon(iconPath("arrow-left-short")));
+    ui.clearPaintBtn->setIcon(QIcon(iconPath("eraser")));
+    // Sub-menus have no stored pointer; find them by objectName via the menu
+    // bar actions. On Windows the menu bar is hosted inside the custom title
+    // bar (QMainWindow::menuBar() would create a new one and evict the title
+    // bar from the menu widget area); other platforms use the native menu bar.
+    QMenuBar *mbar = (ui.titleBar != nullptr)
+                         ? ui.titleBar->menuBar()
+                         : QMainWindow::menuBar();
+    for (QAction *menuAct : mbar->actions())
+    {
+        if (QMenu *menu = menuAct->menu())
+        {
+            for (QAction *subAct : menu->actions())
+            {
+                if (QMenu *sub = subAct->menu())
+                {
+                    if (sub->objectName() == QLatin1String("themeMenu"))
+                    {
+                        sub->setIcon(QIcon(iconPath("skin")));
+                    }
+                    else if (sub->objectName() == QLatin1String("mouseForMenu"))
+                    {
+                        sub->setIcon(QIcon(iconPath("mouse")));
+                    }
+                }
+            }
+        }
+    }
+    if (ui.titleBar != nullptr)
+    {
+        ui.titleBar->updateMaximizeButton(isMaximized());
+    }
 }
 
 void IIViewer::setTheme()

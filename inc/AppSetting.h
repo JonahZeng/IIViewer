@@ -4,7 +4,6 @@
 #include <QJsonObject>
 #include <QString>
 #include <QColor>
-
 class AppSettings
 {
 public:
@@ -22,6 +21,7 @@ public:
     ByteOrderType rawByteOrder;
     bool raw_compact;
     QString theme;
+    IIVOptionDialog::ColorScheme colorScheme;
     int uv_value_disp_mode;
     IIVOptionDialog::PaintPixValBgColor pix_val_bg_index;
     QColor pix_val_cus_bg_color;

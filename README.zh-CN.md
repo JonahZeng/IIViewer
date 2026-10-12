@@ -53,7 +53,7 @@
 
 启动应用后，将任意支持的图像文件拖拽到窗口中即可：
 
-![windows-main-ui](./doc/image/main-ui.png)
+![win-zh-ui](./doc/image/win-zh.png)
 
 ![ubuntu-zh-ui](./doc/image/ubuntu-zh.png)
 

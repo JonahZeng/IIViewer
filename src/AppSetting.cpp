@@ -27,6 +27,7 @@ AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE),
 {
     workPath = QDir::homePath();
     theme = QStyleFactory::keys().first();
+    colorScheme = IIVOptionDialog::ColorScheme::LIGHT;
     windowGeometry = QRect(0, 0, 800, 600);  // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }
 
@@ -133,6 +134,10 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
     {
         theme = json.value("theme").toString();
     }
+    if (json.contains("colorScheme"))
+    {
+        colorScheme = static_cast<IIVOptionDialog::ColorScheme>(json.value("colorScheme").toInt());
+    }
     if (json.contains("uv_value_disp_mode"))
     {
         uv_value_disp_mode = json.value("uv_value_disp_mode").toInt();
@@ -219,6 +224,8 @@ void AppSettings::write(QJsonObject& json) const
     json["raw_compact"] = static_cast<int>(raw_compact);
 
     json["theme"] = theme;
+
+    json["colorScheme"] = static_cast<int>(colorScheme);
 
     json["uv_value_disp_mode"] = uv_value_disp_mode;
 

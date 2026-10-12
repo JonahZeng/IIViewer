@@ -53,7 +53,7 @@ For windows 10/11 user, winget is the most convenient install method, just run c
 
 Start the app and drag any supported image file onto the window:
 
-![windows-main-ui](./doc/image/main-ui.png)
+![win-zh-ui](./doc/image/win-zh.png)
 
 ![ubuntu-zh-ui](./doc/image/ubuntu-zh.png)
 

@@ -15,7 +15,7 @@ constexpr int defaultUiFontPointSize = 10;
 }
 
 
-IIVOptionDialog::IIVOptionDialog(QWidget *parent): QDialog(parent), pix_val_bg_color_index(PaintPixValBgColor::GRAY), ui()
+IIVOptionDialog::IIVOptionDialog(QWidget *parent): QDialog(parent), pix_val_bg_color_index(PaintPixValBgColor::GRAY), color_scheme(ColorScheme::LIGHT), ui()
 {
     ui.setupUi(this);
     ui.paint_pix_val_bg_color_comboBox->setItemIcon(PaintPixValBgColor::NONE, QIcon()); 
@@ -54,6 +54,9 @@ IIVOptionDialog::IIVOptionDialog(QWidget *parent): QDialog(parent), pix_val_bg_c
             { this->uv_disp_mode = ui.uv_pix_value_mode_comboBox->currentIndex();});
     
     connect(ui.paint_pix_val_bg_color_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &IIVOptionDialog::change_pix_val_bg_color);
+
+    connect(ui.color_scheme_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]()
+            { this->color_scheme = static_cast<ColorScheme>(ui.color_scheme_comboBox->currentIndex());});
 
     initFontControls();
     set_ui_display_font(QApplication::font());
