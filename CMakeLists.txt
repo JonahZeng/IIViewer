@@ -155,6 +155,9 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/YuvFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.ui
+        ${CMAKE_SOURCE_DIR}/src/RgbFileInfoDlg.cpp
+        ${CMAKE_SOURCE_DIR}/inc/RgbFileInfoDlg.h
+        ${CMAKE_SOURCE_DIR}/inc/RgbFileInfoDlg.ui
         ${CMAKE_SOURCE_DIR}/src/DataVisualDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/DataVisualDlg.h
         ${CMAKE_SOURCE_DIR}/inc/resource.h

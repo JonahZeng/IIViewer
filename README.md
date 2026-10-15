@@ -36,6 +36,7 @@ This image viewer is designed for open, view and compare ISP intermediate image.
 |rgbir-raw|8/10/12/14/16/18/20/22/24 bit|
 |dng|(CFA Bayer + uncompressed) produced by DJI pocket 4, (LinearRaw + LossJPEG-compressed) produced by iPhone 13 pro|
 |yuv|8/10/12, 444-interleave/444-planar/422-UYVY/422-YUYV/420-NV12/420-NV21/420P-YU12/420P-YV12/400|
+|rgb|8/10/12/14/16 bit, 8bit stored in 1 byte, >8bit in 2 bytes (LSB aligned, little-endian)|
 |heif|yuv420/422/444 8bit|
 
 ## Usage

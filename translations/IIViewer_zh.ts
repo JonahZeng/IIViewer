@@ -1066,4 +1066,38 @@
         <translation>UYVY_AS1</translation>
     </message>
 </context>
+<context>
+    <name>rgbInfoDialog</name>
+    <message>
+        <location filename="../inc/RgbFileInfoDlg.ui" line="20"/>
+        <source>RGB info setting</source>
+        <translation>RGB信息设置</translation>
+    </message>
+    <message>
+        <location filename="../inc/RgbFileInfoDlg.ui" line="28"/>
+        <source>width:</source>
+        <translation>宽度：</translation>
+    </message>
+    <message>
+        <location filename="../inc/RgbFileInfoDlg.ui" line="33"/>
+        <location filename="../inc/RgbFileInfoDlg.ui" line="49"/>
+        <source>D0000</source>
+        <translation>D0000</translation>
+    </message>
+    <message>
+        <location filename="../inc/RgbFileInfoDlg.ui" line="44"/>
+        <source>height:</source>
+        <translation>高度：</translation>
+    </message>
+    <message>
+        <location filename="../inc/RgbFileInfoDlg.ui" line="62"/>
+        <source>bit depth:</source>
+        <translation>位深：</translation>
+    </message>
+    <message>
+        <location filename="../inc/RgbFileInfoDlg.ui" line="82"/>
+        <source>8bit: 1 byte per component; &gt;8bit: 2 bytes, LSB aligned, little-endian</source>
+        <translation>8bit：每分量 1 字节；超过 8bit：2 字节，低位对齐，little-endian</translation>
+    </message>
+</context>
 </TS>

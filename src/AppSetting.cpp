@@ -5,10 +5,13 @@
 #include <QJsonDocument>
 #include <QStyleFactory>
 
-AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE), 
+AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE),
     yuv_bitDepth(8), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     yuv_width(0),
     yuv_height(0),
+    rgb_bitDepth(8), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    rgb_width(0),
+    rgb_height(0),
     rawByType(BayerPatternType::RGGB),
     raw_bitDepth(8), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     raw_width(0),
@@ -105,6 +108,18 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
     if (json.contains("yuv_height"))
     {
         yuv_height = json.value("yuv_height").toInt();
+    }
+    if (json.contains("rgb_bitDepth"))
+    {
+        rgb_bitDepth = json.value("rgb_bitDepth").toInt();
+    }
+    if (json.contains("rgb_width"))
+    {
+        rgb_width = json.value("rgb_width").toInt();
+    }
+    if (json.contains("rgb_height"))
+    {
+        rgb_height = json.value("rgb_height").toInt();
     }
     if (json.contains("rawByType"))
     {
@@ -210,6 +225,12 @@ void AppSettings::write(QJsonObject& json) const
     json["yuv_width"] = yuv_width;
 
     json["yuv_height"] = yuv_height;
+
+    json["rgb_bitDepth"] = rgb_bitDepth;
+
+    json["rgb_width"] = rgb_width;
+
+    json["rgb_height"] = rgb_height;
 
     json["rawByType"] = static_cast<int>(rawByType);
 

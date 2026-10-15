@@ -14,6 +14,9 @@ public:
     int yuv_bitDepth;
     int yuv_width;
     int yuv_height;
+    int rgb_bitDepth;
+    int rgb_width;
+    int rgb_height;
     BayerPatternType rawByType;
     int raw_bitDepth;
     int raw_width;

@@ -1736,6 +1736,10 @@ void IIViewer::reLoadFile(int scrollArea) // NOLINT(readability-function-cogniti
     {
         loadYuvFile(dstFn, scrollArea, true);
     }
+    else if (dstFn.endsWith(".rgb", Qt::CaseInsensitive))
+    {
+        loadRgbFile(dstFn, scrollArea, true);
+    }
     else if (dstFn.endsWith(".heic", Qt::CaseInsensitive))
     {
         loadHeifFile(dstFn, scrollArea, true);
@@ -1827,6 +1831,10 @@ void IIViewer::loadFile(const QString &fileName, int scrollArea) // NOLINT(reada
     {
         loadYuvFile(fileName, scrollArea);
     }
+    else if (fileName.endsWith(".rgb", Qt::CaseInsensitive))
+    {
+        loadRgbFile(fileName, scrollArea);
+    }
     else if (fileName.endsWith(".dng", Qt::CaseInsensitive))
     {
         loadDngFile(fileName, scrollArea);
@@ -1880,6 +1888,15 @@ void IIViewer::setYuvImage(QString &imageName, YuvType yuv_tp, int bitDepth, int
     ui.imageLabel.at(leftOrRight)->paintEnd = false;
     ui.imageLabel.at(leftOrRight)->imgName = &imageName;
     ui.imageLabel.at(leftOrRight)->setPixmap(yuv_tp, bitDepth, width, height, pixSize);
+    ui.imageLabel.at(leftOrRight)->lastCurve = std::array<QPoint, IMG_PREVIEW_ADJ_CURVE_DOTS>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
+}
+
+void IIViewer::setRgbImage(QString &imageName, int bitDepth, int width, int height, int pixSize, int leftOrRight)
+{
+    ui.imageLabel.at(leftOrRight)->paintBegin = false;
+    ui.imageLabel.at(leftOrRight)->paintEnd = false;
+    ui.imageLabel.at(leftOrRight)->imgName = &imageName;
+    ui.imageLabel.at(leftOrRight)->setRgbPixmap(bitDepth, width, height, pixSize);
     ui.imageLabel.at(leftOrRight)->lastCurve = std::array<QPoint, IMG_PREVIEW_ADJ_CURVE_DOTS>{QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0), QPoint(0, 0)};
 }
 

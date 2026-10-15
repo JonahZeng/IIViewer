@@ -36,6 +36,7 @@
 |rgbir-raw|8/10/12/14/16/18/20/22/24 bit|
 |dng|(CFA Bayer + 未压缩) 由 DJI pocket 4 拍摄，(LinearRaw + LossJPEG 压缩) 由 iPhone 13 pro 拍摄|
 |yuv|8/10/12，444-交织/444-平面/422-UYVY/422-YUYV/420-NV12/420-NV21/420P-YU12/420P-YV12/400|
+|rgb|8/10/12/14/16 bit，8bit 每分量 1 字节存储，超过 8bit 用 2 字节（低位对齐，little-endian）|
 |heif|yuv420/422/444 8bit|
 
 ## 使用方法
