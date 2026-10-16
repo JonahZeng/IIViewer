@@ -42,6 +42,7 @@ private:
     static bool isRemoteUrl(const QString &s);
     void reLoadFile(int scrollArea);
     void loadYuvFile(const QString &fileName, int scrollArea, bool reload=false);
+    void loadRgbFile(const QString &fileName, int scrollArea, bool reload=false);
     void loadRawFile(const QString &fileName, int scrollArea, bool reload=false);
     void loadPnmFile(const QString &fileName, int scrollArea, bool reload=false);
     void loadPgmFile(const QString &fileName, int scrollArea, bool reload=false);
@@ -50,6 +51,7 @@ private:
     void loadFilePostProcessLayoutAndScrollValue(int leftOrRight);
     void setImage(QString &image, int leftOrRight);
     void setYuvImage(QString &imageName, YuvType tp, int bitDepth, int width, int height, int pixSize, int leftOrRight);
+    void setRgbImage(QString &imageName, int bitDepth, int width, int height, int pixSize, int leftOrRight);
     void setRawImage(QString &image, BayerPatternType bay, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight);
     void setDngRawImage(QString &image, BayerPatternType bay, ByteOrderType order, int bitDepth, bool compact, int width, int height, int leftOrRight, const uint8_t* raw_buffer);
     void setDngPnmImage(QString &imageName, int bitDepth, int width, int height, int leftOrRight, const uint8_t* rgb_buffer);
@@ -105,6 +107,7 @@ public slots:
     void syncScrollArea0_verScBarVal(int);
     void updateExchangeBtn();
     void updateZoomLabelText();
+    void refreshIcons();
     void exchangeRight2LeftImg();
     void restoreLeftImg();
     void showImageInfo();

@@ -5,10 +5,13 @@
 #include <QJsonDocument>
 #include <QStyleFactory>
 
-AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE), 
+AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE),
     yuv_bitDepth(8), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     yuv_width(0),
     yuv_height(0),
+    rgb_bitDepth(8), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    rgb_width(0),
+    rgb_height(0),
     rawByType(BayerPatternType::RGGB),
     raw_bitDepth(8), // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     raw_width(0),
@@ -27,6 +30,7 @@ AppSettings::AppSettings() : yuvType(YuvType::YUV444_INTERLEAVE),
 {
     workPath = QDir::homePath();
     theme = QStyleFactory::keys().first();
+    colorScheme = IIVOptionDialog::ColorScheme::LIGHT;
     windowGeometry = QRect(0, 0, 800, 600);  // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 }
 
@@ -105,6 +109,18 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
     {
         yuv_height = json.value("yuv_height").toInt();
     }
+    if (json.contains("rgb_bitDepth"))
+    {
+        rgb_bitDepth = json.value("rgb_bitDepth").toInt();
+    }
+    if (json.contains("rgb_width"))
+    {
+        rgb_width = json.value("rgb_width").toInt();
+    }
+    if (json.contains("rgb_height"))
+    {
+        rgb_height = json.value("rgb_height").toInt();
+    }
     if (json.contains("rawByType"))
     {
         rawByType = BayerPatternType(json.value("rawByType").toInt());
@@ -132,6 +148,10 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
     if (json.contains("theme"))
     {
         theme = json.value("theme").toString();
+    }
+    if (json.contains("colorScheme"))
+    {
+        colorScheme = static_cast<IIVOptionDialog::ColorScheme>(json.value("colorScheme").toInt());
     }
     if (json.contains("uv_value_disp_mode"))
     {
@@ -206,6 +226,12 @@ void AppSettings::write(QJsonObject& json) const
 
     json["yuv_height"] = yuv_height;
 
+    json["rgb_bitDepth"] = rgb_bitDepth;
+
+    json["rgb_width"] = rgb_width;
+
+    json["rgb_height"] = rgb_height;
+
     json["rawByType"] = static_cast<int>(rawByType);
 
     json["raw_bitDepth"] = raw_bitDepth;
@@ -219,6 +245,8 @@ void AppSettings::write(QJsonObject& json) const
     json["raw_compact"] = static_cast<int>(raw_compact);
 
     json["theme"] = theme;
+
+    json["colorScheme"] = static_cast<int>(colorScheme);
 
     json["uv_value_disp_mode"] = uv_value_disp_mode;
 

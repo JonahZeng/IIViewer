@@ -31,7 +31,8 @@ ImageWidget::ImageWidget(QColor color, int penWidth, QScrollArea *parentScroll, 
       pixValPaintRect(), 
       rawDataPtr(nullptr), rawDataBit(0),
       pnmDataPtr(nullptr), pnmDataBit(0), pgmDataPtr(nullptr), pgmDataBit(0),
-      yuvDataPtr(nullptr), yuvDataBit(0), 
+      yuvDataPtr(nullptr), yuvDataBit(0),
+      rgbDataPtr(nullptr), rgbDataBit(0),
       normalDataPixMap(nullptr),
       rawBayerType(BayerPatternType::BAYER_UNKNOW), rawByteOrderType(RAW_LITTLE_ENDIAN), yuvType(YuvType::YUV_UNKNOW),
       openedImgType(UNKNOW_IMG),
@@ -491,6 +492,99 @@ void ImageWidget::paintPgmPixVal(QPoint &viewTopLeftPix, QPainter &painter, int 
                 QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 32);
 
                 painter.drawText(pixValRect, Qt::AlignCenter, QString::asprintf("%d", gray));
+            }
+        }
+    }
+}
+
+void ImageWidget::paintRgbPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft)
+{
+    int xStart = viewTopLeftPix.x();
+    int yStart = viewTopLeftPix.y();
+
+    if(appSettings->pix_val_bg_index != IIVOptionDialog::PaintPixValBgColor::NONE)
+    {
+        setPainterColorShape(painter);
+        for (int h = 0; h < viewPixHeight; h++)
+        {
+            for (int w = 0; w < viewPixWidth; w++)
+            {
+                QRectF pixValBgRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 64);
+                painter.drawRect(pixValBgRect);
+            }
+        }
+    }
+
+    int rgbWidth = pixMap->width();
+    int rgbHeight = pixMap->height();
+
+    painter.setPen(QColor(255, 0, 0));
+    for (int h = 0; h < viewPixHeight; h++)
+    {
+        for (int w = 0; w < viewPixWidth; w++)
+        {
+            if (yStart + h < rgbHeight && xStart + w < rgbWidth)
+            {
+                unsigned int r = 0;
+                if (rgbDataBit <= 8)
+                {
+                    r = ((unsigned char *)rgbDataPtr)[(yStart + h) * rgbWidth * 3 + (xStart + w) * 3];
+                }
+                else if (rgbDataBit > 8 && rgbDataBit <= 16)
+                {
+                    r = ((unsigned short *)rgbDataPtr)[(yStart + h) * rgbWidth * 3 + (xStart + w) * 3];
+                }
+
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16, 64, 21);
+
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("%d", r));
+            }
+        }
+    }
+
+    painter.setPen(QColor(0, 255, 0));
+    for (int h = 0; h < viewPixHeight; h++)
+    {
+        for (int w = 0; w < viewPixWidth; w++)
+        {
+            if (yStart + h < rgbHeight && xStart + w < rgbWidth)
+            {
+                unsigned int g = 0;
+                if (rgbDataBit <= 8)
+                {
+                    g = ((unsigned char *)rgbDataPtr)[(yStart + h) * rgbWidth * 3 + (xStart + w) * 3 + 1];
+                }
+                else if (rgbDataBit > 8 && rgbDataBit <= 16)
+                {
+                    g = ((unsigned short *)rgbDataPtr)[(yStart + h) * rgbWidth * 3 + (xStart + w) * 3 + 1];
+                }
+
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
+
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("%d", g));
+            }
+        }
+    }
+    painter.setPen(QColor(0, 0, 255));
+    for (int h = 0; h < viewPixHeight; h++)
+    {
+        for (int w = 0; w < viewPixWidth; w++)
+        {
+            if (yStart + h < rgbHeight && xStart + w < rgbWidth)
+            {
+                unsigned int b = 0;
+                if (rgbDataBit <= 8)
+                {
+                    b = ((unsigned char *)rgbDataPtr)[(yStart + h) * rgbWidth * 3 + (xStart + w) * 3 + 2];
+                }
+                else if (rgbDataBit > 8 && rgbDataBit <= 16)
+                {
+                    b = ((unsigned short *)rgbDataPtr)[(yStart + h) * rgbWidth * 3 + (xStart + w) * 3 + 2];
+                }
+
+                QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21 + 21, 64, 21);
+
+                painter.drawText(pixValRect, Qt::AlignCenter | Qt::TextWordWrap, QString::asprintf("%d", b));
             }
         }
     }
@@ -1503,6 +1597,10 @@ void ImageWidget::paintEvent(QPaintEvent *event)
                 paintYuv400PixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
             }
         }
+        else if (openedImgType == RGB_IMG)
+        {
+            paintRgbPixVal(viewTopLeftPix, painter, viewPixWidth, viewPixHeight, paintPixValTopLeft);
+        }
     }
 }
 
@@ -2474,6 +2572,74 @@ void ImageWidget::setDngPnmPixmap(int bitDepth, int width, int height, const uin
     repaint();
 }
 
+void ImageWidget::setRgbPixmap(int bitDepth, int width, int height, int pixSize) // rgb: 8bit->1byte, >8bit->2byte LSB aligned little-endian
+{
+    if(imgName == nullptr)
+    {
+        return;
+    }
+
+    const qint64 total_size = static_cast<qint64>(pixSize) * width * height * 3;
+
+    releaseBuffer();
+
+    unsigned char *buffer = new unsigned char[total_size];
+    pixMap = new QImage(width, height, QImage::Format_RGB888);
+    int bytesperline = pixMap->bytesPerLine();
+    unsigned char *bufferShow = pixMap->bits();
+
+    QFile rgbFile(*imgName);
+    bool open_result = rgbFile.open(QIODevice::ReadOnly);
+    if (!open_result)
+    {
+        QMessageBox::critical(this, "error", "failed to open rgb image", QMessageBox::StandardButton::Ok);
+        return;
+    }
+    rgbFile.read((char *)buffer, total_size);
+    rgbFile.close();
+
+    if (pixSize == 1)
+    {
+        for (qint64 i = 0; i < height; i++)
+        {
+            for (qint64 j = 0; j < width * 3; j++)
+            {
+                bufferShow[i * bytesperline + j] = buffer[i * width * 3 + j];
+            }
+        }
+    }
+    else // 2 bytes per component, LSB aligned, little-endian
+    {
+        unsigned short *buffer_us = (unsigned short *)buffer;
+        for (qint64 i = 0; i < height; i++)
+        {
+            for (qint64 j = 0; j < width * 3; j++)
+            {
+                bufferShow[i * bytesperline + j] = buffer_us[i * width * 3 + j] >> (bitDepth - 8);
+            }
+        }
+    }
+
+    rawDataPtr = nullptr;
+    rawDataBit = 0;
+    rawBayerType = BAYER_UNKNOW;
+    rawByteOrderType = ByteOrderType::RAW_LITTLE_ENDIAN;
+    pnmDataPtr = nullptr;
+    pnmDataBit = 0;
+    pgmDataPtr = nullptr;
+    pgmDataBit = 0;
+    yuvDataPtr = nullptr;
+    yuvDataBit = 0;
+    yuvType = YUV_UNKNOW;
+    rgbDataPtr = buffer;
+    rgbDataBit = bitDepth;
+    openedImgType = RGB_IMG;
+    normalDataPixMap = nullptr;
+
+    resize(pixMap->size() * zoomList[zoomIdx]);
+    repaint();
+}
+
 void ImageWidget::setPixmap(YuvType tp, int bitDepth, int width, int height, int pixSize) // yuv
 {
     if(imgName == nullptr)
@@ -2724,6 +2890,11 @@ void ImageWidget::releaseBuffer()
         delete[] yuvDataPtr;
         yuvDataPtr = nullptr;
     }
+    if (rgbDataPtr != nullptr)
+    {
+        delete[] rgbDataPtr;
+        rgbDataPtr = nullptr;
+    }
 }
 
 void ImageWidget::acceptImgFromOther(const ImageWidget *other)
@@ -2738,6 +2909,8 @@ void ImageWidget::acceptImgFromOther(const ImageWidget *other)
     pgmDataBitBak = pgmDataBit;
     yuvDataPtrBak = yuvDataPtr;
     yuvDataBitBak = yuvDataBit;
+    rgbDataPtrBak = rgbDataPtr;
+    rgbDataBitBak = rgbDataBit;
     rawBayerTypeBak = rawBayerType;
     rawByteOrderTypeBak = rawByteOrderType;
     yuvTypeBak = yuvType;
@@ -2753,6 +2926,8 @@ void ImageWidget::acceptImgFromOther(const ImageWidget *other)
     pgmDataBit = other->pgmDataBit;
     yuvDataPtr = other->yuvDataPtr;
     yuvDataBit = other->yuvDataBit;
+    rgbDataPtr = other->rgbDataPtr;
+    rgbDataBit = other->rgbDataBit;
     rawBayerType = other->rawBayerType;
     rawByteOrderType = other->rawByteOrderType;
     yuvType = other->yuvType;
@@ -2772,6 +2947,8 @@ void ImageWidget::restoreImg()
     pgmDataBit = pgmDataBitBak;
     yuvDataPtr = yuvDataPtrBak;
     yuvDataBit = yuvDataBitBak;
+    rgbDataPtr = rgbDataPtrBak;
+    rgbDataBit = rgbDataBitBak;
     rawBayerType = rawBayerTypeBak;
     rawByteOrderType = rawByteOrderTypeBak;
     yuvType = yuvTypeBak;
@@ -2807,6 +2984,11 @@ void ImageWidget::adjustPreviewCurve()
     {
         img_bits = yuvDataBit;
         src_img = yuvDataPtr;
+    }
+    else if(openedImgType == OpenedImageType::RGB_IMG)
+    {
+        img_bits = rgbDataBit;
+        src_img = rgbDataPtr;
     }
 
     CurveAdjustDialog* curveDialog = nullptr;

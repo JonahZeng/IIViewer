@@ -42,6 +42,7 @@ public:
     void setDngRawPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height, const uint8_t* raw_buffer);
     void setDngPnmPixmap(int bitDepth, int width, int height, const uint8_t* rgb_buffer);
     void setPixmap(YuvType tp, int bitDepth, int width, int height, int pixSize);
+    void setRgbPixmap(int bitDepth, int width, int height, int pixSize);
     void zoomIn(int zoomIdx);
     void zoomOut(int zoomIdx);
     void setMouseActionPaintRoi()
@@ -89,6 +90,7 @@ private:
     void paintYuv420PYU12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv420PYV12PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void paintYuv400PixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
+    void paintRgbPixVal(QPoint &viewTopLeftPix, QPainter &painter, int viewPixWidth, int viewPixHeight, QPoint &paintPixValTopLeft);
     void setPainterColorShape(QPainter &painter);
     BayerPixelType getPixType(int y, int x, BayerPatternType by);
     QString generateRoiDataStr();
@@ -124,6 +126,8 @@ public:
     int pgmDataBit;
     unsigned char *yuvDataPtr;
     int yuvDataBit;
+    unsigned char *rgbDataPtr;
+    int rgbDataBit;
     QImage *normalDataPixMap;
     BayerPatternType rawBayerType;
     ByteOrderType rawByteOrderType;
@@ -143,6 +147,8 @@ private:
     int pgmDataBitBak;
     unsigned char *yuvDataPtrBak;
     int yuvDataBitBak;
+    unsigned char *rgbDataPtrBak;
+    int rgbDataBitBak;
     QImage *normalDataPixMapBak;
     BayerPatternType rawBayerTypeBak;
     ByteOrderType rawByteOrderTypeBak;

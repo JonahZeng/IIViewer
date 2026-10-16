@@ -1,10 +1,102 @@
 #include "config.h"
 #include "IIViewer.h"
+#include "RgbFileInfoDlg.h"
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QImageReader>
 #include <libheif/heif.h>
 #include <dng/dng_parser.h>
+
+void IIViewer::loadRgbFile(const QString &fileName, int scrollArea, bool reload)
+{
+    RgbFileInfoDlg dlg(this);
+
+    dlg.ui.bitDepthSpinBox->setValue(settings.rgb_bitDepth);
+    dlg.ui.widthLineEdit->setText(QString::asprintf("%d", settings.rgb_width));
+    dlg.ui.heightLineEdit->setText(QString::asprintf("%d", settings.rgb_height));
+
+    if (dlg.exec() != RgbFileInfoDlg::Accepted)
+    {
+        return;
+    }
+
+    const int bitDepth = dlg.ui.bitDepthSpinBox->value();
+    int pixSize = 2;
+    if (bitDepth <= BIT8)
+    {
+        pixSize = 1;
+    }
+    else if (bitDepth > BIT8 && bitDepth <= BIT16)
+    {
+        pixSize = 2;
+    }
+    else
+    {
+        QMessageBox::warning(this, tr("error"), tr("rgb bits > 16"), QMessageBox::StandardButton::Ok);
+        return;
+    }
+
+    const int width = dlg.ui.widthLineEdit->text().toInt();
+    const int height = dlg.ui.heightLineEdit->text().toInt();
+    // 8bit: 1 byte per component; >8bit: 2 bytes, LSB aligned, little-endian
+    const qint64 totalSize = static_cast<qint64>(width) * height * pixSize * 3U;
+
+    settings.rgb_bitDepth = bitDepth;
+    settings.rgb_width = width;
+    settings.rgb_height = height;
+
+    const QFileInfo fileInfo(fileName);
+    const qint64 rgbFileSize = fileInfo.size();
+    if (totalSize > rgbFileSize)
+    {
+        QMessageBox::warning(this, tr("error"), tr("rgb file size < your require"), QMessageBox::StandardButton::Ok);
+        return;
+    }
+    if (scrollArea == LEFT_IMG_WIDGET)
+    {
+        if (!openedFile.at(1).isEmpty())
+        {
+            if (QSize(width, height) != originSize.at(1))
+            {
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
+                return;
+            }
+        }
+        if(!reload)
+        {
+            onCloseLeftFileAction();
+        }
+        openedFile.at(0) = fileName;
+        originSize.at(0) = QSize(width, height);
+        setRgbImage(openedFile.at(0), bitDepth, width, height, pixSize, LEFT_IMG_WIDGET);
+        if(!reload) {
+            loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
+    }
+    else if (scrollArea == RIGHT_IMG_WIDGET)
+    {
+        if (!openedFile.at(0).isEmpty())
+        {
+            if (QSize(width, height) != originSize.at(0))
+            {
+                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"), QMessageBox::StandardButton::Ok);
+                return;
+            }
+        }
+        if(!reload)
+        {
+            onCloseRightFileAction();
+        }
+        openedFile.at(1) = fileName;
+        originSize.at(1) = QSize(width, height);
+        setRgbImage(openedFile.at(1), bitDepth, width, height, pixSize, RIGHT_IMG_WIDGET);
+        if(!reload) {
+            loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
+            addFileToHistory(fileName);
+        }
+    }
+}
 
 void IIViewer::loadYuvFile(const QString &fileName, int scrollArea, bool reload) // NOLINT(readability-function-cognitive-complexity)
 {

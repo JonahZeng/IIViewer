@@ -52,9 +52,10 @@ int main(int argc, char* argv[])
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
 #endif
     const QApplication app(argc, argv);
-    // Pin the UI to the light color scheme so it does not follow the OS
-    // light/dark switching (Qt >= 6.5). Qt < 6.5 has no dark-mode support
-    // and is always light, so nothing to do there.
+    // Pin the UI to the light color scheme by default so it does not follow
+    // the OS light/dark switching (Qt >= 6.5). The scheme saved in the app
+    // settings is applied later, when IIViewer loads its settings.
+    // Qt < 6.5 has no dark-mode support and is always light.
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     app.styleHints()->setColorScheme(Qt::ColorScheme::Light);
 #endif
@@ -95,8 +96,16 @@ int main(int argc, char* argv[])
     {
         const QDir appDir(QApplication::applicationDirPath());
         // qDebug() << "Application directory: " << appDir.absolutePath();
+        // 繁体中文系统使用 zh_TW 翻译，其余中文使用简体 zh 翻译
+        const bool isTraditionalChinese = qt_locale.startsWith("zh_TW") ||
+                                          qt_locale.startsWith("zh_HK") ||
+                                          qt_locale.startsWith("zh_MO") ||
+                                          qt_locale == "zh-Hant";
+        const QString qmFileName = isTraditionalChinese
+                                       ? QString("translations/IIViewer_zh_TW.qm")
+                                       : QString("translations/IIViewer_zh.qm");
         QString zhTranslateFilePath;
-        
+
 #ifdef Q_OS_MACOS
         QDir resourcesDir(appDir);
         if (appDir.dirName() == "MacOS")
@@ -104,18 +113,18 @@ int main(int argc, char* argv[])
             // 如果在.app bundle中，转到Resources目录
             if (resourcesDir.cdUp() && resourcesDir.cd("Resources"))
             {
-                zhTranslateFilePath = resourcesDir.absoluteFilePath("translations/IIViewer_zh.qm");
+                zhTranslateFilePath = resourcesDir.absoluteFilePath(qmFileName);
             }
             else
             {
-                zhTranslateFilePath = appDir.absoluteFilePath("../Resources/translations/IIViewer_zh.qm");
+                zhTranslateFilePath = appDir.absoluteFilePath(QString("../Resources/") + qmFileName);
             }
         } else {
             // 如果不是在.app bundle中，使用相对路径
-            zhTranslateFilePath = appDir.absoluteFilePath("translations/IIViewer_zh.qm");
+            zhTranslateFilePath = appDir.absoluteFilePath(qmFileName);
         }
 #else
-        zhTranslateFilePath = appDir.absoluteFilePath("translations/IIViewer_zh.qm");
+        zhTranslateFilePath = appDir.absoluteFilePath(qmFileName);
 #endif
         if(translator.load(zhTranslateFilePath))
         {

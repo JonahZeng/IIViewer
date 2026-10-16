@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 1.2.3 LANGUAGES CXX)
+project(IIViewer VERSION 1.2.4 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -155,6 +155,9 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/YuvFileInfoDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.h
         ${CMAKE_SOURCE_DIR}/inc/YuvFileInfoDlg.ui
+        ${CMAKE_SOURCE_DIR}/src/RgbFileInfoDlg.cpp
+        ${CMAKE_SOURCE_DIR}/inc/RgbFileInfoDlg.h
+        ${CMAKE_SOURCE_DIR}/inc/RgbFileInfoDlg.ui
         ${CMAKE_SOURCE_DIR}/src/DataVisualDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/DataVisualDlg.h
         ${CMAKE_SOURCE_DIR}/inc/resource.h
@@ -185,6 +188,7 @@ set(PROJECT_SOURCES
 
 set(TRANSLATIONS
     translations/IIViewer_zh.ts
+    translations/IIViewer_zh_TW.ts
 )
 
 set(RESOURCES
@@ -296,7 +300,10 @@ elseif(UNIX AND NOT APPLE)
             COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_BINARY_DIR}/IIViewer_zh.qm
             $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
-            COMMENT "Copy translation qm file to target directory"
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_BINARY_DIR}/IIViewer_zh_TW.qm
+            $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh_TW.qm
+            COMMENT "Copy translation qm files to target directory"
         )
     endif()
 elseif(APPLE)
@@ -313,8 +320,12 @@ elseif(APPLE)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${LRELEASE_EXECUTABLE}
             ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
-            -qm 
+            -qm
             ${_qm_translation_path}/IIViewer_zh.qm
+            COMMAND ${LRELEASE_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh_TW.ts
+            -qm
+            ${_qm_translation_path}/IIViewer_zh_TW.qm
         )
     # endif()
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")

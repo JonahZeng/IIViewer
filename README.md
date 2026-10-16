@@ -18,6 +18,10 @@
     </a>
 </p>
 
+<p align="center">
+    English | <a href="./README.zh-CN.md">简体中文</a>
+</p>
+
 ## About
 
 This image viewer is designed for open, view and compare ISP intermediate image. We support these formats:
@@ -32,15 +36,25 @@ This image viewer is designed for open, view and compare ISP intermediate image.
 |rgbir-raw|8/10/12/14/16/18/20/22/24 bit|
 |dng|(CFA Bayer + uncompressed) produced by DJI pocket 4, (LinearRaw + LossJPEG-compressed) produced by iPhone 13 pro|
 |yuv|8/10/12, 444-interleave/444-planar/422-UYVY/422-YUYV/420-NV12/420-NV21/420P-YU12/420P-YV12/400|
+|rgb|8/10/12/14/16 bit, 8bit stored in 1 byte, >8bit in 2 bytes (LSB aligned, little-endian)|
 |heif|yuv420/422/444 8bit|
 
 ## Usage
 
+Pre-compiled binaries are available on the [release page](https://github.com/JonahZeng/IIViewer/releases):
+
+|OS|Architecture|Packages|
+|:--:|:--:|:--|
+|Windows 10/11|x86_64|`.exe` installer, `.msi`, portable `.zip`|
+|Ubuntu 22.04+|x86_64|`.deb`, `.AppImage` (with `.zsync` for delta updates)|
+|Ubuntu 24.04+|arm64|`.deb`, `.AppImage` (with `.zsync` for delta updates)|
+|macOS|arm64 (Apple Silicon)|`.dmg`|
+
 For windows 10/11 user, winget is the most convenient install method, just run command `winget install JonahZeng.IIViewer`.
 
-Download pre-compiled binary file from the [release page](https://github.com/JonahZeng/IIViewer/releases) (we provide x64 exe, deb, AppImage, and arm64 dmg). Start the app and drag any supported image file onto the window:
+Start the app and drag any supported image file onto the window:
 
-![windows-main-ui](./doc/image/main-ui.png)
+![win-zh-ui](./doc/image/win-zh.png)
 
 ![ubuntu-zh-ui](./doc/image/ubuntu-zh.png)
 

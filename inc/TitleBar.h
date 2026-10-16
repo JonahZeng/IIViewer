@@ -21,6 +21,7 @@ public:
     void setWindowIconPixmap(const QIcon &icon);
     void updateMaximizeButton(bool maximized);
     void updateScale(qreal scaleFactor);
+    void refreshThemeStyles();
 
     QPushButton *getMinimizeButton() const { return minimizeButton; }
     QPushButton *getMaximizeButton() const { return maximizeButton; }
@@ -33,6 +34,8 @@ protected:
 private:
     void syncMenuBarFont();
     void updateButtonIcons(bool maximized);
+    void refreshWindowButtonStyles();
+    void refreshMenuBarStyles();
 
     QLabel *iconLabel;
     QMenuBar *menuBarWidget;
@@ -40,4 +43,5 @@ private:
     QPushButton *maximizeButton;
     QPushButton *closeButton;
     qreal scale;
+    bool refreshingStyles = false;
 };

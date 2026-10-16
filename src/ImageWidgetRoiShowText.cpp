@@ -144,6 +144,48 @@ QString ImageWidget::generateRoiDataStr()
         }
         roiPixelValStr.append("]");
     }
+    else if(openedImgType == OpenedImageType::RGB_IMG)
+    {
+        int rgbWidth = pixMap->width();
+        roiPixelValStr.append("[");
+        for (int row = roi_top; row < roi_bottom; row++)
+        {
+            roiPixelValStr.append("[");
+            for (int col = roi_left; col < roi_right; col++)
+            {
+                unsigned int r_ = 0;
+                unsigned int g_ = 0;
+                unsigned int b_ = 0;
+                if (rgbDataBit <= 8)
+                {
+                    r_ = ((unsigned char *)rgbDataPtr)[row * rgbWidth * 3 + col * 3 + 0];
+                    g_ = ((unsigned char *)rgbDataPtr)[row * rgbWidth * 3 + col * 3 + 1];
+                    b_ = ((unsigned char *)rgbDataPtr)[row * rgbWidth * 3 + col * 3 + 2];
+                }
+                else if (rgbDataBit > 8 && rgbDataBit <= 16)
+                {
+                    r_ = ((unsigned short *)rgbDataPtr)[row * rgbWidth * 3 + col * 3 + 0];
+                    g_ = ((unsigned short *)rgbDataPtr)[row * rgbWidth * 3 + col * 3 + 1];
+                    b_ = ((unsigned short *)rgbDataPtr)[row * rgbWidth * 3 + col * 3 + 2];
+                }
+
+                if(col != roi_right - 1)
+                    roiPixelValStr.append(QString("[%1, %2, %3], ").arg(r_).arg(g_).arg(b_));
+                else
+                    roiPixelValStr.append(QString("[%1, %2, %3]").arg(r_).arg(g_).arg(b_));
+            }
+
+            if(row != roi_bottom - 1)
+            {
+                roiPixelValStr.append("],\n");
+            }
+            else
+            {
+                roiPixelValStr.append("]");
+            }
+        }
+        roiPixelValStr.append("]");
+    }
     else if(openedImgType == OpenedImageType::RAW_IMG)
     {
         int rawWidth = pixMap->width();

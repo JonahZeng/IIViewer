@@ -1,5 +1,6 @@
 #include "ImgInfoDlg.h"
 #include "IIViewer.h"
+#include "IconResource.h"
 #include "ImgDiffReportDlg.h"
 #include <QMessageBox>
 
@@ -43,13 +44,13 @@ void IIViewer::updateZoomLabelText()
 void IIViewer::exchangeRight2LeftImg()
 {
     ui.imageLabel.at(0)->acceptImgFromOther(ui.imageLabel.at(1));
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left-pressed.svg"));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(iconPath("right2left-pressed")));
 }
 
 void IIViewer::restoreLeftImg()
 {
     ui.imageLabel.at(0)->restoreImg();
-    ui.exchangeAreaPreviewBtn->setIcon(QIcon(":/image/src/resource/right2left.svg"));
+    ui.exchangeAreaPreviewBtn->setIcon(QIcon(iconPath("right2left")));
 }
 
 void IIViewer::showImageInfo()
@@ -69,9 +70,13 @@ void IIViewer::showImageInfo()
     {
         dlg.setImgInfo(img0Name, img0Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(0)->pgmDataBit, true);
     }
-    else if (openedFile.at(0).endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
+    else if (img0Name.endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
     {
         dlg.setImgInfo(img0Name, img0Size, BAYER_UNKNOW, ui.imageLabel.at(0)->yuvType, ui.imageLabel.at(0)->yuvDataBit, true);
+    }
+    else if (img0Name.endsWith("rgb", Qt::CaseSensitivity::CaseInsensitive))
+    {
+        dlg.setImgInfo(img0Name, img0Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(0)->rgbDataBit, true);
     }
     else if (img0Name.endsWith("jpg", Qt::CaseSensitivity::CaseInsensitive) || img0Name.endsWith("jpeg", Qt::CaseSensitivity::CaseInsensitive) || 
         img0Name.endsWith("bmp", Qt::CaseSensitivity::CaseInsensitive) || img0Name.endsWith("png", Qt::CaseSensitivity::CaseInsensitive))
@@ -107,6 +112,10 @@ void IIViewer::showImageInfo()
     else if (img1Name.endsWith("yuv", Qt::CaseSensitivity::CaseInsensitive))
     {
         dlg.setImgInfo(img1Name, img1Size, BAYER_UNKNOW, ui.imageLabel.at(1)->yuvType, ui.imageLabel.at(1)->yuvDataBit, false);
+    }
+    else if (img1Name.endsWith("rgb", Qt::CaseSensitivity::CaseInsensitive))
+    {
+        dlg.setImgInfo(img1Name, img1Size, BAYER_UNKNOW, YUV_UNKNOW, ui.imageLabel.at(1)->rgbDataBit, false);
     }
     else if (img1Name.endsWith("jpg", Qt::CaseSensitivity::CaseInsensitive) || img1Name.endsWith("jpeg", Qt::CaseSensitivity::CaseInsensitive) || 
         img1Name.endsWith("bmp", Qt::CaseSensitivity::CaseInsensitive) || img1Name.endsWith("png", Qt::CaseSensitivity::CaseInsensitive))
@@ -797,6 +806,17 @@ void IIViewer::showImageDiffReport()
             return;
         }
         const ImgDiffResult result = compareRawImage(ui.imageLabel[0]->rawDataPtr, ui.imageLabel[1]->rawDataPtr, ui.imageLabel[0]->rawDataBit, originSize[0]);
+        diffResult.report += result.report;
+        diffResult.maxDiffPos = result.maxDiffPos;
+    }
+    else if(ui.imageLabel[0]->openedImgType == OpenedImageType::RGB_IMG)
+    {
+        if(ui.imageLabel[0]->rgbDataBit != ui.imageLabel[1]->rgbDataBit)
+        {
+            QMessageBox::critical(this, tr("error"), tr("left image bit width not equal to right side!"), QMessageBox::StandardButton::Close);
+            return;
+        }
+        const ImgDiffResult result = comparePnmImage(ui.imageLabel[0]->rgbDataPtr, ui.imageLabel[1]->rgbDataPtr, ui.imageLabel[0]->rgbDataBit, originSize[0]);
         diffResult.report += result.report;
         diffResult.maxDiffPos = result.maxDiffPos;
     }

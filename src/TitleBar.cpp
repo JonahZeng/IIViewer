@@ -1,5 +1,7 @@
 #include "TitleBar.h"
+#include "IconResource.h"
 
+#include <QGuiApplication>
 #include <QIcon>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -58,17 +60,8 @@ TitleBar::TitleBar(QWidget *parent)
     layout->addWidget(maximizeButton, 0, Qt::AlignRight);
     layout->addWidget(closeButton, 0, Qt::AlignRight);
 
-    setStyleSheet(
-        "QWidget#titleBar { background: palette(window); }"
-        "QPushButton#titleBarMinimizeButton, QPushButton#titleBarMaximizeButton, QPushButton#titleBarCloseButton {"
-        " border: none; background: transparent; padding: 0; }"
-        "QPushButton#titleBarMinimizeButton[ncHover=\"true\"], QPushButton#titleBarMaximizeButton[ncHover=\"true\"] { background: rgba(0, 0, 0, 0.08); }"
-        "QPushButton#titleBarCloseButton[ncHover=\"true\"] { background: rgb(232, 17, 35); }"
-        "QPushButton#titleBarMinimizeButton:hover, QPushButton#titleBarMaximizeButton:hover { background: rgba(0, 0, 0, 0.08); }"
-        "QPushButton#titleBarCloseButton:hover { background: rgb(232, 17, 35); }"
-        "QPushButton#titleBarMinimizeButton:pressed, QPushButton#titleBarMaximizeButton:pressed { background: rgba(0, 0, 0, 0.16); }"
-        "QPushButton#titleBarCloseButton:pressed { background: rgb(180, 0, 0); }"
-    );
+    refreshWindowButtonStyles();
+    refreshMenuBarStyles();
 
     if (auto *window = qobject_cast<QWidget *>(parent))
     {
@@ -183,6 +176,24 @@ void TitleBar::changeEvent(QEvent *event)
         case QEvent::StyleChange:
             syncMenuBarFont();
             break;
+        case QEvent::PaletteChange:
+        case QEvent::ApplicationPaletteChange:
+            // Palette flips with the color scheme; refresh the scheme
+            // dependent overlays and themed button icons. Guard against
+            // reentry: setStyleSheet() inside the handlers re-sends
+            // StyleChange/PaletteChange, which would recurse forever.
+            if (!refreshingStyles)
+            {
+                refreshingStyles = true;
+                refreshWindowButtonStyles();
+                refreshMenuBarStyles();
+                if (auto *mainWindow = qobject_cast<QMainWindow *>(window()))
+                {
+                    updateButtonIcons(mainWindow->isMaximized());
+                }
+                refreshingStyles = false;
+            }
+            break;
         default:
             break;
         }
@@ -243,11 +254,71 @@ void TitleBar::mouseDoubleClickEvent(QMouseEvent *event)
 
 void TitleBar::updateButtonIcons(bool maximized)
 {
-    minimizeButton->setIcon(QIcon(QStringLiteral(":/image/src/resource/titlebar-minimize.svg")));
+    minimizeButton->setIcon(QIcon(iconPath("titlebar-minimize")));
     maximizeButton->setIcon(QIcon(maximized
-        ? QStringLiteral(":/image/src/resource/titlebar-restore.svg")
-        : QStringLiteral(":/image/src/resource/titlebar-maximize.svg")));
-    closeButton->setIcon(QIcon(QStringLiteral(":/image/src/resource/titlebar-close.svg")));
+        ? iconPath("titlebar-restore")
+        : iconPath("titlebar-maximize")));
+    closeButton->setIcon(QIcon(iconPath("titlebar-close")));
+}
+
+void TitleBar::refreshWindowButtonStyles()
+{
+    // Hover/pressed highlight overlays must flip with the color scheme:
+    // a translucent black overlay is invisible on a dark background, and
+    // vice versa. Use styleHints() as the source of truth - the same one
+    // iconPath() uses - instead of guessing from the palette, which may
+    // not have propagated yet when this runs.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+    constexpr bool dark = false; // Qt < 6.5 has no dark-mode support, always light
+#endif
+    const char *overlayHover = dark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)";
+    const char *overlayPressed = dark ? "rgba(255, 255, 255, 0.20)" : "rgba(0, 0, 0, 0.16)";
+
+    setStyleSheet(
+        QStringLiteral(
+        "QWidget#titleBar { background: palette(window); }"
+        "QPushButton#titleBarMinimizeButton, QPushButton#titleBarMaximizeButton, QPushButton#titleBarCloseButton {"
+        " border: none; background: transparent; padding: 0; }"
+        "QPushButton#titleBarMinimizeButton[ncHover=\"true\"], QPushButton#titleBarMaximizeButton[ncHover=\"true\"] { background: %1; }"
+        "QPushButton#titleBarCloseButton[ncHover=\"true\"] { background: rgb(232, 17, 35); }"
+        "QPushButton#titleBarMinimizeButton:hover, QPushButton#titleBarMaximizeButton:hover { background: %1; }"
+        "QPushButton#titleBarCloseButton:hover { background: rgb(232, 17, 35); }"
+        "QPushButton#titleBarMinimizeButton:pressed, QPushButton#titleBarMaximizeButton:pressed { background: %2; }"
+        "QPushButton#titleBarCloseButton:pressed { background: rgb(180, 0, 0); }")
+            .arg(QLatin1String(overlayHover), QLatin1String(overlayPressed)));
+}
+
+void TitleBar::refreshMenuBarStyles()
+{
+    if (menuBarWidget == nullptr)
+    {
+        return;
+    }
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+    constexpr bool dark = false; // Qt < 6.5 has no dark-mode support, always light
+#endif
+    menuBarWidget->setStyleSheet(QStringLiteral(
+        "QMenuBar { background: transparent; border: none; }"
+        "QMenuBar::item { padding: 4px 8px; margin: 0; }"
+        "QMenuBar::item:selected { background: %1; }")
+            .arg(QLatin1String(dark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)")));
+}
+
+void TitleBar::refreshThemeStyles()
+{
+    // Called explicitly after a color scheme change; the reentry guard is
+    // inherited from changeEvent handling. Also refreshes themed icons.
+    refreshWindowButtonStyles();
+    refreshMenuBarStyles();
+    if (auto *mainWindow = qobject_cast<QMainWindow *>(window()))
+    {
+        updateButtonIcons(mainWindow->isMaximized());
+    }
 }
 
 void TitleBar::syncMenuBarFont()

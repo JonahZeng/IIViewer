@@ -7,6 +7,7 @@ enum OpenedImageType
     PNM_IMG = 3,
     PGM_IMG = 4,
     YUV_IMG = 5,
+    RGB_IMG = 6,
     UNKNOW_IMG = -1
 };
 
