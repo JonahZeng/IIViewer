@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 1.2.4 LANGUAGES CXX)
+project(IIViewer VERSION 1.3.0 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -189,6 +189,7 @@ set(PROJECT_SOURCES
 set(TRANSLATIONS
     translations/IIViewer_zh.ts
     translations/IIViewer_zh_TW.ts
+    translations/IIViewer_ko.ts
 )
 
 set(RESOURCES
@@ -303,6 +304,9 @@ elseif(UNIX AND NOT APPLE)
             COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_BINARY_DIR}/IIViewer_zh_TW.qm
             $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh_TW.qm
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_BINARY_DIR}/IIViewer_ko.qm
+            $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_ko.qm
             COMMENT "Copy translation qm files to target directory"
         )
     endif()
@@ -326,6 +330,10 @@ elseif(APPLE)
             ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh_TW.ts
             -qm
             ${_qm_translation_path}/IIViewer_zh_TW.qm
+            COMMAND ${LRELEASE_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/translations/IIViewer_ko.ts
+            -qm
+            ${_qm_translation_path}/IIViewer_ko.qm
         )
     # endif()
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -461,4 +469,3 @@ elseif(UNIX AND NOT APPLE)
     set(CPACK_PACKAGE_FILE_NAME "IIViewer-${CPACK_PACKAGE_VERSION}-ubuntu-${ARCH_NAME}")
 endif()
 include(CPack)
-

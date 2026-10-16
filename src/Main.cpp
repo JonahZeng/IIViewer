@@ -87,24 +87,29 @@ int main(int argc, char* argv[])
     const QString language = QLocale::languageToString(locale.language());
     // QString localeName = locale.name();
     
-    // 更健壮的语言检测：检查中文语言或中文区域设置
+    // Check the language name and locale prefix for supported translations.
     const bool isChinese = (language == QString("Chinese")) || 
                      qt_locale.startsWith("zh_") || 
                      qt_locale == "zh";
+    const bool isKorean = (language == QString("Korean")) ||
+                          qt_locale.startsWith("ko_") ||
+                          qt_locale.startsWith("ko-") ||
+                          qt_locale == "ko";
   
-    if(isChinese)
+    if(isChinese || isKorean)
     {
         const QDir appDir(QApplication::applicationDirPath());
         // qDebug() << "Application directory: " << appDir.absolutePath();
-        // 繁体中文系统使用 zh_TW 翻译，其余中文使用简体 zh 翻译
         const bool isTraditionalChinese = qt_locale.startsWith("zh_TW") ||
                                           qt_locale.startsWith("zh_HK") ||
                                           qt_locale.startsWith("zh_MO") ||
                                           qt_locale == "zh-Hant";
-        const QString qmFileName = isTraditionalChinese
-                                       ? QString("translations/IIViewer_zh_TW.qm")
-                                       : QString("translations/IIViewer_zh.qm");
-        QString zhTranslateFilePath;
+        const QString qmFileName = isKorean
+                                       ? QString("translations/IIViewer_ko.qm")
+                                       : (isTraditionalChinese
+                                              ? QString("translations/IIViewer_zh_TW.qm")
+                                              : QString("translations/IIViewer_zh.qm"));
+        QString translateFilePath;
 
 #ifdef Q_OS_MACOS
         QDir resourcesDir(appDir);
@@ -113,20 +118,20 @@ int main(int argc, char* argv[])
             // 如果在.app bundle中，转到Resources目录
             if (resourcesDir.cdUp() && resourcesDir.cd("Resources"))
             {
-                zhTranslateFilePath = resourcesDir.absoluteFilePath(qmFileName);
+                translateFilePath = resourcesDir.absoluteFilePath(qmFileName);
             }
             else
             {
-                zhTranslateFilePath = appDir.absoluteFilePath(QString("../Resources/") + qmFileName);
+                translateFilePath = appDir.absoluteFilePath(QString("../Resources/") + qmFileName);
             }
         } else {
             // 如果不是在.app bundle中，使用相对路径
-            zhTranslateFilePath = appDir.absoluteFilePath(qmFileName);
+            translateFilePath = appDir.absoluteFilePath(qmFileName);
         }
 #else
-        zhTranslateFilePath = appDir.absoluteFilePath(qmFileName);
+        translateFilePath = appDir.absoluteFilePath(qmFileName);
 #endif
-        if(translator.load(zhTranslateFilePath))
+        if(translator.load(translateFilePath))
         {
             QApplication::installTranslator(&translator);
         }
