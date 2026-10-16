@@ -96,8 +96,16 @@ int main(int argc, char* argv[])
     {
         const QDir appDir(QApplication::applicationDirPath());
         // qDebug() << "Application directory: " << appDir.absolutePath();
+        // 繁体中文系统使用 zh_TW 翻译，其余中文使用简体 zh 翻译
+        const bool isTraditionalChinese = qt_locale.startsWith("zh_TW") ||
+                                          qt_locale.startsWith("zh_HK") ||
+                                          qt_locale.startsWith("zh_MO") ||
+                                          qt_locale == "zh-Hant";
+        const QString qmFileName = isTraditionalChinese
+                                       ? QString("translations/IIViewer_zh_TW.qm")
+                                       : QString("translations/IIViewer_zh.qm");
         QString zhTranslateFilePath;
-        
+
 #ifdef Q_OS_MACOS
         QDir resourcesDir(appDir);
         if (appDir.dirName() == "MacOS")
@@ -105,18 +113,18 @@ int main(int argc, char* argv[])
             // 如果在.app bundle中，转到Resources目录
             if (resourcesDir.cdUp() && resourcesDir.cd("Resources"))
             {
-                zhTranslateFilePath = resourcesDir.absoluteFilePath("translations/IIViewer_zh.qm");
+                zhTranslateFilePath = resourcesDir.absoluteFilePath(qmFileName);
             }
             else
             {
-                zhTranslateFilePath = appDir.absoluteFilePath("../Resources/translations/IIViewer_zh.qm");
+                zhTranslateFilePath = appDir.absoluteFilePath(QString("../Resources/") + qmFileName);
             }
         } else {
             // 如果不是在.app bundle中，使用相对路径
-            zhTranslateFilePath = appDir.absoluteFilePath("translations/IIViewer_zh.qm");
+            zhTranslateFilePath = appDir.absoluteFilePath(qmFileName);
         }
 #else
-        zhTranslateFilePath = appDir.absoluteFilePath("translations/IIViewer_zh.qm");
+        zhTranslateFilePath = appDir.absoluteFilePath(qmFileName);
 #endif
         if(translator.load(zhTranslateFilePath))
         {

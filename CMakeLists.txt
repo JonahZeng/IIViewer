@@ -188,6 +188,7 @@ set(PROJECT_SOURCES
 
 set(TRANSLATIONS
     translations/IIViewer_zh.ts
+    translations/IIViewer_zh_TW.ts
 )
 
 set(RESOURCES
@@ -299,7 +300,10 @@ elseif(UNIX AND NOT APPLE)
             COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_BINARY_DIR}/IIViewer_zh.qm
             $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh.qm
-            COMMENT "Copy translation qm file to target directory"
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_BINARY_DIR}/IIViewer_zh_TW.qm
+            $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}>$<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}>/translations/IIViewer_zh_TW.qm
+            COMMENT "Copy translation qm files to target directory"
         )
     endif()
 elseif(APPLE)
@@ -316,8 +320,12 @@ elseif(APPLE)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${LRELEASE_EXECUTABLE}
             ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh.ts
-            -qm 
+            -qm
             ${_qm_translation_path}/IIViewer_zh.qm
+            COMMAND ${LRELEASE_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/translations/IIViewer_zh_TW.ts
+            -qm
+            ${_qm_translation_path}/IIViewer_zh_TW.qm
         )
     # endif()
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
