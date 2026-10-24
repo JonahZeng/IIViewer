@@ -8,7 +8,7 @@ Thanks for your interest in contributing! This guide covers everything you need 
 
 - CMake >= 3.20
 - C++17 compatible compiler (MSVC 2022, GCC 11+, or AppleClang)
-- Qt6 (6.8+) with modules: Widgets, DataVisualization, Network, Charts, LinguistTools
+- Qt6 (6.8+) with modules: Widgets, DataVisualization, Network, Charts, Svg, LinguistTools
 - OpenSSL, libheif, libde265 (bundled in `thirdparty/`)
 
 > For Qt5 support, see the [qt5 branch](https://github.com/JonahZeng/IIViewer/tree/qt5).
@@ -34,6 +34,17 @@ brew install qt
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH=$(brew --prefix qt)
 cmake --build build -j$(sysctl -n hw.ncpu)
+```
+
+**harmonyOS**
+```bash
+QtSDK=~/Qt/6.12.0
+DevEco=/Applications/DevEco-Studio.app
+AdditionalPackages=~/.local/opt/ohos/additional-packages
+cd build
+$QtSDK/harmonyos_arm64_v8a/bin/qt-cmake .. -DCMAKE_FIND_ROOT_PATH=$AdditionalPackages
+cmake --build . --parallel
+cmake --build . --target IIViewer_make_hap
 ```
 
 ### Build third-party libraries (Windows)
