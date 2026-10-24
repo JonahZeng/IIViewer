@@ -79,5 +79,6 @@ CMakeSettings.json
 build/
 thirdparty/libde265
 thirdparty/libheif
+thirdparty/OpenSSL/hm
 .cache
 .opencode

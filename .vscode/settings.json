@@ -1,8 +1,11 @@
 {
     "cmake.configureOnOpen": false,
+    "cmake.automaticReconfigure": false,
     "cmake.options.statusBarVisibility": "compact",
     "cmake.configureArgs": [
-        "-DCMAKE_PREFIX_PATH=C:\\Qt\\qt-5.15.16\\qtbase"
+        // "-DCMAKE_PREFIX_PATH=C:\\Qt\\qt-5.15.16\\qtbase"
+        // "-DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt"
+        "-DCMAKE_PREFIX_PATH=/Users/jonah/Qt/6.12.0/macos"
     ],
     "github-actions.remote-name": "origin",
     "C_Cpp.codeAnalysis.clangTidy.enabled": true,
