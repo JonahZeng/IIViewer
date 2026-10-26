@@ -7,8 +7,8 @@ Thanks for your interest in contributing! This guide covers everything you need 
 ### Prerequisites
 
 - CMake >= 3.20
-- C++17 compatible compiler (MSVC 2022, GCC 11+, or AppleClang)
-- Qt6 (6.8+) with modules: Widgets, DataVisualization, Network, Charts, Svg, LinguistTools
+- C++17 compatible compiler (MSVC 2022, GCC 11+, AppleClang, Clang 15+ on HarmonyOS)
+- Windows/Ubuntu/MacOS Qt6 (6.8+), HarmonyOS Qt6 (6.12+) with modules: Widgets, DataVisualization, Network, Charts, Svg, LinguistTools
 - OpenSSL, libheif, libde265 (bundled in `thirdparty/`)
 
 > For Qt5 support, see the [qt5 branch](https://github.com/JonahZeng/IIViewer/tree/qt5).
