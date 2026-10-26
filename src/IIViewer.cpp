@@ -12,7 +12,7 @@
 #include <QEvent>
 #include <QFileDialog>
 #include <QHoverEvent>
-#include <QInputDialog>
+// #include <QInputDialog>
 #include <QBuffer>
 #include <QMessageBox>
 #include <QMimeData>
@@ -22,19 +22,9 @@
 #include <QStandardPaths>
 #include <QStyleFactory>
 #include <QWindow>
-#include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QJsonDocument>
-#include <QJsonObject>
+#include <QTimer>
 #include <QToolTip>
-#ifdef Q_OS_WINDOWS
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <dwmapi.h>
-#include <windows.h>
-#include <windowsx.h>
-#endif
 #if (defined _MSC_VER) && (defined HAVE_VISIBILITY)
 #undef HAVE_VISIBILITY
 #endif
@@ -78,101 +68,6 @@ static void applyColorScheme(IIVOptionDialog::ColorScheme scheme)
     Q_UNUSED(scheme); // Qt < 6.5 has no dark-mode support and is always light
 #endif
 }
-
-#ifdef Q_OS_WINDOWS
-#ifndef DWMWA_BORDER_COLOR
-#define DWMWA_BORDER_COLOR 34
-#endif
-
-#ifndef DWMWA_COLOR_NONE
-#define DWMWA_COLOR_NONE 0xFFFFFFFE
-#endif
-
-static bool isWindows11OrGreater()
-{
-    static int result = -1;
-    if (result >= 0)
-        return result == 1;
-    result = 0;
-    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
-    if (ntdll != nullptr)
-    {
-        using RtlGetVersionPtr = NTSTATUS (WINAPI *)(PRTL_OSVERSIONINFOW);
-        auto RtlGetVersion = reinterpret_cast<RtlGetVersionPtr>(GetProcAddress(ntdll, "RtlGetVersion"));
-        if (RtlGetVersion != nullptr)
-        {
-            RTL_OSVERSIONINFOW ver = {};
-            ver.dwOSVersionInfoSize = sizeof(ver);
-            if (RtlGetVersion(&ver) == 0)
-            {
-                if (ver.dwMajorVersion == 10 && ver.dwMinorVersion == 0 && ver.dwBuildNumber >= 22000)
-                {
-                    result = 1;
-                }
-            }
-        }
-    }
-    return result == 1;
-}
-
-static int frameBorderWidth(HWND hwnd)
-{
-    const UINT dpi = GetDpiForWindow(hwnd);
-    return GetSystemMetricsForDpi(SM_CXSIZEFRAME, dpi) + GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
-}
-
-static int frameBorderHeight(HWND hwnd)
-{
-    const UINT dpi = GetDpiForWindow(hwnd);
-    return GetSystemMetricsForDpi(SM_CYSIZEFRAME, dpi) + GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
-}
-
-static void updateNativeShadow(HWND hwnd, bool maximized)
-{
-    BOOL compositionEnabled = FALSE;
-    if (FAILED(DwmIsCompositionEnabled(&compositionEnabled)) || compositionEnabled == FALSE)
-    {
-        return;
-    }
-
-    COLORREF borderColor = DWMWA_COLOR_NONE;
-    if (isWindows11OrGreater())
-    {
-        DWORD colorizationColor = 0;
-        BOOL opaqueBlend = FALSE;
-        if (SUCCEEDED(DwmGetColorizationColor(&colorizationColor, &opaqueBlend)))
-        {
-            borderColor = opaqueBlend ? colorizationColor : colorizationColor & 0x00FFFFFF;
-        }
-    }
-    DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &borderColor, sizeof(borderColor));
-
-    MARGINS margins = {0, 0, 0, 0};
-    if (!maximized && isWindows11OrGreater())
-    {
-        margins.cyTopHeight = 1;
-    }
-    DwmExtendFrameIntoClientArea(hwnd, &margins);
-}
-
-static bool isCaptionButtonHitTest(const WPARAM wParam)
-{
-    return wParam == HTMAXBUTTON || wParam == HTMINBUTTON || wParam == HTCLOSE;
-}
-
-static QPushButton *captionButtonFromHitTest(const WPARAM wParam, TitleBar *titleBar)
-{
-    if (titleBar == nullptr)
-        return nullptr;
-    switch (wParam)
-    {
-    case HTMAXBUTTON: return titleBar->getMaximizeButton();
-    case HTMINBUTTON: return titleBar->getMinimizeButton();
-    case HTCLOSE:     return titleBar->getCloseButton();
-    default:          return nullptr;
-    }
-}
-#endif
 
 namespace
 {
@@ -221,9 +116,7 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     lastFileWatcherNotifyPath{QString(), QString()},
     lastFileWatcherNotifyIsWaitProcess{false, false}
 {
-#ifdef Q_OS_WINDOWS
-    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-#endif
+    applyNativeWindowFlags();
     if (settings.loadSettingsFromFile())
     {
         workPath = settings.workPath;
@@ -254,22 +147,13 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
 
     setAcceptDrops(true);
     ui.setupUi(this);
-#ifdef Q_OS_WINDOWS
-    winId();
-    if (isWindows11OrGreater())
-    {
-        const HWND hwnd = reinterpret_cast<HWND>(winId());
-        constexpr int DWMWA_WINDOW_TREATMENT_POLICY = 20;
-        int snapValue = 2;
-        DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_TREATMENT_POLICY, &snapValue, sizeof(snapValue));
-    }
-#endif
+    applyNativeSnapLayout();
     ui.imageLabel.at(LEFT_IMG_WIDGET)->appSettings = &settings;
     ui.imageLabel.at(RIGHT_IMG_WIDGET)->appSettings = &settings;
 
     const QList<QScreen *> screenInfoList = QApplication::screens();
     bool prevScreenExist = false;
-    for(auto *scre: screenInfoList)
+    for(const auto *scre: screenInfoList)
     {
         if(scre->name() == settings.windowScreenName)
         {
@@ -327,7 +211,8 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     //         { qApp->aboutQt(); });
     connect(ui.aboutThisAction, &QAction::triggered, this, [this]()
             { AboutDlg dlg(this); dlg.exec(); });
-    connect(ui.checkUpdateAction, &QAction::triggered, this, &IIViewer::checkUpdate);
+    connect(ui.checkUpdateAction, &QAction::triggered, this, [this]()
+            { checkUpdate(false); });
     connect(ui.onlineHelpAction, &QAction::triggered, this, []()
             { QDesktopServices::openUrl(QUrl("https://jonahzeng.github.io/IIViewer/")); });
 
@@ -442,6 +327,9 @@ IIViewer::IIViewer(QString& needOpenFilePath, QWidget *parent) // NOLINT(readabi
     {
         emit needOpenFileFromCmdArgv(needOpenFilePath);
     }
+
+    // 启动后延迟执行自动更新检查（每周最多一次），避免影响窗口初始化
+    QTimer::singleShot(3000, this, &IIViewer::checkUpdateIfDue);
 }
 
 void IIViewer::changeEvent(QEvent *event)
@@ -451,12 +339,10 @@ void IIViewer::changeEvent(QEvent *event)
         ui.titleBar->updateMaximizeButton(isMaximized());
     }
 
-#ifdef Q_OS_WINDOWS
     if (event->type() == QEvent::WindowStateChange)
     {
-    updateNativeShadow(reinterpret_cast<HWND>(winId()), isMaximized());
+        refreshNativeShadow();
     }
-#endif
 
     QMainWindow::changeEvent(event);
 }
@@ -526,276 +412,9 @@ void IIViewer::ensureWindowHandleConnections()
     windowHandleConnectionsInitialized = true;
 }
 
-
-#ifdef Q_OS_WINDOWS
-#if QT_VERSION_MAJOR < 6
-bool IIViewer::nativeEvent(const QByteArray &eventType, void *message, long *result)
-#else
-bool IIViewer::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
-#endif
-{
-    Q_UNUSED(eventType);
-    auto *msg = static_cast<MSG *>(message);
-
-    if (msg == nullptr)
-    {
-        return false;
-    }
-
-    auto setNcButtonHover = [](QPushButton *btn, bool hover) {
-        if (btn == nullptr) {
-            return;
-        }
-        btn->setProperty("ncHover", hover);
-        btn->style()->unpolish(btn);
-        btn->style()->polish(btn);
-        btn->update();
-    };
-
-    auto clearNcHover = [this, &setNcButtonHover]() {
-        if (ncHoveredButton != nullptr)
-        {
-            setNcButtonHover(ncHoveredButton, false);
-            ncHoveredButton = nullptr;
-        }
-    };
-
-    if (msg->message == WM_NCHITTEST)
-    {
-        const LONG xPos = GET_X_LPARAM(msg->lParam);
-        const LONG yPos = GET_Y_LPARAM(msg->lParam);
-#if QT_VERSION_MAJOR >= 6
-        const UINT dpi = GetDpiForWindow(msg->hwnd);
-        const qreal dpr = dpi / 96.0;
-        const QPoint globalPos(qRound(xPos / dpr), qRound(yPos / dpr));
-#else
-        const QPoint globalPos(xPos, yPos);
-#endif
-        const QPoint titleBarPos = ui.titleBar != nullptr ? ui.titleBar->mapFromGlobal(globalPos) : QPoint();
-        const bool inTitleBar = ui.titleBar != nullptr && ui.titleBar->rect().contains(titleBarPos);
-        QWidget *hitWidget = inTitleBar ? ui.titleBar->childAt(titleBarPos) : nullptr;
-
-        if (hitWidget != nullptr)
-        {
-            const auto objectName = hitWidget->objectName();
-            int htResult = 0;
-            if (objectName == QLatin1String("titleBarMaximizeButton"))
-                htResult = HTMAXBUTTON;
-            else if (objectName == QLatin1String("titleBarMinimizeButton"))
-                htResult = HTMINBUTTON;
-            else if (objectName == QLatin1String("titleBarCloseButton"))
-                htResult = HTCLOSE;
-
-            if (htResult != 0)
-            {
-                *result = htResult;
-                return true;
-            }
-        }
-
-        RECT windowRect{};
-        GetWindowRect(msg->hwnd, &windowRect);
-        const int resizeBorderWidth = frameBorderWidth(msg->hwnd);
-        const int resizeBorderHeight = frameBorderHeight(msg->hwnd);
-
-        const bool onLeft = xPos >= windowRect.left && xPos < windowRect.left + resizeBorderWidth;
-        const bool onRight = xPos < windowRect.right && xPos >= windowRect.right - resizeBorderWidth;
-        const bool onTop = yPos >= windowRect.top && yPos < windowRect.top + resizeBorderHeight;
-        const bool onBottom = yPos < windowRect.bottom && yPos >= windowRect.bottom - resizeBorderHeight;
-
-        if (!isMaximized())
-        {
-            if (onTop && onLeft)  { *result = HTTOPLEFT;    return true; }
-            if (onTop && onRight) { *result = HTTOPRIGHT;   return true; }
-            if (onBottom && onLeft)  { *result = HTBOTTOMLEFT;  return true; }
-            if (onBottom && onRight) { *result = HTBOTTOMRIGHT; return true; }
-            if (onLeft)   { *result = HTLEFT;   return true; }
-            if (onRight)  { *result = HTRIGHT;  return true; }
-            if (onTop)    { *result = HTTOP;    return true; }
-            if (onBottom) { *result = HTBOTTOM; return true; }
-        }
-
-        if (ui.titleBar == nullptr)
-        {
-            return QMainWindow::nativeEvent(eventType, message, result);
-        }
-
-        if (ui.titleBar->rect().contains(titleBarPos))
-        {
-            const bool hitInteractiveWidget = hitWidget != nullptr &&
-                (qobject_cast<QPushButton *>(hitWidget) != nullptr ||
-                 qobject_cast<QMenuBar *>(hitWidget) != nullptr);
-            if (!hitInteractiveWidget)
-            {
-                *result = HTCAPTION;
-                return true;
-            }
-        }
-    }
-
-    if (msg->message == WM_NCMOUSEMOVE)
-    {
-        if (msg->wParam == HTMAXBUTTON)
-        {
-            QPushButton *btn = captionButtonFromHitTest(HTMAXBUTTON, ui.titleBar);
-            if (btn != ncHoveredButton)
-            {
-                if (ncHoveredButton != nullptr)
-                    setNcButtonHover(ncHoveredButton, false);
-                if (btn != nullptr)
-                    setNcButtonHover(btn, true);
-                ncHoveredButton = btn;
-            }
-            *result = 0;
-            return true;
-        }
-        QPushButton *btn = captionButtonFromHitTest(msg->wParam, ui.titleBar);
-        if (btn != ncHoveredButton)
-        {
-            if (ncHoveredButton != nullptr)
-                setNcButtonHover(ncHoveredButton, false);
-            if (btn != nullptr)
-                setNcButtonHover(btn, true);
-            ncHoveredButton = btn;
-        }
-        *result = 0;
-        return true;
-    }
-    if (msg->message == WM_NCMOUSEHOVER)
-    {
-        if (msg->wParam == HTMAXBUTTON)
-        {
-            *result = 0;
-            return true;
-        }
-        *result = 0;
-        return true;
-    }
-    if (msg->message == WM_NCMOUSELEAVE)
-    {
-        clearNcHover();
-        *result = 0;
-        return true;
-    }
-    if ((msg->message == WM_NCLBUTTONDOWN || msg->message == WM_NCLBUTTONDBLCLK) &&
-         isCaptionButtonHitTest(msg->wParam))
-    {
-        *result = 0;
-        return true;
-    }
-    if (msg->message == WM_NCLBUTTONUP && isCaptionButtonHitTest(msg->wParam))
-    {
-        WPARAM sc = 0;
-        switch (msg->wParam)
-        {
-        case HTMAXBUTTON: sc = IsZoomed(msg->hwnd) ? SC_RESTORE : SC_MAXIMIZE; break;
-        case HTMINBUTTON: sc = SC_MINIMIZE; break;
-        case HTCLOSE:     sc = SC_CLOSE; break;
-        default: break;
-        }
-        if (sc != 0)
-        {
-            SendMessage(msg->hwnd, WM_SYSCOMMAND, sc, 0);
-        }
-        *result = 0;
-        return true;
-    }
-    if (msg->message == WM_MOUSEMOVE)
-    {
-        clearNcHover();
-    }
-
-    if (msg->message == WM_NCCALCSIZE)
-    {
-        if (msg->wParam != 0)
-        {
-            static bool firstNcCalc = true;
-            if (firstNcCalc)
-            {
-                firstNcCalc = false;
-                *result = 0;
-                return false;
-            }
-            auto *params = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
-            const int borderWidth = frameBorderWidth(msg->hwnd);
-            const int borderHeight = frameBorderHeight(msg->hwnd);
-            const bool maximized = IsZoomed(msg->hwnd) != FALSE;
-            const bool keepVisualFrame = maximized || isWindows11OrGreater();
-            int topInset = 0;
-            if (maximized)
-            {
-                topInset = borderHeight;
-            }
-            else if (keepVisualFrame)
-            {
-                topInset = 1;
-            }
-            params->rgrc[0].left += keepVisualFrame ? borderWidth : 0;
-            params->rgrc[0].top += topInset;
-            params->rgrc[0].right -= keepVisualFrame ? borderWidth : 0;
-            params->rgrc[0].bottom -= keepVisualFrame ? borderHeight : 0;
-            *result = 0;
-            return true;
-        }
-    }
-
-    if (msg->message == WM_GETMINMAXINFO)
-    {
-        auto *minMaxInfo = reinterpret_cast<MINMAXINFO *>(msg->lParam);
-        const HMONITOR monitor = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
-        if (monitor != nullptr)
-        {
-            MONITORINFO monitorInfo{};
-            monitorInfo.cbSize = sizeof(MONITORINFO);
-            GetMonitorInfo(monitor, &monitorInfo);
-            const RECT workArea = monitorInfo.rcWork;
-            const RECT monitorArea = monitorInfo.rcMonitor;
-            const int borderWidth = frameBorderWidth(msg->hwnd);
-            const int borderHeight = frameBorderHeight(msg->hwnd);
-
-            minMaxInfo->ptMaxPosition.x = workArea.left - monitorArea.left - borderWidth;
-            minMaxInfo->ptMaxPosition.y = workArea.top - monitorArea.top - borderHeight;
-            minMaxInfo->ptMaxSize.x = workArea.right - workArea.left + (borderWidth * 2);
-            minMaxInfo->ptMaxSize.y = workArea.bottom - workArea.top + (borderHeight * 2);
-            minMaxInfo->ptMaxTrackSize = minMaxInfo->ptMaxSize;
-            *result = 0;
-            return true;
-        }
-    }
-
-    if (msg->message == WM_DPICHANGED)
-    {
-        // qDebug() << "[DPI] WM_DPICHANGED" << HIWORD(msg->wParam);
-        applyDpiScale(window()->windowHandle() != nullptr ? window()->windowHandle()->screen() : nullptr);
-    }
-
-    if (msg->message == WM_WINDOWPOSCHANGED)
-    {
-        auto *windowPos = reinterpret_cast<WINDOWPOS *>(msg->lParam);
-        if (windowPos != nullptr && (windowPos->flags & SWP_FRAMECHANGED))
-        {
-            updateNativeShadow(msg->hwnd, IsZoomed(msg->hwnd) == TRUE);
-        }
-    }
-
-    return QMainWindow::nativeEvent(eventType, message, result);
-}
-#endif
-
 void IIViewer::showEvent(QShowEvent *event)
 {
-#ifdef Q_OS_WINDOWS
-    static bool nativeFrameInitialized = false;
-    if (!nativeFrameInitialized)
-    {
-        nativeFrameInitialized = true;
-        const HWND hwnd = reinterpret_cast<HWND>(winId());
-
-        SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
-                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-    }
-    updateNativeShadow(reinterpret_cast<HWND>(winId()), isMaximized());
-#endif
+    initNativeFrame();
 
     ensureWindowHandleConnections();
 
@@ -1113,41 +732,6 @@ void IIViewer::onSysOptionAction(bool check)
     }
 }
 
-void IIViewer::checkUpdate()
-{
-    QNetworkRequest request(QUrl("https://api.github.com/repos/JonahZeng/IIViewer/releases/latest"));
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    request.setTransferTimeout(30'000);
-#endif
-    QNetworkReply *reply = networkManager.get(request);
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply] {
-        if (reply->error() == QNetworkReply::NoError) {
-            QByteArray const response = reply->readAll();
-            QJsonDocument const jsonDoc = QJsonDocument::fromJson(response);
-            const QJsonObject jsonObj = jsonDoc.object();
-            QString latestVersion = jsonObj.value("tag_name").toString();
-            if (latestVersion.startsWith('v', Qt::CaseSensitivity::CaseInsensitive))
-            {
-                latestVersion.remove(QChar('v'), Qt::CaseSensitivity::CaseInsensitive);
-             }
-             const QVersionNumber currentVersion{IIViewer_VERSION_MAJOR, IIViewer_VERSION_MINOR, IIViewer_VERSION_PATCH}; // 当前版本号
-             const QVersionNumber newVersion = QVersionNumber::fromString(latestVersion);
-            //  qDebug() << currentVersion << newVersion << latestVersion;
-             if (newVersion > currentVersion) {
-                const QString text("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>");
-                QMessageBox msgBox(QMessageBox::Icon::Information, tr("find new version"), text, QMessageBox::StandardButton::Ok, this);
-                msgBox.exec();
-                // QMessageBox::information(this, tr("find new version"), tr("<a href=\"https://github.com/JonahZeng/IIViewer/releases\">Click here to github release page download new version</a>"), QMessageBox::StandardButton::Ok);
-            } else {
-                QMessageBox::information(this, tr("no new version"), tr("You are using the latest version"), QMessageBox::StandardButton::Ok);
-            }
-        } else {
-            QMessageBox::critical(this, tr("network error"), QString("Error checking for updates: %1").arg(reply->errorString()), QMessageBox::StandardButton::Ok);
-        }
-        reply->deleteLater();
-    });
-}
-
 void IIViewer::openedFileChanged(const QString &filePath)
 {
     if(filePath == openedFile.at(LEFT_IMG_WIDGET))
@@ -1265,8 +849,7 @@ void IIViewer::closeEvent(QCloseEvent *event)
 
 void IIViewer::setTitle()
 {
-#ifdef Q_OS_WINDOWS
-#else
+#ifndef Q_OS_WINDOWS
     QString openedFile0_t(openedFile[0]);
     QString openedFile1_t(openedFile[1]);
     if (openedFile[0].length() > 50) // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
@@ -1491,120 +1074,6 @@ void IIViewer::openGivenFileFromCmdArgv(QString& image)
         emit updateExchangeBtnStatus();
         emit updateZoomLabelStatus();
     }
-}
-
-bool IIViewer::isRemoteUrl(const QString &s)
-{
-    return s.startsWith("http://", Qt::CaseInsensitive) || s.startsWith("https://", Qt::CaseInsensitive);
-}
-
-void IIViewer::onOpenUrlAction()
-{
-    bool ok = false;
-    const QString text = QInputDialog::getText(this, tr("open image from url"),
-        tr("Image URL:"), QLineEdit::Normal, QString(), &ok);
-    if (!ok || text.trimmed().isEmpty())
-    {
-        return;
-    }
-
-    const QUrl url = QUrl::fromUserInput(text.trimmed());
-    if (!url.isValid() || (url.scheme() != "http" && url.scheme() != "https"))
-    {
-        QMessageBox::warning(this, tr("invalid url"),
-            tr("Please input a valid http/https url"), QMessageBox::StandardButton::Ok);
-        return;
-    }
-
-    if (sender() == static_cast<QObject *>(ui.openUrlRightAction))
-    {
-        loadNetworkImage(url, RIGHT_IMG_WIDGET);
-    }
-    else
-    {
-        loadNetworkImage(url, LEFT_IMG_WIDGET);
-    }
-}
-
-void IIViewer::loadNetworkImage(const QUrl &url, int scrollArea)
-{
-    QNetworkRequest request(url);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    request.setTransferTimeout(30'000); // 避免挂死的连接无限期占用 reply/socket
-#endif
-    QNetworkReply *reply = networkManager.get(request); // manager 为成员，连接池复用，随窗口析构
-    QObject::connect(reply, &QNetworkReply::finished, this,
-        [this, reply, url, scrollArea]
-        {
-            if (reply->error() != QNetworkReply::NoError)
-            {
-                QMessageBox::critical(this, tr("network error"),
-                    tr("Failed to download image: %1").arg(reply->errorString()),
-                    QMessageBox::StandardButton::Ok);
-                reply->deleteLater();
-                return;
-            }
-
-            const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            if (httpStatus >= 400)
-            {
-                QMessageBox::critical(this, tr("network error"),
-                    tr("Failed to download image: HTTP %1").arg(httpStatus),
-                    QMessageBox::StandardButton::Ok);
-                reply->deleteLater();
-                return;
-            }
-
-            QByteArray data = reply->readAll();
-            reply->deleteLater();
-
-            QBuffer buffer(&data);
-            buffer.open(QIODevice::ReadOnly);
-            QImageReader reader(&buffer);
-            reader.setAutoTransform(true);
-            reader.setAutoDetectImageFormat(true); // 按内容识别 jpg/webp，忽略 URL 后缀/token
-            const QImage image = reader.read();
-            if (image.isNull())
-            {
-                QMessageBox::critical(this, tr("error"),
-                    tr("Failed to decode image: %1").arg(reader.errorString()),
-                    QMessageBox::StandardButton::Ok);
-                return;
-            }
-
-            const int other = (scrollArea == LEFT_IMG_WIDGET) ? RIGHT_IMG_WIDGET : LEFT_IMG_WIDGET;
-            if (!openedFile.at(other).isEmpty() && image.size() != originSize.at(other))
-            {
-                QMessageBox::warning(this, tr("warning"), tr("image0 size != image1 size"),
-                    QMessageBox::StandardButton::Ok);
-                return;
-            }
-
-            const QString urlStr = url.toString();
-            if (scrollArea == LEFT_IMG_WIDGET)
-            {
-                onCloseLeftFileAction();
-                openedFile.at(0) = urlStr; // 标题栏显示 URL
-                originSize.at(0) = image.size();
-                ui.imageLabel.at(LEFT_IMG_WIDGET)->imgName = &openedFile.at(0);
-                ui.imageLabel.at(LEFT_IMG_WIDGET)->setPixmap(image);
-                loadFilePostProcessLayoutAndScrollValue(LEFT_IMG_WIDGET);
-            }
-            else
-            {
-                onCloseRightFileAction();
-                openedFile.at(1) = urlStr;
-                originSize.at(1) = image.size();
-                ui.imageLabel.at(RIGHT_IMG_WIDGET)->imgName = &openedFile.at(1);
-                ui.imageLabel.at(RIGHT_IMG_WIDGET)->setPixmap(image);
-                loadFilePostProcessLayoutAndScrollValue(RIGHT_IMG_WIDGET);
-            }
-
-            masterScrollarea = ui.scrollArea.at(scrollArea);
-            setTitle();
-            emit updateExchangeBtnStatus();
-            emit updateZoomLabelStatus();
-        });
 }
 
 void IIViewer::loadFilePostProcessLayoutAndScrollValue(int leftOrRight)

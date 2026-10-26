@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(IIViewer VERSION 1.3.0 LANGUAGES CXX)
+project(IIViewer VERSION 1.3.1 LANGUAGES CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_SOURCE_DIR}/bin/MinSizeRel)
@@ -149,6 +149,8 @@ set(PROJECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/IIViewer.cpp
         ${CMAKE_SOURCE_DIR}/src/IIViewerLoadFile.cpp
         ${CMAKE_SOURCE_DIR}/src/IIViewerLrImgProcess.cpp
+        ${CMAKE_SOURCE_DIR}/src/IIViewerNetworkTask.cpp
+        ${CMAKE_SOURCE_DIR}/src/IIViewerWindows.cpp
         ${CMAKE_SOURCE_DIR}/inc/IIViewer.h
         ${CMAKE_SOURCE_DIR}/src/AboutDlg.cpp
         ${CMAKE_SOURCE_DIR}/inc/AboutDlg.h

@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <QString>
 #include <QColor>
+#include <QDateTime>
 class AppSettings
 {
 public:
@@ -37,6 +38,7 @@ public:
     QColor penColor;
     bool dataAnalyseDockVisible;
     bool playListDockVisible;
+    QDateTime lastUpdateCheckTime; // 上次成功检查更新的时间，无效表示从未检查过
 
     bool loadSettingsFromFile();
     void dumpSettingsToFile();

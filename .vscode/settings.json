@@ -5,7 +5,8 @@
     "cmake.configureArgs": [
         // "-DCMAKE_PREFIX_PATH=C:\\Qt\\qt-5.15.16\\qtbase"
         // "-DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt"
-        "-DCMAKE_PREFIX_PATH=/Users/jonah/Qt/6.12.0/macos"
+        // "-DCMAKE_PREFIX_PATH=/Users/jonah/Qt/6.12.0/macos"
+        "-DCMAKE_PREFIX_PATH=D:/software/qt683/6.8.3/msvc2022_64"
     ],
     "github-actions.remote-name": "origin",
     "C_Cpp.codeAnalysis.clangTidy.enabled": true,
@@ -13,6 +14,10 @@
     "C_Cpp.codeAnalysis.clangTidy.args": [
         "--config-file=${workspaceFolder}/.clang-tidy"
     ],
+    // 不对生成代码（uic/moc 产物）做代码分析，避免 Qt 头文件路径缺失等误报
+    "C_Cpp.codeAnalysis.exclude": {
+        "**/build/**": true
+    },
     // "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
     "editor.renderWhitespace": "all",
     "files.associations": {

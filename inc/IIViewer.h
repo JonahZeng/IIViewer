@@ -37,6 +37,11 @@ public:
 private:
     void applyDpiScale(QScreen *screen);
     void ensureWindowHandleConnections();
+    // 原生窗口处理，Windows 实现在 IIViewerWindows.cpp，其他平台为空实现
+    void applyNativeWindowFlags();
+    void applyNativeSnapLayout();
+    void refreshNativeShadow();
+    void initNativeFrame();
     void loadFile(const QString &fileName, int scrollArea);
     void loadNetworkImage(const QUrl &url, int scrollArea);
     static bool isRemoteUrl(const QString &s);
@@ -112,7 +117,8 @@ public slots:
     void restoreLeftImg();
     void showImageInfo();
     void showImageDiffReport();
-    void checkUpdate();
+    void checkUpdate(bool silent = false);
+    void checkUpdateIfDue();
     void openedFileChanged(const QString& filePath);
 
 signals:
