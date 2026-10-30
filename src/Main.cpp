@@ -105,10 +105,12 @@ int main(int argc, char* argv[])
                                           qt_locale.startsWith("zh_MO") ||
                                           qt_locale == "zh-Hant";
         const QString qmFileName = isKorean
-                                       ? QString("translations/IIViewer_ko.qm")
+                                       ? QString("IIViewer_ko.qm")
                                        : (isTraditionalChinese
-                                              ? QString("translations/IIViewer_zh_TW.qm")
-                                              : QString("translations/IIViewer_zh.qm"));
+                                              ? QString("IIViewer_zh_TW.qm")
+                                              : QString("IIViewer_zh.qm"));
+        const QString qmResourcePath = QString(":/i18n/%1").arg(qmFileName);
+        const QString qmRelativePath = QString("translations/%1").arg(qmFileName);
         QString translateFilePath;
 
 #ifdef Q_OS_MACOS
@@ -118,23 +120,28 @@ int main(int argc, char* argv[])
             // 如果在.app bundle中，转到Resources目录
             if (resourcesDir.cdUp() && resourcesDir.cd("Resources"))
             {
-                translateFilePath = resourcesDir.absoluteFilePath(qmFileName);
+                translateFilePath = resourcesDir.absoluteFilePath(qmRelativePath);
             }
             else
             {
-                translateFilePath = appDir.absoluteFilePath(QString("../Resources/") + qmFileName);
+                translateFilePath = appDir.absoluteFilePath(QString("../Resources/") + qmRelativePath);
             }
         } else {
             // 如果不是在.app bundle中，使用相对路径
-            translateFilePath = appDir.absoluteFilePath(qmFileName);
+            translateFilePath = appDir.absoluteFilePath(qmRelativePath);
         }
 #else
-        translateFilePath = appDir.absoluteFilePath(qmFileName);
+        translateFilePath = appDir.absoluteFilePath(qmRelativePath);
 #endif
-        if(translator.load(translateFilePath))
+        if (translator.load(qmResourcePath) || translator.load(translateFilePath))
         {
             QApplication::installTranslator(&translator);
         }
+        // else
+        // {
+        //     qWarning() << "Failed to load application translation from"
+        //                << qmResourcePath << "or" << translateFilePath;
+        // }
     }
 
     QString needOpenFilePath{};

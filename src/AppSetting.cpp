@@ -211,6 +211,11 @@ void AppSettings::read(const QJsonObject& json) // NOLINT(readability-function-c
     }
     if (json.contains("dataAnalyseDockVisible")) { dataAnalyseDockVisible = json.value("dataAnalyseDockVisible").toBool(); }
     if (json.contains("playListDockVisible"))   { playListDockVisible = json.value("playListDockVisible").toBool(); }
+    if (json.contains("lastUpdateCheckTime"))
+    {
+        const QString timeText = json.value("lastUpdateCheckTime").toString();
+        lastUpdateCheckTime = QDateTime::fromString(timeText, Qt::ISODate);
+    }
 }
 
 void AppSettings::write(QJsonObject& json) const
@@ -277,5 +282,6 @@ void AppSettings::write(QJsonObject& json) const
     json["penColor"] = penColorObj;
     json["dataAnalyseDockVisible"] = dataAnalyseDockVisible;
     json["playListDockVisible"] = playListDockVisible;
+    json["lastUpdateCheckTime"] = lastUpdateCheckTime.isValid() ? lastUpdateCheckTime.toString(Qt::ISODate) : QString();
     // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 }

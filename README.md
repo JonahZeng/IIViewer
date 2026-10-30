@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-windows-platform.yml/badge.svg?branch=main" alt="Windows Build"/>
-    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-ubuntu-platform.yml/badge.svg?branch=main" alt="Ubuntu Build"/>
-    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-macos-platform.yml/badge.svg?branch=main" alt="MacOS Build"/>
+    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-windows-platform.yml/badge.svg" alt="Windows Build"/>
+    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-ubuntu-platform.yml/badge.svg" alt="Ubuntu Build"/>
+    <img src="https://github.com/JonahZeng/IIViewer/actions/workflows/cmake-macos-platform.yml/badge.svg" alt="MacOS Build"/>
     <a href="https://appimage.github.io/IIViewer/">
         <img src="https://img.shields.io/badge/listed-AppImageHub-be5137?logo=appimage&logoColor=white" alt="IIViewer on AppImageHub"/>
     </a>
