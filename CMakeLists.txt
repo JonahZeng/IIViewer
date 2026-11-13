@@ -85,6 +85,30 @@ elseif(APPLE)
     find_program(LRELEASE_EXECUTABLE lrelease HINTS "${_qt_bin_dir}")
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
     set(EXTRA_QT_INCLUDE_DIRS "${_qt_bin_dir}/../include")
+    if(QT_VERSION_MAJOR EQUAL 6)
+        execute_process(
+            COMMAND "${_qmake_executable}" -query QT_INSTALL_TRANSLATIONS
+            OUTPUT_VARIABLE _qt_translations_dir
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            RESULT_VARIABLE _qt_translations_query_result
+        )
+        if(NOT _qt_translations_query_result STREQUAL "0")
+            message(FATAL_ERROR "Failed to query Qt translation directory using ${_qmake_executable}")
+        endif()
+        set(_qt_translation_catalogs
+            qt_zh_CN.qm
+            qt_zh_TW.qm
+            qt_ko.qm
+            qtbase_zh_CN.qm
+            qtbase_zh_TW.qm
+            qtbase_ko.qm
+        )
+        foreach(_qt_translation_catalog IN LISTS _qt_translation_catalogs)
+            if(NOT EXISTS "${_qt_translations_dir}/${_qt_translation_catalog}")
+                message(FATAL_ERROR "Qt translation catalog not found: ${_qt_translations_dir}/${_qt_translation_catalog}")
+            endif()
+        endforeach()
+    endif()
 endif()
 
 include(InstallRequiredSystemLibraries)
@@ -357,6 +381,21 @@ elseif(APPLE)
             -qm
             ${_qm_translation_path}/IIViewer_ko.qm
         )
+        if(QT_VERSION_MAJOR EQUAL 6)
+            set(_qt_translation_copy_commands)
+            foreach(_qt_translation_catalog IN LISTS _qt_translation_catalogs)
+                list(APPEND _qt_translation_copy_commands
+                    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                    "${_qt_translations_dir}/${_qt_translation_catalog}"
+                    "${_qm_translation_path}/${_qt_translation_catalog}"
+                )
+            endforeach()
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                ${_qt_translation_copy_commands}
+                COMMENT "Copying Qt translation catalogs to app bundle"
+                VERBATIM
+            )
+        endif()
     # endif()
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(_app_path "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/${PROJECT_NAME}.app")

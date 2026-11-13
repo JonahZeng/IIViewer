@@ -2,7 +2,7 @@
 Type=Application
 Name=IIViewer
 Exec=IIViewer %F
-Icon=default
+Icon=IIViewer
 Comment=isp develop image viewer
 Terminal=false
 Categories=Development;

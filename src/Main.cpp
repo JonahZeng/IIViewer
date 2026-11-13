@@ -52,13 +52,6 @@ int main(int argc, char* argv[])
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
 #endif
     const QApplication app(argc, argv);
-    // Pin the UI to the light color scheme by default so it does not follow
-    // the OS light/dark switching (Qt >= 6.5). The scheme saved in the app
-    // settings is applied later, when IIViewer loads its settings.
-    // Qt < 6.5 has no dark-mode support and is always light.
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    app.styleHints()->setColorScheme(Qt::ColorScheme::Light);
-#endif
     // QCoreApplication::setOrganizationName("IIViewer.org");
     // QCoreApplication::setOrganizationDomain("IIViewer.com");
     QCoreApplication::setApplicationName("IIViewer");
@@ -66,13 +59,80 @@ int main(int argc, char* argv[])
 //     QApplication::setFont(QFont("Microsoft YaHei UI", 10)); // NOLINT(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
 // #endif
 
-    QTranslator qt_translator; 
+    QTranslator qt_translator;
 #ifdef Q_OS_MACOS
+#if QT_VERSION_MAJOR >= 6
+    QTranslator qtbase_translator;
+#endif
     QString qt_locale = detectSystemLanguage();
 #else
     const QString qt_locale = QLocale::system().name();
 #endif
     // qDebug() << "System language: " << qt_locale;
+#if defined(Q_OS_MACOS) && QT_VERSION_MAJOR >= 6
+    QString qt_translation_locale;
+    if (qt_locale.startsWith("zh_TW") || qt_locale.startsWith("zh_HK") ||
+        qt_locale.startsWith("zh_MO") || qt_locale.startsWith("zh-TW") ||
+        qt_locale.startsWith("zh-Hant"))
+    {
+        qt_translation_locale = "zh_TW";
+    }
+    else if (qt_locale.startsWith("zh"))
+    {
+        qt_translation_locale = "zh_CN";
+    }
+    else if (qt_locale.startsWith("ko"))
+    {
+        qt_translation_locale = "ko";
+    }
+
+    QDir qtTranslationsDir(QApplication::applicationDirPath());
+    if (qtTranslationsDir.dirName() == "MacOS")
+    {
+        if (qtTranslationsDir.cdUp() && qtTranslationsDir.cd("Resources"))
+        {
+            qtTranslationsDir.cd("translations");
+        }
+        else
+        {
+            qtTranslationsDir = QDir(QApplication::applicationDirPath() +
+                                     "/../Resources/translations");
+        }
+    }
+    else
+    {
+        qtTranslationsDir.cd("translations");
+    }
+
+    bool qtTranslatorLoaded = false;
+    bool qtbaseTranslatorLoaded = false;
+    if (!qt_translation_locale.isEmpty())
+    {
+        qtTranslatorLoaded = qt_translator.load(
+            QString("qt_%1").arg(qt_translation_locale), qtTranslationsDir.absolutePath());
+        qtbaseTranslatorLoaded = qtbase_translator.load(
+            QString("qtbase_%1").arg(qt_translation_locale), qtTranslationsDir.absolutePath());
+    }
+
+    if (!qtTranslatorLoaded)
+    {
+        qtTranslatorLoaded = qt_translator.load(
+            QString("qt_%1").arg(qt_locale), QLibraryInfo::path(QLibraryInfo::TranslationsPath));
+    }
+    if (!qtbaseTranslatorLoaded)
+    {
+        qtbaseTranslatorLoaded = qtbase_translator.load(
+            QString("qtbase_%1").arg(qt_locale), QLibraryInfo::path(QLibraryInfo::TranslationsPath));
+    }
+    if (qtTranslatorLoaded)
+    {
+        QApplication::installTranslator(&qt_translator);
+    }
+    if (qtbaseTranslatorLoaded)
+    {
+        QApplication::installTranslator(&qtbase_translator);
+    }
+#else
 #if QT_VERSION_MAJOR >= 6
     if(qt_translator.load(QString("qt_%1").arg(qt_locale), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
 #else
@@ -81,6 +141,7 @@ int main(int argc, char* argv[])
     {
         QApplication::installTranslator(&qt_translator);
     }
+#endif
 
     QTranslator translator;
     const QLocale locale = QLocale::system();
