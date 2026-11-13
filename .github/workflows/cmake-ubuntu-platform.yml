@@ -136,31 +136,116 @@ jobs:
     #   run: ctest -C ${{env.BUILD_TYPE}}
     - name: install
       run: cmake --install ${{github.workspace}}/build
-    - name: generate deb package
-      working-directory: ${{github.workspace}}/build
-      run: cpack -G DEB
-    - name: generate tgz package
-      working-directory: ${{github.workspace}}/build
-      run: cpack -G TGZ
-    # - name: generate AppImage package
-    #   working-directory: ${{github.workspace}}
-    #   run: |
-    #     cp ./icon/* ./bin/${{env.BUILD_TYPE}}/ && 
-    #     wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage && 
-    #     chmod a+x ./linuxdeployqt-continuous-x86_64.AppImage && 
-    #     ./linuxdeployqt-continuous-x86_64.AppImage ./bin/${{env.BUILD_TYPE}}/IIViewer -verbose=2 -bundle-non-qt-libs -appimage
+    - name: Collect dependencies (linuxdeploy)
+      working-directory: ${{github.workspace}}
+      run: |
+        wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+        chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+        # GitHub runners provide no /dev/fuse, run the AppImage tools in extraction mode
+        export APPIMAGE_EXTRACT_AND_RUN=1
+        # linuxdeploy-plugin-qt locates Qt via qmake in PATH
+        export PATH="$QT_ROOT_DIR/bin:$PATH"
+        # 先收集依赖并设置 $ORIGIN rpath（usr/bin、usr/lib、usr/plugins 等），deb 与 appimage 两个步骤共用这个 AppDir
+        ./linuxdeploy-x86_64.AppImage \
+          --appdir AppDir \
+          --executable ./bin/${{env.BUILD_TYPE}}/IIViewer \
+          --desktop-file ./icon/IIViewer.desktop \
+          --icon-file ./icon/IIViewer.png \
+          --plugin qt
 
-    # - name: Upload Deb Artifacts
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #       name: IIViewer ubuntu deb
-    #       if-no-files-found: ignore
-    #       path: ${{github.workspace}}/build/IIViewer-*-Linux.deb
-    #       compression-level: 0 # no compression
-    # - name: Upload Tgz Artifacts
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #       name: IIViewer ubuntu tgz
-    #       if-no-files-found: ignore
-    #       path: ${{github.workspace}}/build/IIViewer-*-Linux.tar.gz
-    #       compression-level: 0 # no compression
+    - name: generate deb package
+      working-directory: ${{github.workspace}}
+      run: |
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+          VERSION="pr-${GITHUB_HEAD_REF}-${GITHUB_SHA::7}"
+        else
+          VERSION="dev-${GITHUB_SHA::7}"
+        fi
+        echo "VERSION=$VERSION"
+        DEBROOT="${{github.workspace}}/debroot"
+        rm -rf "$DEBROOT"
+        # linuxdeploy 收集好的 AppDir/usr 目录树(bin + lib + plugins + translations + bin/qt.conf)
+        # rpath 均为 $ORIGIN 相对路径，整体搬到 /opt/IIViewer 后仍然可用
+        mkdir -p "$DEBROOT/opt/IIViewer"
+        cp -a ./AppDir/usr/. "$DEBROOT/opt/IIViewer/"
+        rm -rf "$DEBROOT/opt/IIViewer/share"
+        # 规范 /opt 树的权限，保证 root 以外的用户也能读取执行
+        chmod -R u+rwX,go+rX "$DEBROOT/opt/IIViewer"
+        # 启动脚本：desktop 文件中的 Exec=IIViewer 通过它落到 /opt 里的真实二进制
+        mkdir -p "$DEBROOT/usr/bin"
+        cat > "$DEBROOT/usr/bin/IIViewer" <<'EOF'
+        #!/bin/bash
+        exec /opt/IIViewer/bin/IIViewer "$@"
+        EOF
+        chmod 755 "$DEBROOT/usr/bin/IIViewer"
+        # desktop 文件：dpkg 安装时自动落到 /usr/share/applications，即可在应用菜单中单击启动
+        mkdir -p "$DEBROOT/usr/share/applications"
+        sed -e '/^X-AppImage-Version/d' ./AppDir/usr/share/applications/IIViewer.desktop \
+          > "$DEBROOT/usr/share/applications/IIViewer.desktop"
+        # 各尺寸图标装入 hicolor 图标主题
+        for size in 16 20 24 32 48 64 128 256 512; do
+          mkdir -p "$DEBROOT/usr/share/icons/hicolor/${size}x${size}/apps"
+          cp "./icon/IIViewer_${size}.png" "$DEBROOT/usr/share/icons/hicolor/${size}x${size}/apps/IIViewer.png"
+        done
+        mkdir -p "$DEBROOT/usr/share/doc/iiviewer"
+        cp ./LICENSE.txt "$DEBROOT/usr/share/doc/iiviewer/copyright"
+        # dpkg 控制信息：Qt 依赖已全部打包进 /opt，仅需声明系统级库
+        mkdir -p "$DEBROOT/DEBIAN"
+        cat > "$DEBROOT/DEBIAN/control" <<EOF
+        Package: iiviewer
+        Version: $VERSION
+        Architecture: amd64
+        Section: graphics
+        Priority: optional
+        Maintainer: JonahZeng <JonahZeng@github>
+        Depends: libc6, libstdc++6, libgcc-s1, libgl1, libegl1, libopengl0, libx11-6, libxcb1, libfontconfig1, libfreetype6, libexpat1, libuuid1, libcom-err2, libgpg-error0, zlib1g
+        Description: Cross-platform image viewer for ISP developers
+         Supports RAW, MIPI-RAW, RGBIR-RAW, DNG, YUV, RGB, PGM, PNM, HEIF and
+         standard image formats (JPG, BMP, PNG, TIFF).
+        EOF
+        cat > "$DEBROOT/DEBIAN/postinst" <<'EOF'
+        #!/bin/sh
+        if command -v update-desktop-database >/dev/null 2>&1; then
+          update-desktop-database -q || true
+        fi
+        if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+          gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+        fi
+        EOF
+        chmod 755 "$DEBROOT/DEBIAN/postinst"
+        dpkg-deb --build --root-owner-group "$DEBROOT" "IIViewer-${VERSION}-ubuntu-amd64.deb"
+    - name: generate appimage package
+      working-directory: ${{github.workspace}}
+      run: |
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+          VERSION="pr-${GITHUB_HEAD_REF}-${GITHUB_SHA::7}"
+        else
+          VERSION="dev-${GITHUB_SHA::7}"
+        fi
+        echo "VERSION=$VERSION"
+        export OUTPUT="IIViewer-${VERSION}-ubuntu-amd64.AppImage"
+        export VERSION="${VERSION}"
+        # linuxdeploy + AppImage plugin
+        wget https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage
+        chmod +x linuxdeploy-plugin-appimage-x86_64.AppImage
+        # GitHub runners provide no /dev/fuse, run the AppImage tools in extraction mode
+        export APPIMAGE_EXTRACT_AND_RUN=1
+        # linuxdeploy-plugin-qt locates Qt via qmake in PATH
+        export PATH="$QT_ROOT_DIR/bin:$PATH"
+        # linuxdeploy 不会改写 desktop 模板里的占位版本号，打包前替换为实际版本
+        sed -i "s/^X-AppImage-Version=.*/X-AppImage-Version=${VERSION}/" ./AppDir/usr/share/applications/IIViewer.desktop
+        # 依赖已在 Collect dependencies 步骤收集完成，此处只补上 AppImage 外壳
+        ./linuxdeploy-x86_64.AppImage \
+          --appdir AppDir \
+          --executable ./bin/${{env.BUILD_TYPE}}/IIViewer \
+          --desktop-file ./icon/IIViewer.desktop \
+          --icon-file ./icon/IIViewer.png \
+          --plugin qt \
+          --output appimage
+        rm linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage linuxdeploy-plugin-appimage-x86_64.AppImage
+        zsyncmake -u "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${OUTPUT}" "./${OUTPUT}"
