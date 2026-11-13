@@ -157,13 +157,14 @@ jobs:
     - name: generate deb package
       working-directory: ${{github.workspace}}
       run: |
-        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-          VERSION="${GITHUB_REF#refs/tags/v}"
-        elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-          VERSION="pr-${GITHUB_HEAD_REF}-${GITHUB_SHA::7}"
-        else
-          VERSION="dev-${GITHUB_SHA::7}"
-        fi
+        # if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+        #   VERSION="${GITHUB_REF#refs/tags/v}"
+        # elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+        #   VERSION="pr-${GITHUB_HEAD_REF}-${GITHUB_SHA::7}"
+        # else
+        #  VERSION="dev-${GITHUB_SHA::7}"
+        # fi
+        VERSION=9.9.9
         echo "VERSION=$VERSION"
         DEBROOT="${{github.workspace}}/debroot"
         rm -rf "$DEBROOT"
