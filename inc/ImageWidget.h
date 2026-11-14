@@ -36,6 +36,7 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    bool event(QEvent *event) override;
     void setPixmap();
     void setPixmap(const QImage &image);
     void setPixmap(BayerPatternType by, ByteOrderType order, int bitDepth, bool compact, int width, int height);
@@ -154,6 +155,7 @@ private:
     ByteOrderType rawByteOrderTypeBak;
     YuvType yuvTypeBak;
     OpenedImageType openedImgTypeBak;
+    qreal nativeZoomRemainder = 0.0;
 signals:
     void inform_real_Pos(QPointF, QPointF);
     void inform_drag_img(QPoint, QPoint);
