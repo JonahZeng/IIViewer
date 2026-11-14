@@ -52,13 +52,11 @@ Pre-compiled binaries are available on the [release page](https://github.com/Jon
 
 For windows 10/11 user, winget is the most convenient install method, just run command `winget install JonahZeng.IIViewer`.
 
-Start the app and drag any supported image file onto the window:
+Start the app and drag any supported image file onto the window, here are some demo:
 
-![win-zh-ui](./doc/image/win-zh.png)
+![img-diff-report](./doc/image/img_diff_report.png)
 
-![ubuntu-zh-ui](./doc/image/ubuntu-zh.png)
-
-![macos-zh-ui](./doc/image/macos-zh.png)
+![plot-roi](./doc/image/plot_roi.png)
 
 Drag any supported format image to the dash rectangle, and it will display the image content. Zoom in to 96x by scrolling your mouse wheel to see every pixel's real value.
 

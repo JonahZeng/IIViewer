@@ -6,6 +6,9 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QMouseEvent>
+#ifdef Q_OS_MACOS
+  #include <QNativeGestureEvent>
+#endif
 #include <QPainter>
 #include <QAction>
 #include <stdexcept>
@@ -63,53 +66,53 @@ static const BayerPixelType type_RGG_IR[16] = {
     PIX_R,  PIX_GR, PIX_B,  PIX_GB,
     PIX_GB, PIX_IR, PIX_GR, PIX_IR,
     PIX_B,  PIX_GB, PIX_R,  PIX_GR,
-    PIX_GR, PIX_IR, PIX_GB, PIX_IR
+    PIX_GR, PIX_IR, PIX_GB, PIX_IR,
 };
 static const BayerPixelType type_BGG_IR[16] = {
     PIX_B,  PIX_GB, PIX_R,  PIX_GR,
     PIX_GR, PIX_IR, PIX_GB, PIX_IR,
     PIX_R,  PIX_GR, PIX_B,  PIX_GB,
-    PIX_GB, PIX_IR, PIX_GR, PIX_IR
+    PIX_GB, PIX_IR, PIX_GR, PIX_IR,
 };
 static const BayerPixelType type_GR_IR_G[16] = {
     PIX_GR, PIX_R,  PIX_GB, PIX_B,
     PIX_IR, PIX_GB, PIX_IR, PIX_GR,
     PIX_GB, PIX_B,  PIX_GR, PIX_R,
-    PIX_IR, PIX_GR, PIX_IR, PIX_GB
+    PIX_IR, PIX_GR, PIX_IR, PIX_GB,
 };
 static const BayerPixelType type_GB_IR_G[16] = {
     PIX_GB, PIX_B,  PIX_GR, PIX_R,
     PIX_IR, PIX_GR, PIX_IR, PIX_GB,
     PIX_GR, PIX_R,  PIX_GB, PIX_B,
-    PIX_IR, PIX_GB, PIX_IR, PIX_GR
+    PIX_IR, PIX_GB, PIX_IR, PIX_GR,
 };
 static const BayerPixelType type_G_IR_RG[16] = {
     PIX_GB, PIX_IR, PIX_GR, PIX_IR,
     PIX_R,  PIX_GR, PIX_B,  PIX_GB,
     PIX_GR, PIX_IR, PIX_GB, PIX_IR,
-    PIX_B,  PIX_GB, PIX_R,  PIX_GR
+    PIX_B,  PIX_GB, PIX_R,  PIX_GR,
 };
 static const BayerPixelType type_G_IR_BG[16] = {
     PIX_GR, PIX_IR, PIX_GB, PIX_IR,
     PIX_B,  PIX_GB, PIX_R,  PIX_GR,
     PIX_GB, PIX_IR, PIX_GR, PIX_IR,
-    PIX_R,  PIX_GR, PIX_B,  PIX_GB
+    PIX_R,  PIX_GR, PIX_B,  PIX_GB,
 };
 static const BayerPixelType type_IR_GGR[16] = {
     PIX_IR, PIX_GB, PIX_IR, PIX_GR,
     PIX_GR, PIX_R,  PIX_GB, PIX_B,
     PIX_IR, PIX_GR, PIX_IR, PIX_GB,
-    PIX_GB, PIX_B,  PIX_GR, PIX_R
+    PIX_GB, PIX_B,  PIX_GR, PIX_R,
 };
 static const BayerPixelType type_IR_GGB[16] = {
     PIX_IR, PIX_GR, PIX_IR, PIX_GB,
     PIX_GB, PIX_B,  PIX_GR, PIX_R,
     PIX_IR, PIX_GB, PIX_IR, PIX_GR,
-    PIX_GR, PIX_R,  PIX_GB, PIX_B
+    PIX_GR, PIX_R,  PIX_GB, PIX_B,
 };
 
 static const BayerPixelType* type_rgbir[8] = {
-    type_RGG_IR, type_BGG_IR, type_GR_IR_G, type_GB_IR_G, type_G_IR_RG, type_G_IR_BG, type_IR_GGR, type_IR_GGB
+    type_RGG_IR, type_BGG_IR, type_GR_IR_G, type_GB_IR_G, type_G_IR_RG, type_G_IR_BG, type_IR_GGR, type_IR_GGB,
 };
 
 BayerPixelType ImageWidget::getPixType(int y, int x, BayerPatternType by)
@@ -1188,11 +1191,11 @@ void ImageWidget::paintYuv420NV21PixVal(QPoint &viewTopLeftPix, QPainter &painte
                     unsigned int u = 0;
                     if (yuvDataBit <= 8)
                     {
-                        u = ((unsigned char *)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w) + 1];
+                        u = ((unsigned char *)yuvDataPtr)[(yuvWidth * yuvHeight) + (((yStart + h) / 2) * yuvWidth) + (xStart + w) + 1];
                     }
                     else if (yuvDataBit > 8 && yuvDataBit <= 16)
                     {
-                        u = ((unsigned short *)yuvDataPtr)[yuvWidth * yuvHeight + ((yStart + h) / 2) * yuvWidth + (xStart + w) + 1];
+                        u = ((unsigned short *)yuvDataPtr)[(yuvWidth * yuvHeight) + (((yStart + h) / 2) * yuvWidth) + (xStart + w) + 1];
                     }
 
                     QRectF pixValRect(paintPixValTopLeft.x() + w * 96 + 16, paintPixValTopLeft.y() + h * 96 + 16 + 21, 64, 21);
@@ -1783,6 +1786,52 @@ void ImageWidget::wheelEvent(QWheelEvent *event)
         processWheelZoom(event, -1);
     }
     event->accept();
+}
+
+bool ImageWidget::event(QEvent *event)
+{
+#ifdef Q_OS_MACOS
+    if (event->type() == QEvent::NativeGesture)
+    {
+        auto *gestureEvent = static_cast<QNativeGestureEvent *>(event);
+        if (gestureEvent->gestureType() == Qt::BeginNativeGesture ||
+            gestureEvent->gestureType() == Qt::EndNativeGesture)
+        {
+            nativeZoomRemainder = 0.0;
+        }
+        else if (gestureEvent->gestureType() == Qt::ZoomNativeGesture && pixMap != nullptr)
+        {
+            nativeZoomRemainder += gestureEvent->value();
+            constexpr qreal zoomStepThreshold = 0.15;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            const QPointF globalPosition = gestureEvent->globalPosition();
+#else
+            const QPointF globalPosition = gestureEvent->screenPos();
+#endif
+            const QPointF localPosition = mapFromGlobal(globalPosition.toPoint());
+            while (nativeZoomRemainder >= zoomStepThreshold && zoomIdx < ZOOM_LIST_LENGTH - 1)
+            {
+                QWheelEvent syntheticEvent(localPosition, globalPosition, QPoint(), QPoint(0, 120),
+                                            Qt::NoButton, gestureEvent->modifiers(), Qt::NoScrollPhase, false);
+                wheelEvent(&syntheticEvent);
+                nativeZoomRemainder -= zoomStepThreshold;
+            }
+            while (nativeZoomRemainder <= -zoomStepThreshold && zoomIdx > 0)
+            {
+                QWheelEvent syntheticEvent(localPosition, globalPosition, QPoint(), QPoint(0, -120),
+                                            Qt::NoButton, gestureEvent->modifiers(), Qt::NoScrollPhase, false);
+                wheelEvent(&syntheticEvent);
+                nativeZoomRemainder += zoomStepThreshold;
+            }
+            if ((zoomIdx == ZOOM_LIST_LENGTH - 1 && nativeZoomRemainder > 0.0) ||
+                (zoomIdx == 0 && nativeZoomRemainder < 0.0))
+                nativeZoomRemainder = 0.0;
+            event->accept();
+            return true;
+        }
+    }
+#endif
+    return QWidget::event(event);
 }
 
 void ImageWidget::setPixmap(const QImage &image)

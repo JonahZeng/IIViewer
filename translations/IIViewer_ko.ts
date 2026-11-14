@@ -606,6 +606,38 @@
         <translation>최대 차이로 이동</translation>
     </message>
     <message>
+        <source>Image comparison</source>
+        <translation>이미지 비교</translation>
+    </message>
+    <message>
+        <source>Difference metrics</source>
+        <translation>차이 지표</translation>
+    </message>
+    <message>
+        <source>Pixel</source>
+        <translation>픽셀</translation>
+    </message>
+    <message>
+        <source>Component</source>
+        <translation>채널</translation>
+    </message>
+    <message>
+        <source>Max diff</source>
+        <translation>최대 차이</translation>
+    </message>
+    <message>
+        <source>Position (row, column)</source>
+        <translation>위치(행, 열)</translation>
+    </message>
+    <message>
+        <source>Min diff</source>
+        <translation>최소 차이</translation>
+    </message>
+    <message>
+        <source>Mean diff</source>
+        <translation>평균 차이</translation>
+    </message>
+    <message>
         <location filename="../src/ImgDiffReportDlg.cpp" line="27"/>
         <source>img difference report</source>
         <translation>이미지 차이 보고서</translation>
@@ -617,6 +649,42 @@
         <location filename="../src/ImgInfoDlg.cpp" line="16"/>
         <source>image info</source>
         <translation>이미지 정보</translation>
+    </message>
+    <message>
+        <source>Left image</source>
+        <translation>왼쪽 이미지</translation>
+    </message>
+    <message>
+        <source>Right image</source>
+        <translation>오른쪽 이미지</translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation>파일</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>경로</translation>
+    </message>
+    <message>
+        <source>Dimensions</source>
+        <translation>크기</translation>
+    </message>
+    <message>
+        <source>Bit depth</source>
+        <translation>비트 심도</translation>
+    </message>
+    <message>
+        <source>Bayer pattern</source>
+        <translation>Bayer 패턴</translation>
+    </message>
+    <message>
+        <source>YUV format</source>
+        <translation>YUV 형식</translation>
+    </message>
+    <message>
+        <source>%1 bit</source>
+        <translation>%1비트</translation>
     </message>
 </context>
 <context>

@@ -1,7 +1,7 @@
 #pragma once
 #include <QDialog>
 #include <QPushButton>
-#include <QTextEdit>
+#include <QTextBrowser>
 
 class ImgDiffReportDlg final : public QDialog
 {
@@ -20,6 +20,6 @@ private:
     void initUI();
     void onGotoMaxDiffClicked();
 
-    QTextEdit* diffInfoEdit;
+    QTextBrowser* reportView;
     QPushButton* gotoMaxDiffBtn;
 };
