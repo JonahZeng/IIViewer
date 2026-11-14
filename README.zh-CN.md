@@ -52,13 +52,11 @@
 
 对于 Windows 10/11 用户，winget 是最便捷的安装方式，只需运行命令 `winget install JonahZeng.IIViewer`。
 
-启动应用后，将任意支持的图像文件拖拽到窗口中即可：
+启动应用后，将任意支持的图像文件拖拽到窗口中即可，如下是两个示例：
 
-![win-zh-ui](./doc/image/win-zh.png)
+![img-diff-report](./doc/image/img_diff_report.png)
 
-![ubuntu-zh-ui](./doc/image/ubuntu-zh.png)
-
-![macos-zh-ui](./doc/image/macos-zh.png)
+![plot-roi](./doc/image/plot_roi.png)
 
 将任意支持格式的图像拖拽到虚线矩形区域，即可显示图像内容。滚动鼠标滚轮将图像放大至 96 倍，即可查看每个像素的真实数值。
 

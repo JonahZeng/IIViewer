@@ -606,6 +606,38 @@
         <translation>跳轉到最大差異</translation>
     </message>
     <message>
+        <source>Image comparison</source>
+        <translation>影像比較</translation>
+    </message>
+    <message>
+        <source>Difference metrics</source>
+        <translation>差異指標</translation>
+    </message>
+    <message>
+        <source>Pixel</source>
+        <translation>像素</translation>
+    </message>
+    <message>
+        <source>Component</source>
+        <translation>通道</translation>
+    </message>
+    <message>
+        <source>Max diff</source>
+        <translation>最大差異</translation>
+    </message>
+    <message>
+        <source>Position (row, column)</source>
+        <translation>位置（列，欄）</translation>
+    </message>
+    <message>
+        <source>Min diff</source>
+        <translation>最小差異</translation>
+    </message>
+    <message>
+        <source>Mean diff</source>
+        <translation>平均差異</translation>
+    </message>
+    <message>
         <location filename="../src/ImgDiffReportDlg.cpp" line="27"/>
         <source>img difference report</source>
         <translation>影像差異報告</translation>
@@ -617,6 +649,42 @@
         <location filename="../src/ImgInfoDlg.cpp" line="16"/>
         <source>image info</source>
         <translation>影像資訊</translation>
+    </message>
+    <message>
+        <source>Left image</source>
+        <translation>左側影像</translation>
+    </message>
+    <message>
+        <source>Right image</source>
+        <translation>右側影像</translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation>檔案</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>位置</translation>
+    </message>
+    <message>
+        <source>Dimensions</source>
+        <translation>尺寸</translation>
+    </message>
+    <message>
+        <source>Bit depth</source>
+        <translation>位元深度</translation>
+    </message>
+    <message>
+        <source>Bayer pattern</source>
+        <translation>Bayer 排列</translation>
+    </message>
+    <message>
+        <source>YUV format</source>
+        <translation>YUV 格式</translation>
+    </message>
+    <message>
+        <source>%1 bit</source>
+        <translation>%1 位元</translation>
     </message>
 </context>
 <context>
